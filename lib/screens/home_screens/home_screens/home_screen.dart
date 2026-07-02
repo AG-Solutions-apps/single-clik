@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:new_version_plus/new_version_plus.dart';
 import 'package:single_clik/constants/constant_color.dart';
 import 'package:single_clik/constants/constant_string.dart';
 import 'package:single_clik/constants/show_toast.dart';
@@ -21,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late Animation<double> animation;
   late AnimationController _animationController;
-
+  bool _showUpdateBar = false;
   @override
   void initState() {
     super.initState();
@@ -36,7 +37,9 @@ class _HomeScreenState extends State<HomeScreen>
     )..addListener(() {
         scale.value = animation.value;
       });
-
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _checkForUpdate();
+  });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getData();
       getServices();
@@ -68,7 +71,21 @@ class _HomeScreenState extends State<HomeScreen>
       }
     });
   }
+Future<void> _checkForUpdate() async {
+  final newVersion = NewVersionPlus(
+    androidId: "com.singleclick.agsolution",
+  );
 
+  final status = await newVersion.getVersionStatus();
+
+  if (status == null) return;
+
+  if (status.canUpdate && mounted) {
+    setState(() {
+      _showUpdateBar = true;
+    });
+  }
+}
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
