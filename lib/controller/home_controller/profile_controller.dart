@@ -172,8 +172,11 @@ class ProfileController extends GetxController {
           parsedProducts = productsList;
         }
 
-        parsedProfile['products'] = parsedProducts;
-        parsedProfile['product_services'] = parsedProducts;
+        if (responseData.containsKey('total_points')) parsedProfile['total_points'] = responseData['total_points'];
+        if (responseData.containsKey('claim_points')) parsedProfile['claim_points'] = responseData['claim_points'];
+        if (responseData.containsKey('history_points')) parsedProfile['history_points'] = responseData['history_points'];
+        if (responseData.containsKey('claim_history')) parsedProfile['claim_history'] = responseData['claim_history'];
+        if (responseData.containsKey('image_url')) parsedProfile['image_url'] = responseData['image_url'];
 
         profileMap.value = parsedProfile;
         filePath.value =

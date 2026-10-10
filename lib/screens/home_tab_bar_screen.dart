@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:single_clik/constants/constant_color.dart';
@@ -306,6 +307,15 @@ class HomeTabBarScreenState extends State<HomeTabBarScreen>
     debugPrint('currentBackPressTime $currentBackPressTime $now');
     debugPrint('selectTab ${homeController.selectTab.value}');
     debugPrint('tabIndex ${homeController.tabIndex.value}');
+
+    // If search is active, close search first
+    if (homeController.isSearchOpen.value) {
+      homeController.isSearchOpen.value = false;
+      homeController.searchController.value.clear();
+      homeController.searchProduct('');
+      return Future.value(false);
+    }
+
     if (homeController.selectTab.value == 0 &&
         homeController.tabIndex.value == 0) {
       homeController.searchController.value.clear();
@@ -335,14 +345,12 @@ class HomeTabBarScreenState extends State<HomeTabBarScreen>
     double width = MediaQuery.of(context).size.width;
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
-          Future.microtask(() async {
-            final shouldPop = await onWillPop();
-            if (shouldPop && context.mounted) {
-              Navigator.of(context).maybePop();
-            }
-          });
+          final shouldPop = await onWillPop();
+          if (shouldPop) {
+            SystemNavigator.pop();
+          }
         }
       },
       child: Scaffold(
@@ -371,8 +379,8 @@ class HomeTabBarScreenState extends State<HomeTabBarScreen>
                 child: Center(
                   child: Image.asset(
                     "assets/icons/icon_menu.png",
-                    height: 20,
-                    width: 20,
+                    height: 28,
+                    width: 28,
                   ),
                 ),
               ),

@@ -45,6 +45,204 @@ class BusinessSignUpController extends GetxController {
   RxString createdPassword = "".obs;
   RxInt createdUserId = 0.obs;
 
+  RxBool isVerifyingReferral = false.obs;
+  RxBool isReferralVerified = false.obs;
+  RxString referralMessage = "".obs;
+  RxString verifiedReferralCode = "".obs;
+
+  Future<bool> checkReferralApi(String code) async {
+    final cleanCode = code.trim();
+    if (cleanCode.isEmpty) {
+      referralMessage.value = "Please enter referral code";
+      isReferralVerified.value = false;
+      verifiedReferralCode.value = "";
+      return false;
+    }
+    try {
+      isVerifyingReferral.value = true;
+      referralMessage.value = "";
+
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+      };
+      String? token = await SharPreferences.getString(SharPreferences.token);
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+
+      http.Response? response;
+
+      // Method 1: MultipartRequest POST with all parameter aliases
+      try {
+        final request = http.MultipartRequest('POST', Uri.parse(API.checkReferral));
+        request.headers.addAll(headers);
+        request.fields['referred_by_code'] = cleanCode;
+        request.fields['referral_code'] = cleanCode;
+        request.fields['code'] = cleanCode;
+
+        var streamedRes = await request.send().timeout(const Duration(seconds: 10));
+        var resDone = await http.Response.fromStream(streamedRes);
+        debugPrint('Method 1 (Multipart POST) status: ${resDone.statusCode}, body: ${resDone.body}');
+        if (resDone.statusCode == 200 && _isResponseSuccess(resDone.body)) {
+          response = resDone;
+        } else if (response == null) {
+          response = resDone;
+        }
+      } catch (e) {
+        debugPrint('Method 1 error: $e');
+      }
+
+      // Method 2: Standard http.post if Method 1 didn't succeed
+      if (response == null || response.statusCode != 200 || !_isResponseSuccess(response.body)) {
+        try {
+          final postRes = await http.post(
+            Uri.parse(API.checkReferral),
+            headers: headers,
+            body: {
+              'referred_by_code': cleanCode,
+              'referral_code': cleanCode,
+              'code': cleanCode,
+            },
+          ).timeout(const Duration(seconds: 10));
+          debugPrint('Method 2 (Standard POST) status: ${postRes.statusCode}, body: ${postRes.body}');
+          if (postRes.statusCode == 200 && _isResponseSuccess(postRes.body)) {
+            response = postRes;
+          }
+        } catch (e) {
+          debugPrint('Method 2 error: $e');
+        }
+      }
+
+      // Method 3: http.get (query parameters) if Method 1 & 2 didn't pass
+      if (response == null || response.statusCode != 200 || !_isResponseSuccess(response.body)) {
+        try {
+          final getUri = Uri.parse(API.checkReferral).replace(queryParameters: {
+            'referred_by_code': cleanCode,
+            'referral_code': cleanCode,
+            'code': cleanCode,
+          });
+          final getRes = await http.get(getUri, headers: headers).timeout(const Duration(seconds: 10));
+          debugPrint('Method 3 (GET) status: ${getRes.statusCode}, body: ${getRes.body}');
+          if (getRes.statusCode == 200 && _isResponseSuccess(getRes.body)) {
+            response = getRes;
+          }
+        } catch (e) {
+          debugPrint('Method 3 error: $e');
+        }
+      }
+
+      if (response != null && response.statusCode == 200) {
+        final bodyStr = response.body.trim();
+        Map<String, dynamic> responseData = {};
+        try {
+          final decoded = json.decode(bodyStr);
+          if (decoded is Map<String, dynamic>) {
+            responseData = decoded;
+          }
+        } catch (_) {}
+
+        if (_isResponseSuccess(bodyStr)) {
+          isReferralVerified.value = true;
+          verifiedReferralCode.value = cleanCode;
+
+          String msgStr = "Code applied successfully!";
+          final rawMsg = responseData['msg']?.toString() ??
+              responseData['message']?.toString() ??
+              responseData['data']?.toString();
+          if (rawMsg != null && rawMsg.trim().isNotEmpty && rawMsg.toLowerCase() != 'yes') {
+            msgStr = rawMsg;
+          }
+          referralMessage.value = msgStr;
+          isVerifyingReferral.value = false;
+          return true;
+        } else {
+          isReferralVerified.value = false;
+          verifiedReferralCode.value = "";
+
+          String msgStr = "Invalid referral code";
+          final rawMsg = responseData['msg']?.toString() ??
+              responseData['message']?.toString() ??
+              responseData['data']?.toString();
+          if (rawMsg != null && rawMsg.trim().isNotEmpty && rawMsg.toLowerCase() != 'no') {
+            msgStr = rawMsg;
+          }
+          referralMessage.value = msgStr;
+          isVerifyingReferral.value = false;
+          return false;
+        }
+      } else {
+        isReferralVerified.value = false;
+        verifiedReferralCode.value = "";
+        referralMessage.value = "Invalid referral code";
+        isVerifyingReferral.value = false;
+        return false;
+      }
+    } catch (e) {
+      isVerifyingReferral.value = false;
+      isReferralVerified.value = false;
+      verifiedReferralCode.value = "";
+      referralMessage.value = "Invalid referral code";
+      debugPrint("Check referral error: $e");
+      return false;
+    }
+  }
+
+  bool _isResponseSuccess(String bodyStr) {
+    final cleanBody = bodyStr.trim().toLowerCase();
+
+    if (cleanBody == 'yes' || cleanBody == '"yes"' || cleanBody == 'true' || cleanBody == '"true"') {
+      return true;
+    }
+    if (cleanBody == 'no' || cleanBody == '"no"' || cleanBody == 'false' || cleanBody == '"false"') {
+      return false;
+    }
+
+    try {
+      final decoded = json.decode(bodyStr);
+      if (decoded is Map<String, dynamic>) {
+        final code = decoded['code']?.toString().toLowerCase();
+        final status = decoded['status']?.toString().toLowerCase();
+        final success = decoded['success']?.toString().toLowerCase();
+        final msg = decoded['msg']?.toString().toLowerCase();
+        final message = decoded['message']?.toString().toLowerCase();
+        final data = decoded['data']?.toString().toLowerCase();
+
+        // Check for 'yes' in any field
+        if (code == 'yes' || status == 'yes' || success == 'yes' || msg == 'yes' || message == 'yes' || data == 'yes') {
+          return true;
+        }
+
+        // Check for 'no' in any field
+        if (code == 'no' || status == 'no' || success == 'no' || msg == 'no' || message == 'no' || data == 'no') {
+          return false;
+        }
+
+        if (code == '200' || status == 'true' || status == '200' || success == 'true' || decoded['status'] == true || decoded['success'] == true || decoded['code'] == 200) {
+          return true;
+        }
+
+        if (code == '400' || status == 'false' || status == '400' || success == 'false' || decoded['status'] == false || decoded['success'] == false || decoded['code'] == 400) {
+          return false;
+        }
+      } else if (decoded is String) {
+        final str = decoded.trim().toLowerCase();
+        if (str == 'yes' || str == 'true') return true;
+        if (str == 'no' || str == 'false') return false;
+      }
+    } catch (_) {
+      if (cleanBody.contains('"yes"') || cleanBody.contains(':yes') || cleanBody.contains(':"yes"')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void resetReferralStatus() {
+    isReferralVerified.value = false;
+    referralMessage.value = "";
+    verifiedReferralCode.value = "";
+  }
+
   @override
   void onClose() {
     txtFullName.value?.dispose();
@@ -272,17 +470,17 @@ class BusinessSignUpController extends GetxController {
   }
   
   void clearFields() {
-    txtFullName.value?.clear();
-    txtCompanyName.value?.clear();
-    txtMobileNo.value?.clear();
-    txtEmailId.value?.clear();
-    txtWhatsappNo.value?.clear();
-    txtWebsite.value?.clear();
-    txtAbout.value?.clear();
-    txtArea.value?.clear();
-    txtReferredCode.value?.clear();
-    txtOtherCategory.value?.clear();
-    txtOtherSubCategory.value?.clear();
+    txtFullName.value.clear();
+    txtCompanyName.value.clear();
+    txtMobileNo.value.clear();
+    txtEmailId.value.clear();
+    txtWhatsappNo.value.clear();
+    txtWebsite.value.clear();
+    txtAbout.value.clear();
+    txtArea.value.clear();
+    txtReferredCode.value.clear();
+    txtOtherCategory.value.clear();
+    txtOtherSubCategory.value.clear();
     selectedProfileType.value = "";
     selectedCategory.clear();
     selectedSubCategory.clear();
@@ -291,6 +489,7 @@ class BusinessSignUpController extends GetxController {
     isAccountCreated.value = false;
     createdPassword.value = "";
     createdUserId.value = 0;
+    resetReferralStatus();
   }
 
   // ── Business Request Tracking ─────────────────────────────────────────────

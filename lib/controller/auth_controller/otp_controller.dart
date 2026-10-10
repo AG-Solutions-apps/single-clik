@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:single_clik/constants/constant_string.dart';
+import 'package:single_clik/constants/firebase_services.dart';
 import 'package:single_clik/services/api.dart';
 import 'package:single_clik/utils/shar_preferences.dart';
 
@@ -172,11 +173,18 @@ class OTPController extends GetxController {
   }
 
   Future<Map<String, dynamic>> postLoginApi(Map<String, String> bodyParams) async {
+    // Ensure original FCM token / device_id is present
+    if (bodyParams['device_id'] == null ||
+        bodyParams['device_id']!.trim().isEmpty ||
+        bodyParams['device_id'] == 'Unknown_Device') {
+      bodyParams['device_id'] = await FirebaseService.getFcmToken();
+    }
+
     debugPrint('=== postLoginApi Called ===');
     debugPrint('Request body:');
     debugPrint('  mobile: ${bodyParams['mobile']}');
     debugPrint('  password: ${bodyParams['password']?.length ?? 0} characters');
-    debugPrint('  device_id: ${bodyParams['device_id']}');
+    debugPrint('  device_id (FCM Token): ${bodyParams['device_id']}');
     
     try {
       isButtonLoading.value = true;

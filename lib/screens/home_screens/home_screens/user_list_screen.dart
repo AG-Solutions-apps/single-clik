@@ -205,98 +205,34 @@ One tap. One profile. One click away.''';
                 referrerName: _referrerName,
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Share Via',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.grey.shade600,
-                    letterSpacing: 0.5,
+              // ── Universal Share Button ────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Share.share(_buildWhatsAppMessage());
+                  },
+                  icon: const Icon(Icons.share_rounded, color: Colors.white, size: 20),
+                  label: const Text(
+                    'Share Invitation',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ConstantColor.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    elevation: 3,
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 14),
-
-              // ── Share options row ────────────────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildShareOption(
-                    icon: Icons.chat_bubble_outline,
-                    color: const Color(0xff25D366),
-                    label: 'WhatsApp',
-                    onTap: () async {
-                      Navigator.pop(context);
-                      await _shareToWhatsApp();
-                    },
-                  ),
-                  _buildShareOption(
-                    icon: Icons.sms_outlined,
-                    color: const Color(0xff0084FF),
-                    label: 'SMS',
-                    onTap: () async {
-                      Navigator.pop(context);
-                      final msg = _buildPlainMessage();
-                      final uri = Uri(
-                        scheme: 'sms',
-                        queryParameters: {'body': msg},
-                      );
-                      try {
-                        await launchUrl(uri);
-                      } catch (_) {
-                        Share.share(msg);
-                      }
-                    },
-                  ),
-                  _buildShareOption(
-                    icon: Icons.mail_outline_rounded,
-                    color: const Color(0xffEA4335),
-                    label: 'Email',
-                    onTap: () async {
-                      Navigator.pop(context);
-                      final msg = _buildPlainMessage();
-                      final uri = Uri(
-                        scheme: 'mailto',
-                        queryParameters: {
-                          'subject': _buildEmailSubject(),
-                          'body': msg,
-                        },
-                      );
-                      try {
-                        await launchUrl(uri);
-                      } catch (_) {
-                        Share.share(msg);
-                      }
-                    },
-                  ),
-                  _buildShareOption(
-                    icon: Icons.copy_all_rounded,
-                    color: const Color(0xff5F6368),
-                    label: 'Copy',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Clipboard.setData(ClipboardData(text: _buildWhatsAppMessage()));
-                      ShowToast.showToast(
-                        'Invitation copied to clipboard!',
-                        showSuccess: true,
-                      );
-                    },
-                  ),
-                  _buildShareOption(
-                    icon: Icons.more_horiz_rounded,
-                    color: ConstantColor.primary,
-                    label: 'More',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Share.share(_buildPlainMessage());
-                    },
-                  ),
-                ],
               ),
 
               const SizedBox(height: 10),
@@ -304,45 +240,6 @@ One tap. One profile. One click away.''';
           ),
         );
       },
-    );
-  }
-
-  Widget _buildShareOption({
-    required IconData icon,
-    required Color color,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
-                shape: BoxShape.circle,
-                border: Border.all(color: color.withOpacity(0.2), width: 1.5),
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -372,12 +269,6 @@ One tap. One profile. One click away.''';
             color: Colors.white,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share, color: Colors.white),
-            onPressed: () => _showInvitationBottomSheet(context),
-          ),
-        ],
       ),
       body: Obx(
         () => userListController.isLoading.value
@@ -481,167 +372,237 @@ One tap. One profile. One click away.''';
                       )
                     : ListView.builder(
                         itemCount: userListController.userList.length,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         itemBuilder: (context, index) {
-                          return Column(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  Get.to(() => UserDetailsScreen(
-                                        id: userListController.userList[index]
-                                                ['id']
-                                            .toString(),
-                                      ));
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: ConstantColor.whiteColor,
+                          final userItem = userListController.userList[index];
+                          return GestureDetector(
+                            onTap: () {
+                              debugPrint('Id: ${userItem['id']}');
+                              Get.to(() => UserDetailsScreen(
+                                    id: userItem['id'].toString(),
+                                  ));
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: ConstantColor.whiteColor,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withAlpha(15),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 4),
                                   ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: SizedBox(
+                                  height: 128,
+                                  child: Stack(
                                     children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: ConstantColor.primary,
-                                            width: 2,
-                                          ),
-                                          shape: BoxShape.circle,
+                                      /// ── Left small wave decoration ──
+                                      Positioned(
+                                        left: 0,
+                                        bottom: 0,
+                                        width: 90,
+                                        height: 45,
+                                        child: CustomPaint(
+                                          painter: _LeftWavePainter(),
                                         ),
-                                        child: ClipOval(
-                                          child: AppImageAsset(
-                                            image:
-                                                '${ConstantString.userImgUrlPath}${userListController.userList[index]['photo']}',
-                                            isFile: false,
-                                            fit: BoxFit.cover,
-                                            height: width / 3.5,
-                                            width: width / 3.5,
+                                      ),
+
+                                      /// ── Right blue wave decoration (Two waves) ──
+                                      Positioned(
+                                        right: 0,
+                                        top: 0,
+                                        bottom: 0,
+                                        width: width * 0.48,
+                                        child: CustomPaint(
+                                          painter: _WavePainter(),
+                                        ),
+                                      ),
+
+                                      /// ── Chevron button ──
+                                      Positioned(
+                                        right: 16,
+                                        top: 0,
+                                        bottom: 0,
+                                        child: Center(
+                                          child: Container(
+                                            height: 36,
+                                            width: 36,
+                                            decoration: BoxDecoration(
+                                              color: ConstantColor.whiteColor,
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withAlpha(20),
+                                                  blurRadius: 6,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: const Icon(
+                                              Icons.chevron_right_rounded,
+                                              color: Color(0xff0B3C9B),
+                                              size: 22,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                      SizedBox(width: width * 0.02),
-                                      Expanded(
-                                        child: Column(
+
+                                      /// ── Content Row ──
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 14, vertical: 14),
+                                        child: Row(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              CrossAxisAlignment.center,
                                           children: [
-                                            Text(
-                                              userListController.userList[index]
-                                                              ['name'] ==
-                                                          null ||
-                                                      userListController
-                                                          .userList[index]['name']
-                                                          .toString()
-                                                          .trim()
-                                                          .isEmpty
-                                                  ? 'Name ${ConstantString.naLabel}'
-                                                  : userListController
-                                                      .userList[index]['name']
-                                                      .toString()
-                                                      .trim(),
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w600,
-                                                color: ConstantColor.primary,
-                                              ),
-                                            ),
-                                            SizedBox(height: width / 90),
-                                            Text(
-                                              userListController.userList[index]
-                                                              ['company_name'] ==
-                                                          null ||
-                                                      userListController
-                                                          .userList[index]
-                                                              ['company_name']
-                                                          .toString()
-                                                          .trim()
-                                                          .isEmpty
-                                                  ? 'Company Name ${ConstantString.naLabel}'
-                                                  : userListController
-                                                      .userList[index]
-                                                          ['company_name']
-                                                      .toString()
-                                                      .trim(),
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                                color: ConstantColor.primaryDark,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            SizedBox(height: width / 90),
+                                            /// Avatar
                                             Container(
-                                              width: width,
-                                              margin: EdgeInsets.only(
-                                                  right: Get.width / 30),
                                               decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(1000),
-                                                gradient: LinearGradient(
-                                                  begin: Alignment.centerLeft,
-                                                  end: Alignment.centerRight,
-                                                  colors: [
-                                                    Colors.deepOrange
-                                                        .withAlpha(0),
-                                                    Colors.deepOrange.shade900
-                                                        .withAlpha(128),
-                                                  ],
+                                                shape: BoxShape.circle,
+                                                color: const Color(0xffF0F4FF),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: const Color(0xff0B3C9B)
+                                                        .withAlpha(38),
+                                                    blurRadius: 10,
+                                                    offset: const Offset(0, 3),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: ClipOval(
+                                                child: AppImageAsset(
+                                                  image:
+                                                      "${ConstantString.userImgUrlPath}${userItem['photo']}",
+                                                  isFile: false,
+                                                  fit: BoxFit.cover,
+                                                  height: width / 5.5,
+                                                  width: width / 5.5,
                                                 ),
                                               ),
-                                              padding: EdgeInsets.fromLTRB(
-                                                width / 90,
-                                                width / 90,
-                                                width / 40,
-                                                width / 90,
-                                              ),
-                                              child: Text(
-                                                userListController.userList[index]
-                                                                ['category'] ==
-                                                            null ||
-                                                        userListController
-                                                            .userList[index]
-                                                                ['category']
+                                            ),
+
+                                            const SizedBox(width: 14),
+
+                                            /// Text content
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  /// Name
+                                                  Text(
+                                                    (userItem['name'] == null ||
+                                                            userItem['name']
+                                                                .toString()
+                                                                .trim()
+                                                                .isEmpty)
+                                                        ? 'Name ${ConstantString.naLabel}'
+                                                        : userItem['name']
                                                             .toString()
-                                                            .trim()
-                                                            .isEmpty
-                                                    ? 'Category ${ConstantString.naLabel}'
-                                                    : userListController
-                                                        .userList[index]
-                                                            ['category']
-                                                        .toString()
-                                                        .trim(),
-                                                style: const TextStyle(
-                                                  fontSize: 19,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.deepOrange,
-                                                ),
+                                                            .trim(),
+                                                    style: const TextStyle(
+                                                      fontSize: 17,
+                                                      fontWeight: FontWeight.w800,
+                                                      color: Color(0xff0F172A),
+                                                      letterSpacing: -0.2,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+
+                                                  const SizedBox(height: 3),
+
+                                                  /// Company name
+                                                  Text(
+                                                    (userItem['company_name'] ==
+                                                                null ||
+                                                            userItem['company_name']
+                                                                .toString()
+                                                                .trim()
+                                                                .isEmpty)
+                                                        ? 'Company Name ${ConstantString.naLabel}'
+                                                        : userItem['company_name']
+                                                            .toString()
+                                                            .trim(),
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.w500,
+                                                      color: Color(0xff64748B),
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+
+                                                  const SizedBox(height: 8),
+
+                                                  /// Category chip
+                                                  Container(
+                                                    decoration: BoxDecoration(
+                                                      color: const Color(0xffEEF2FF),
+                                                      borderRadius:
+                                                          BorderRadius.circular(8),
+                                                    ),
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 4,
+                                                    ),
+                                                    child: Text(
+                                                      userItem['category'] ==
+                                                                  null ||
+                                                              userItem['category']
+                                                                  .toString()
+                                                                  .trim()
+                                                                  .isEmpty
+                                                          ? 'Category ${ConstantString.naLabel}'
+                                                          : userItem['category']
+                                                              .toString()
+                                                              .toUpperCase(),
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                        fontWeight: FontWeight.w800,
+                                                        color: Color(0xff0B3C9B),
+                                                        letterSpacing: 1.1,
+                                                      ),
+                                                    ),
+                                                  ),
+
+                                                  const SizedBox(height: 5),
+
+                                                  /// Sub-category
+                                                  Text(
+                                                    userItem['subcategory'] ==
+                                                                null ||
+                                                            userItem['subcategory']
+                                                                .toString()
+                                                                .trim()
+                                                                .isEmpty
+                                                        ? 'Sub Category ${ConstantString.naLabel}'
+                                                        : userItem['subcategory']
+                                                            .toString()
+                                                            .trim(),
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.w500,
+                                                      color: Color(0xff94A3B8),
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                            SizedBox(height: width / 90),
-                                            Text(
-                                              userListController.userList[index]
-                                                              ['subcategory'] ==
-                                                          null ||
-                                                      userListController
-                                                          .userList[index]
-                                                              ['subcategory']
-                                                          .toString()
-                                                          .trim()
-                                                          .isEmpty
-                                                  ? 'Sub Category ${ConstantString.naLabel}'
-                                                  : userListController
-                                                      .userList[index]
-                                                          ['subcategory']
-                                                      .toString()
-                                                      .trim(),
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.grey.shade600,
-                                              ),
-                                            ),
+
+                                            /// Right spacer so text doesn't overlap chevron
+                                            const SizedBox(width: 44),
                                           ],
                                         ),
                                       ),
@@ -649,18 +610,54 @@ One tap. One profile. One click away.''';
                                   ),
                                 ),
                               ),
-                              // Black line divider
-                              if (index != userListController.userList.length - 1)
-                                Container(
-                                  height: 1,
-                                  color: const Color.fromARGB(255, 180, 180, 180),
-                                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                                ),
-                            ],
+                            ),
                           );
                         },
                       ),
               ),
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.transparent,
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 8),
+        child: SafeArea(
+          child: GestureDetector(
+            onTap: () => _showInvitationBottomSheet(context),
+            child: Container(
+              height: 54,
+              decoration: BoxDecoration(
+                gradient: ConstantColor.primaryGradient,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: ConstantColor.primary.withOpacity(0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(
+                    Icons.share_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Invite your Friends',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -947,4 +944,72 @@ class _InvitePreviewCard extends StatelessWidget {
       ],
     );
   }
+}
+
+class _WavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // ── Layer 1 (Lightest / Background Wave) ──
+    final path1 = Path();
+    path1.moveTo(size.width * 0.1, size.height);
+    path1.cubicTo(
+      size.width * 0.6, size.height * 0.75, // Lift off
+      size.width * 0.6, size.height * 0.15, // Flatten out above chevron
+      size.width, size.height * 0.15,
+    );
+    path1.lineTo(size.width, size.height);
+    path1.lineTo(size.width * 0.1, size.height);
+    path1.close();
+    canvas.drawPath(path1, Paint()..color = const Color(0xffDDE8FF));
+
+    // ── Layer 2 (Middle Wave) ──
+    final pathMiddle = Path();
+    pathMiddle.moveTo(size.width * 0.28, size.height);
+    pathMiddle.cubicTo(
+      size.width * 0.6, size.height * 0.78,
+      size.width * 0.68, size.height * 0.35,
+      size.width, size.height * 0.35,
+    );
+    pathMiddle.lineTo(size.width, size.height);
+    pathMiddle.close();
+    canvas.drawPath(
+      pathMiddle,
+      Paint()..color = const Color(0xffC7D8F8),
+    );
+
+    // ── Layer 3 (Darker / Foreground Wave) ──
+    final path2 = Path();
+    path2.moveTo(size.width * 0.45, size.height);
+    path2.cubicTo(
+      size.width * 0.65, size.height * 0.8, // Lift off
+      size.width * 0.75, size.height * 0.55, // Flatten out below chevron
+      size.width, size.height * 0.55,
+    );
+    path2.lineTo(size.width, size.height);
+    path2.close();
+    canvas.drawPath(
+        path2, Paint()..color = const Color.fromARGB(255, 204, 217, 245));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _LeftWavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path();
+    path.moveTo(0, size.height * 0.1);
+    path.quadraticBezierTo(
+      size.width * 0.2, size.height * 1.2,
+      size.width, size.height,
+    );
+    path.lineTo(0, size.height);
+    path.close();
+
+    canvas.drawPath(path, Paint()..color = const Color(0xffDDE8FF));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

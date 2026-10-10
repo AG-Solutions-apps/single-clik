@@ -9,6 +9,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:single_clik/constants/constant_color.dart';
 import 'package:single_clik/constants/constant_string.dart';
+import 'package:single_clik/constants/firebase_services.dart';
 import 'package:single_clik/constants/show_toast.dart';
 import 'package:single_clik/controller/auth_controller/business_sign_up_controller.dart';
 import 'package:single_clik/controller/auth_controller/mobile_number_controller.dart';
@@ -217,11 +218,12 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
     debugPrint('Password: $password');
     
     try {
-      debugPrint('Calling postLoginApi');
+      final fcmToken = await FirebaseService.getFcmToken();
+      debugPrint('Calling postLoginApi with FCM Token: $fcmToken');
       final response = await otpController.postLoginApi({
         "mobile": mobileNumber,
         "password": password,
-        "device_id": await SharPreferences.getString(SharPreferences.fcmToken) ?? "Unknown_Device",
+        "device_id": fcmToken,
       });
       
       debugPrint('Login API Response: $response');
@@ -247,10 +249,9 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: ConstantColor.bgColor,
+      backgroundColor: ConstantColor.whiteColor,
       body: Obx(
         () => mobileNumberController.isLoading.value
             ? Center(
@@ -260,9 +261,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
               )
             : Stack(
                 children: [
-                  // ── Background Bubbles ──────────────────────────────────────
-                  _buildBackgroundBubbles(height, width),
-                  
                   // ── Main Content ────────────────────────────────────────────
                   Center(
                     child: SingleChildScrollView(
@@ -623,92 +621,4 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
     );
   }
 
-  /// Helper to create beautiful background bubbles
-  Widget _buildBackgroundBubbles(double height, double width) {
-    return Stack(
-      children: [
-        // Large bubble top left
-        _bubble(
-          left: -width * 0.2,
-          top: -height * 0.1,
-          size: height * 0.4,
-          color: ConstantColor.primary,
-          opacity: 0.12,
-        ),
-        // Large bubble bottom right
-        _bubble(
-          right: -width * 0.2,
-          bottom: -height * 0.1,
-          size: height * 0.35,
-          color: ConstantColor.primaryDark,
-          opacity: 0.12,
-        ),
-        // Medium warm orange bubble center-left
-        _bubble(
-          left: -width * 0.1,
-          top: height * 0.4,
-          size: height * 0.22,
-          color: ConstantColor.orangeColor,
-          opacity: 0.12,
-        ),
-        // Medium bubble top right
-        _bubble(
-          right: width * 0.05,
-          top: height * 0.12,
-          size: height * 0.15,
-          color: ConstantColor.primary,
-          opacity: 0.12,
-        ),
-        // Medium bubble bottom left
-        _bubble(
-          left: width * 0.05,
-          bottom: height * 0.15,
-          size: height * 0.12,
-          color: ConstantColor.primaryDark,
-          opacity: 0.12,
-        ),
-        // Small decorative bubble
-        _bubble(
-          right: width * 0.2,
-          top: height * 0.35,
-          size: height * 0.08,
-          color: ConstantColor.primary,
-          opacity: 0.12,
-        ),
-      ],
-    );
-  }
-
-  /// Creates a soft radial bubble positioned anywhere
-  Widget _bubble({
-    double? left,
-    double? right,
-    double? top,
-    double? bottom,
-    required double size,
-    required Color color,
-    required double opacity,
-  }) {
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            center: const Alignment(-0.3, -0.3),
-            radius: 0.85,
-            colors: [
-              color.withOpacity(opacity),
-              color.withOpacity(0.01),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

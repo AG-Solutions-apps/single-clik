@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:single_clik/constants/constant_color.dart';
+import 'package:single_clik/constants/firebase_services.dart';
 import 'package:single_clik/constants/show_toast.dart';
 import 'package:single_clik/controller/auth_controller/otp_controller.dart';
 import 'package:single_clik/screens/home_tab_bar_screen.dart';
@@ -185,16 +186,17 @@ class _OtpScreenState extends State<OtpScreen> {
           }
         }
         
+        final fcmToken = await FirebaseService.getFcmToken();
         debugPrint('Calling postLoginApi with:');
         debugPrint('  Mobile: $mobileNumber');
         debugPrint('  Password: $password');
-        debugPrint('  Device ID: ${await SharPreferences.getString(SharPreferences.fcmToken) ?? "Unknown_Device"}');
+        debugPrint('  Device ID (FCM Token): $fcmToken');
         
         // Call API for login verification
         final response = await otpController.postLoginApi({
           "mobile": mobileNumber,
           "password": password, // Use the actual password from signup response
-          "device_id": await SharPreferences.getString(SharPreferences.fcmToken) ?? "Unknown_Device",
+          "device_id": fcmToken,
         });
 
         debugPrint('Login API Response Code: ${response['code']}');
@@ -348,12 +350,11 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
     bool isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     debugPrint('=== OtpScreen Building ===');
 
     return Scaffold(
-      backgroundColor: ConstantColor.bgColor,
+      backgroundColor: ConstantColor.whiteColor,
       body: Obx(
         () => otpController.isLoading.value
             ? Center(
@@ -363,9 +364,6 @@ class _OtpScreenState extends State<OtpScreen> {
               )
             : Stack(
                 children: [
-                  // ── Background Bubbles ──────────────────────────────────────
-                  _buildBackgroundBubbles(height, width),
-                  
                   // ── Main Content ────────────────────────────────────────────
                   Center(
                     child: SingleChildScrollView(
@@ -691,94 +689,6 @@ class _OtpScreenState extends State<OtpScreen> {
     );
   }
 
-  /// Helper to create beautiful background bubbles
-  Widget _buildBackgroundBubbles(double height, double width) {
-    return Stack(
-      children: [
-        // Large bubble top left
-        _bubble(
-          left: -width * 0.2,
-          top: -height * 0.1,
-          size: height * 0.4,
-          color: ConstantColor.primary,
-          opacity: 0.15,
-        ),
-        // Large bubble bottom right
-        _bubble(
-          right: -width * 0.2,
-          bottom: -height * 0.1,
-          size: height * 0.35,
-          color: ConstantColor.primaryDark,
-          opacity: 0.12,
-        ),
-        // Medium warm orange bubble center-left
-        _bubble(
-          left: -width * 0.1,
-          top: height * 0.4,
-          size: height * 0.22,
-          color: ConstantColor.orangeColor,
-          opacity: 0.08,
-        ),
-        // Medium bubble top right
-        _bubble(
-          right: width * 0.05,
-          top: height * 0.12,
-          size: height * 0.15,
-          color: ConstantColor.primary,
-          opacity: 0.12,
-        ),
-        // Medium bubble bottom left
-        _bubble(
-          left: width * 0.05,
-          bottom: height * 0.15,
-          size: height * 0.12,
-          color: ConstantColor.primaryDark,
-          opacity: 0.12,
-        ),
-        // Small decorative bubble
-        _bubble(
-          right: width * 0.2,
-          top: height * 0.35,
-          size: height * 0.08,
-          color: ConstantColor.primary,
-          opacity: 0.15,
-        ),
-      ],
-    );
-  }
-
-  /// Creates a soft radial bubble positioned anywhere
-  Widget _bubble({
-    double? left,
-    double? right,
-    double? top,
-    double? bottom,
-    required double size,
-    required Color color,
-    required double opacity,
-  }) {
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            center: const Alignment(-0.3, -0.3),
-            radius: 0.85,
-            colors: [
-              color.withOpacity(opacity),
-              color.withOpacity(0.01),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   InputDecoration otpInputDecoration = InputDecoration(
     filled: true,

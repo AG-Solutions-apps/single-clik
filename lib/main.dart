@@ -7,6 +7,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:single_clik/constants/constant_color.dart';
 import 'package:single_clik/constants/firebase_services.dart' as services;
+import 'package:single_clik/controller/app_update_controller.dart';
 import 'package:single_clik/screens/auth_screens/mobile_number_screen.dart';
 import 'package:single_clik/screens/get_started_screen/get_started_page.dart';
 import 'package:single_clik/screens/home_tab_bar_screen.dart';
@@ -18,6 +19,7 @@ String address = "";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Get.put(AppUpdateController(), permanent: true);
 
   try {
     await Firebase.initializeApp();

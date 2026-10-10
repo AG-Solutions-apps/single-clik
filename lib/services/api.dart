@@ -3,6 +3,8 @@ class API {
   static const baseUrl = "https://singleclik.com/api/public/api/"; // Live
 
   static const checkMobile = "${baseUrl}check-mobile";
+  static const checkReferral = "${baseUrl}check-referral";
+  static const createReferralClaim = "${baseUrl}create-refferal-claim";
   static const login = "${baseUrl}login";
   static const signUp = "${baseUrl}sign-up";
   static const businessSignUp = "${baseUrl}sign-up-business";
