@@ -1127,9 +1127,15 @@ Future deleteDialog(BuildContext context, double height, double width) {
 
 Future postDeleteProfileApi() async {
   try {
+    final token = await SharPreferences.getString(SharPreferences.token);
+    if (token == null || token.trim().isEmpty) {
+      ShowToast.showToast("Authentication error. Please login again.", showSuccess: false);
+      return;
+    }
     final request = http.MultipartRequest('POST', Uri.parse(API.deleteProfile));
     request.headers.addAll({
-      'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+      'Authorization': 'Bearer ${token.trim()}',
+      'Accept': 'application/json',
     });
     var res = await request.send();
     var responseDone = await http.Response.fromStream(res);

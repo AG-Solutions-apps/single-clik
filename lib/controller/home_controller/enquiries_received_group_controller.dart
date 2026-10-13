@@ -37,9 +37,16 @@ class EnquiriesSentGroupController extends GetxController {
         isAutoRefreshing.value = true;
       }
       
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        if (!isAutoRefresh) isLoading.value = false;
+        else isAutoRefreshing.value = false;
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.groupSent));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       debugPrint('EnquiryId : $enquiryId');
       request.fields.addAll({'enquiry_id': enquiryId});

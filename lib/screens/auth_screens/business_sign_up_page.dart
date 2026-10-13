@@ -1363,10 +1363,10 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
         await EasyLoading.dismiss();
         
         // Account created successfully
-        if (response['code'] == 200 || businessSignUpController.isAccountCreated.value) {
+        if (response['code'] == 200 && businessSignUpController.isAccountCreated.value) {
           // ✅ Mark locally so user cannot re-submit
           await BusinessSignUpController.markBusinessRequestSubmitted();
-          ShowToast.showToast("Account created successfully! Please login.", showSuccess: true);
+          ShowToast.showToast(response['msg'] ?? "Account created successfully! Please login.", showSuccess: true);
           
           // Get mobile number
           String mobileNumber = bodyParams['mobile'] ?? '';
@@ -1391,16 +1391,11 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
       await EasyLoading.dismiss();
       debugPrint('Submit Error: $error');
       
-      // Check if account was actually created despite error
-      if (businessSignUpController.isAccountCreated.value) {
-        ShowToast.showToast("Account created successfully! Please login.", showSuccess: true);
-        
-        if (mounted) {
-          Get.offAll(() => const MobileNumberScreen());
-        }
-      } else {
-        ShowToast.showToast(error.toString(), showSuccess: false);
+      String errorMsg = error.toString();
+      if (errorMsg.startsWith("Exception: ")) {
+        errorMsg = errorMsg.replaceFirst("Exception: ", "");
       }
+      ShowToast.showToast(errorMsg, showSuccess: false);
     }
   }
   

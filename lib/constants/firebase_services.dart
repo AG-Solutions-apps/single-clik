@@ -77,37 +77,32 @@ class FirebaseService {
         debugPrint("✅ Notification permission status: ${settings.authorizationStatus}");
       }
 
-      // 4. Get Push Token (APNS Token on iOS, FCM Token on Android)
-      String? token;
-      if (Platform.isIOS) {
-        token = await firebaseMessaging.getAPNSToken();
-        debugPrint('APNS Token: $token');
-        if (token == null) {
-          await Future.delayed(const Duration(seconds: 1));
-          token = await firebaseMessaging.getAPNSToken();
-          debugPrint('APNS Token retry: $token');
-        }
-      } else {
-        token = await firebaseMessaging.getToken();
-      }
-
-      if (token != null && token.isNotEmpty) {
-        await SharPreferences.setString(SharPreferences.fcmToken, token);
-        debugPrint("✅ Push Token Initialized (${Platform.isIOS ? 'APNS' : 'FCM'}): $token");
-      } else {
-        debugPrint("⚠️ Failed to retrieve Push Token during init");
-      }
-
-      // Listen for token refreshes and update storage
-      if (Platform.isAndroid) {
-        firebaseMessaging.onTokenRefresh.listen((String newToken) async {
-          debugPrint("🔄 FCM Token Refreshed: $newToken");
-          await SharPreferences.setString(SharPreferences.fcmToken, newToken);
-        });
-      }
-
-      // Enable Auto Initialization
+      // Enable Auto Initialization first
       await firebaseMessaging.setAutoInitEnabled(true);
+
+      // 4. Get FCM Token for Push Notifications
+      String? token;
+      try {
+        if (Platform.isIOS) {
+          await firebaseMessaging.getAPNSToken();
+        }
+        token = await firebaseMessaging.getToken();
+      } catch (e) {
+        debugPrint("⚠️ Failed to retrieve FCM Token during init: $e");
+      }
+
+      if (token != null && token.trim().isNotEmpty) {
+        await SharPreferences.setString(SharPreferences.fcmToken, token.trim());
+        debugPrint("✅ FCM Token Initialized: ${token.trim()}");
+      } else {
+        debugPrint("⚠️ Failed to retrieve FCM Token during init");
+      }
+
+      // Listen for token refreshes and update storage on all platforms
+      firebaseMessaging.onTokenRefresh.listen((String newToken) async {
+        debugPrint("🔄 FCM Token Refreshed: ${newToken.trim()}");
+        await SharPreferences.setString(SharPreferences.fcmToken, newToken.trim());
+      });
 
       // Configure Foreground Notifications Presentation Options
       await firebaseMessaging.setForegroundNotificationPresentationOptions(
@@ -164,45 +159,57 @@ class FirebaseService {
     }
   }
 
-  /// Fetches the push token (APNS token on iOS, FCM token on Android)
-  /// with cache check and device ID fallback.
+  /// Fetches the push token (FCM registration token)
+  /// with cache check and fallback.
   static Future<String> getFcmToken() async {
+    // 1. Try to get fresh FCM token from Firebase
     try {
-      // 1. Try to get direct fresh token from Firebase/APNS depending on platform
-      String? token;
       if (Platform.isIOS) {
-        token = await FirebaseMessaging.instance.getAPNSToken();
-        if (token == null) {
-          await Future.delayed(const Duration(seconds: 1));
-          token = await FirebaseMessaging.instance.getAPNSToken();
+        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken == null) {
+          await Future.delayed(const Duration(milliseconds: 500));
+          await FirebaseMessaging.instance.getAPNSToken();
         }
-      } else {
-        token = await FirebaseMessaging.instance.getToken();
       }
-
+      String? token = await FirebaseMessaging.instance.getToken();
       if (token != null && token.trim().isNotEmpty) {
         await SharPreferences.setString(SharPreferences.fcmToken, token.trim());
-        debugPrint("✅ Fetched direct ${Platform.isIOS ? 'APNS' : 'FCM'} Token: ${token.trim()}");
+        debugPrint("✅ Fetched direct FCM Token: ${token.trim()}");
         return token.trim();
       }
     } catch (e) {
-      debugPrint("⚠️ Direct Push Token fetch failed: $e");
+      debugPrint("⚠️ Direct FCM Token fetch failed: $e");
     }
 
-    // 2. Check SharedPreferences cached token
+    // 2. Check SharedPreferences cached token (must be a valid FCM token format)
     try {
       String? cachedToken = await SharPreferences.getString(SharPreferences.fcmToken);
       if (cachedToken != null &&
           cachedToken.trim().isNotEmpty &&
-          cachedToken != "Unknown_Device") {
-        debugPrint("✅ Using cached Token: ${cachedToken.trim()}");
+          cachedToken != "Unknown_Device" &&
+          !cachedToken.startsWith("Device_") &&
+          cachedToken.length >= 20) {
+        debugPrint("✅ Using cached FCM Token: ${cachedToken.trim()}");
         return cachedToken.trim();
       }
     } catch (e) {
       debugPrint("⚠️ SharedPreferences Token read failed: $e");
     }
 
-    // 3. Fallback to physical device ID if push token is unavailable (e.g. simulator without Play services/APNS)
+    // 3. Retry fetching FCM Token once more with a short delay
+    try {
+      await Future.delayed(const Duration(milliseconds: 500));
+      String? token = await FirebaseMessaging.instance.getToken();
+      if (token != null && token.trim().isNotEmpty) {
+        await SharPreferences.setString(SharPreferences.fcmToken, token.trim());
+        debugPrint("✅ Fetched direct FCM Token on retry: ${token.trim()}");
+        return token.trim();
+      }
+    } catch (e) {
+      debugPrint("⚠️ FCM Token retry failed: $e");
+    }
+
+    // 4. Fallback to physical device ID if push token is unavailable (e.g. simulator without Play services)
     try {
       final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
       if (Platform.isAndroid) {

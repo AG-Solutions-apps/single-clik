@@ -4,9 +4,8 @@ import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:single_clik/constants/constant_color.dart';
 import 'package:single_clik/constants/show_toast.dart';
+import 'package:single_clik/controller/home_controller/home_controller.dart';
 import 'package:single_clik/controller/home_controller/referral_controller.dart';
-import 'package:single_clik/widget/app_button.dart';
-import 'package:single_clik/widget/app_image_assets.dart';
 
 class ReferralRewardsScreen extends StatefulWidget {
   const ReferralRewardsScreen({super.key});
@@ -142,11 +141,52 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
     );
   }
 
+  // ── Referral Code & Share Helpers ──────────────────────────────────────────
+
+  String _getReferralCode() {
+    String code = referralController.userReferralCode.value.trim();
+    if ((code.isEmpty || code == 'N/A') && Get.isRegistered<HomeController>()) {
+      final hcCode = Get.find<HomeController>().userData['referral_code']?.toString().trim() ?? '';
+      if (hcCode.isNotEmpty && hcCode.toLowerCase() != 'null') {
+        code = hcCode;
+      }
+    }
+    return code;
+  }
+
+  void _shareReferralCode({String? productName, int? neededBusinesses, int? neededUsers}) {
+    final code = _getReferralCode();
+    final String shareMessage;
+
+    if (productName != null && productName.isNotEmpty) {
+      shareMessage =
+          "🌟 *Single Clik Referral & Rewards* 🌟\n\n"
+          "Help me unlock *$productName* on Single Clik!\n\n"
+          "${code.isNotEmpty && code != 'N/A' ? 'Use my Referral Code: *$code*\n\n' : ''}"
+          "🎁 *Earn reward points for every referral:*\n"
+          "💼 Business Referral: *1,000 Points*\n"
+          "👤 User Referral: *500 Points*\n\n"
+          "📲 Download & Register now:\nhttps://singleclik.com/app\n\n"
+          "${code.isNotEmpty && code != 'N/A' ? 'Enter Referral Code: *$code* during signup! 🚀' : 'Start earning rewards today! 🚀'}";
+    } else {
+      shareMessage =
+          "🌟 *Join Single Clik & Earn Rewards!* 🌟\n\n"
+          "${code.isNotEmpty && code != 'N/A' ? 'Use my Referral Code: *$code* to get instant rewards!\n\n' : ''}"
+          "🎁 *Earn points on every referral:*\n"
+          "💼 Business Referral: *1,000 Points*\n"
+          "👤 User Referral: *500 Points*\n\n"
+          "📲 Download & Register now:\nhttps://singleclik.com/app\n\n"
+          "${code.isNotEmpty && code != 'N/A' ? 'Don\'t forget to enter code: *$code*! 🚀' : 'Start earning rewards today! 🚀'}";
+    }
+
+    Share.share(shareMessage);
+  }
+
   // ── Points & Referral Code Hero Card ──────────────────────────────────────
 
   Widget _buildHeroCard(double height, double width) {
     final availablePts = referralController.availablePoints;
-    final code = referralController.userReferralCode.value;
+    final code = _getReferralCode();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -303,12 +343,7 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                 ),
               ),
               ElevatedButton.icon(
-                onPressed: () {
-                  if (code.isEmpty) return;
-                  Share.share(
-                    "Join Single Clik app using my referral code: $code to get instant reward points!\nDownload here: https://play.google.com/store/apps/details?id=com.singleclick.agsolution",
-                  );
-                },
+                onPressed: () => _shareReferralCode(),
                 icon: const Icon(Icons.share_rounded, size: 18),
                 label: const Text("Share Code"),
                 style: ElevatedButton.styleFrom(
@@ -395,6 +430,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
         final availablePts = referralController.availablePoints;
         final bool canClaim = availablePts >= prodPoints;
         final int neededPts = prodPoints - availablePts;
+        final int neededBusinesses = (neededPts > 0) ? (neededPts / 1000).ceil() : 0;
+        final int neededUsers = (neededPts > 0) ? (neededPts / 500).ceil() : 0;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
@@ -410,39 +447,20 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
               ),
             ],
             border: Border.all(
-              color: canClaim ? ConstantColor.primary.withOpacity(0.3) : Colors.grey.withOpacity(0.15),
+              color: canClaim
+                  ? ConstantColor.primary.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.15),
               width: 1.5,
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Top Row: Left Side (Name, Points, Description) | Right Side (Complete Image)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product Image
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      height: 85,
-                      width: 85,
-                      color: const Color(0xffF4F6F9),
-                      child: Image.network(
-                        fullImageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Center(
-                          child: Icon(
-                            Icons.card_giftcard_rounded,
-                            size: 40,
-                            color: ConstantColor.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-
-                  // Product Title & Points
+                  // Left Side
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,29 +498,60 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                             ],
                           ),
                         ),
+                        if (prodDesc.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            prodDesc,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                              height: 1.3,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // Right Side: Complete Image (Adaptive Rectangle/Square, without fixed cropping)
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 125,
+                      maxHeight: 110,
+                      minWidth: 70,
+                      minHeight: 60,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        color: const Color(0xffF4F6F9),
+                        child: Image.network(
+                          fullImageUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            width: 80,
+                            height: 80,
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.card_giftcard_rounded,
+                              size: 36,
+                              color: ConstantColor.primary,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
 
-              if (prodDesc.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                Text(
-                  prodDesc,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                    height: 1.3,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-
               const SizedBox(height: 14),
 
-              // Action Button
+              // Bottom Action: Claim Now or Share to Refer
               if (canClaim)
                 SizedBox(
                   width: double.infinity,
@@ -529,22 +578,116 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                   ),
                 )
               else
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xffFFF4F2),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xffFFCDD2), width: 1),
+                InkWell(
+                  onTap: () => _shareReferralCode(
+                    productName: prodName,
+                    neededBusinesses: neededBusinesses,
+                    neededUsers: neededUsers,
                   ),
-                  child: Center(
-                    child: Text(
-                      "Get ${_formatNumber(neededPts)} more points to claim",
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xffD32F2F),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xffFFF3E0),
+                          Color(0xffFFE0B2),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0xffFFB74D),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.orange.withOpacity(0.08),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: const Color(0xffE65100).withOpacity(0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.share_rounded,
+                            color: Color(0xffE65100),
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xffBF360C),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  children: [
+                                    const TextSpan(text: "Refer "),
+                                    TextSpan(
+                                      text: "$neededBusinesses Business${neededBusinesses > 1 ? 'es' : ''}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xffD84315),
+                                      ),
+                                    ),
+                                    const TextSpan(text: " or "),
+                                    TextSpan(
+                                      text: "$neededUsers User${neededUsers > 1 ? 's' : ''}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xffD84315),
+                                      ),
+                                    ),
+                                    const TextSpan(text: " to claim this!"),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Row(
+                                children: [
+                                  Text(
+                                    "Need ${_formatNumber(neededPts)} more pts",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[700],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    "• Tap to share & invite ↗",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xffE65100),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 14,
+                          color: Color(0xffE65100),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -873,7 +1016,10 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                     child: ElevatedButton(
                       onPressed: () async {
                         Get.back();
-                        await referralController.postCreateReferralClaimApi(product['id']);
+                        final isSuccess = await referralController.postCreateReferralClaimApi(product['id']);
+                        if (isSuccess && mounted) {
+                          _showSuccessClaimDialog(product, prodPoints);
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ConstantColor.primary,
@@ -887,6 +1033,233 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                 ],
               ),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ── Success Dialog after Claiming Reward ───────────────────────────────────
+
+  void _showSuccessClaimDialog(Map<String, dynamic> product, int prodPoints) {
+    final prodName = product['refferal_products']?.toString() ?? 'Reward Item';
+    final prodImg = product['refferal_products_image']?.toString() ?? '';
+    final fullImageUrl = "${referralController.imageUrl.value}$prodImg";
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          elevation: 10,
+          backgroundColor: Colors.white,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Top Success Icon with Badge Effect
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xff4CAF50).withOpacity(0.15),
+                        const Color(0xff81C784).withOpacity(0.08),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xff4CAF50),
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 36,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+
+                // Title
+                const Text(
+                  "Claim Request Placed!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Professional Explanation Text
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[700],
+                      height: 1.5,
+                    ),
+                    children: [
+                      const TextSpan(
+                        text: "Your request for ",
+                      ),
+                      TextSpan(
+                        text: "\"$prodName\"",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: " has been successfully submitted. Our team will verify your claim and contact you shortly regarding fulfillment and delivery.",
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+
+                // Product Preview Card
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffF8F9FD),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xffE8ECF4), width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          height: 52,
+                          width: 52,
+                          color: Colors.white,
+                          child: prodImg.isNotEmpty
+                              ? Image.network(
+                                  fullImageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Icon(
+                                    Icons.card_giftcard_rounded,
+                                    color: ConstantColor.primary,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.card_giftcard_rounded,
+                                  color: ConstantColor.primary,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              prodName,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Redeemed with ${_formatNumber(prodPoints)} Pts",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: ConstantColor.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xffE8F5E9),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          "Processing",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xff2E7D32),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Get.back(),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          side: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        child: Text(
+                          "Done",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                          _tabController.animateTo(2); // Switch to "Claimed" tab
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ConstantColor.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                        child: const Text(
+                          "View Claimed",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },

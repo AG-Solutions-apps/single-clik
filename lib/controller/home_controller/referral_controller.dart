@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:single_clik/constants/show_toast.dart';
 import 'package:single_clik/services/api.dart';
 import 'package:single_clik/utils/shar_preferences.dart';
+import 'home_controller.dart';
 
 class ReferralController extends GetxController {
   final isLoading = false.obs;
@@ -20,8 +21,32 @@ class ReferralController extends GetxController {
 
   @override
   void onInit() {
-    fetchReferralData();
     super.onInit();
+    _resolveCodeFromCacheOrHome();
+    fetchReferralData();
+  }
+
+  void _resolveCodeFromCacheOrHome() async {
+    if (Get.isRegistered<HomeController>()) {
+      final hc = Get.find<HomeController>();
+      final code = _extractReferralCode(hc.userData);
+      if (code.isNotEmpty && code.toLowerCase() != 'null') {
+        userReferralCode.value = code;
+        debugPrint('✅ Referral Code pre-resolved from HomeController: "$code"');
+        return;
+      }
+    }
+    final cachedUser = await SharPreferences.getString(SharPreferences.userData);
+    if (cachedUser != null && cachedUser.trim().isNotEmpty) {
+      try {
+        final decoded = json.decode(cachedUser);
+        final code = _extractReferralCode(decoded);
+        if (code.isNotEmpty && code.toLowerCase() != 'null') {
+          userReferralCode.value = code;
+          debugPrint('✅ Referral Code pre-resolved from SharPreferences: "$code"');
+        }
+      } catch (_) {}
+    }
   }
 
   int get availablePoints {
@@ -30,13 +55,86 @@ class ReferralController extends GetxController {
     return total - claimed < 0 ? 0 : total - claimed;
   }
 
+  /// Extracts referral code from various response structures (user vs business)
+  String _extractReferralCode(dynamic data) {
+    if (data == null) return '';
+
+    if (data is Map) {
+      // 1. Direct referral code keys
+      const keys = [
+        'referral_code',
+        'refferal_code',
+        'referralCode',
+        'refferalCode',
+        'ref_code',
+        'refer_code',
+        'user_referral_code',
+      ];
+
+      for (final key in keys) {
+        if (data.containsKey(key)) {
+          final val = data[key];
+          if (val != null) {
+            final str = val.toString().trim();
+            if (str.isNotEmpty && str.toLowerCase() != 'null') {
+              return str;
+            }
+          }
+        }
+      }
+
+      // 2. Common nested containers (business profile / user data)
+      const containers = [
+        'data',
+        'user',
+        'profile',
+        'business',
+        'business_profile',
+        'user_profile',
+        'business_data',
+        'user_data',
+      ];
+
+      for (final containerKey in containers) {
+        if (data.containsKey(containerKey)) {
+          final code = _extractReferralCode(data[containerKey]);
+          if (code.isNotEmpty) return code;
+        }
+      }
+
+      // 3. Check map values (skipping product/history lists)
+      for (final entry in data.entries) {
+        final keyStr = entry.key.toString().toLowerCase();
+        if (keyStr == 'products' || keyStr == 'product_services' || keyStr == 'claim_history') {
+          continue;
+        }
+        if (entry.value is Map || entry.value is List) {
+          final code = _extractReferralCode(entry.value);
+          if (code.isNotEmpty) return code;
+        }
+      }
+    } else if (data is List) {
+      for (final item in data) {
+        final code = _extractReferralCode(item);
+        if (code.isNotEmpty) return code;
+      }
+    }
+
+    return '';
+  }
+
   Future<void> fetchReferralData() async {
     try {
       isLoading.value = true;
+
       final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isLoading.value = false;
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.fetchProfile));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
       });
 
@@ -53,13 +151,51 @@ class ReferralController extends GetxController {
           claimPoints.value = (responseData['claim_points'] ?? '0').toString();
           imageUrl.value = (responseData['image_url'] ?? '').toString();
 
-          // User referral code
-          if (responseData['data'] is List && (responseData['data'] as List).isNotEmpty) {
-            final firstUser = responseData['data'][0];
-            if (firstUser is Map) {
-              userReferralCode.value = (firstUser['referral_code'] ?? '').toString();
+          // 1. Direct check on responseData['data'] (for business users 'data' is a Map)
+          String code = '';
+          if (responseData['data'] != null) {
+            if (responseData['data'] is Map) {
+              final dataMap = responseData['data'] as Map;
+              code = (dataMap['referral_code'] ?? dataMap['refferal_code'] ?? '').toString().trim();
+            } else if (responseData['data'] is List && (responseData['data'] as List).isNotEmpty) {
+              for (var item in (responseData['data'] as List)) {
+                if (item is Map) {
+                  final c = (item['referral_code'] ?? item['refferal_code'] ?? '').toString().trim();
+                  if (c.isNotEmpty && c.toLowerCase() != 'null') {
+                    code = c;
+                    break;
+                  }
+                }
+              }
             }
           }
+
+          // 2. If not found in data, check root or other containers
+          if (code.isEmpty || code.toLowerCase() == 'null') {
+            code = _extractReferralCode(responseData);
+          }
+
+          // 3. Fallback to HomeController.userData
+          if ((code.isEmpty || code.toLowerCase() == 'null') && Get.isRegistered<HomeController>()) {
+            final hc = Get.find<HomeController>();
+            code = _extractReferralCode(hc.userData);
+          }
+
+          // 4. Fallback to cached SharedPreferences userData
+          if (code.isEmpty || code.toLowerCase() == 'null') {
+            final cachedUser = await SharPreferences.getString(SharPreferences.userData);
+            if (cachedUser != null && cachedUser.trim().isNotEmpty) {
+              try {
+                final decoded = json.decode(cachedUser);
+                code = _extractReferralCode(decoded);
+              } catch (_) {}
+            }
+          }
+
+          if (code.isNotEmpty && code.toLowerCase() != 'null') {
+            userReferralCode.value = code;
+          }
+          debugPrint('✅ Referral Code resolved: "${userReferralCode.value}"');
 
           // History Points (Referrals)
           if (responseData['history_points'] is List) {
@@ -100,9 +236,14 @@ class ReferralController extends GetxController {
     try {
       isClaiming.value = true;
       final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isClaiming.value = false;
+        ShowToast.showToast("Authentication error. Please login again.", showSuccess: false);
+        return false;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.createReferralClaim));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
       });
       request.fields['refferal_product_id'] = productId.toString();

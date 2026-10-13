@@ -98,10 +98,17 @@ class UpdateProfileController extends GetxController {
   Future postUpdateProfileApi(Map<String, String> body, String photo) async {
     isButtonLoading.value = true;
     try {
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        ShowToast.showToast("Authentication error. Please login again.", showSuccess: false);
+        isButtonLoading.value = false;
+        return;
+      }
       final request =
           http.MultipartRequest('POST', Uri.parse(API.updateProfile));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll(body);
       debugPrint(photo);
@@ -178,9 +185,15 @@ class UpdateProfileController extends GetxController {
   Future postCategoriesApi() async {
     try {
       isCategoryLoading.value = true;
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isCategoryLoading.value = false;
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.categories));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
 
       var res = await request.send();
@@ -209,10 +222,16 @@ class UpdateProfileController extends GetxController {
   Future postSubCategoriesApi(String? categoryId) async {
     try {
       isCategoryLoading.value = true;
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isCategoryLoading.value = false;
+        return;
+      }
       final request =
           http.MultipartRequest('POST', Uri.parse(API.subcategories));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'category_id': categoryId!});
 

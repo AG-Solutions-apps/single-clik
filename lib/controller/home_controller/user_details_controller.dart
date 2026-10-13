@@ -25,9 +25,16 @@ class UserDetailsController extends GetxController
   Future postUserByIdApi(String? userId) async {
     try {
       isLoading.value = true;
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        debugPrint('UserById: No auth token');
+        isLoading.value = false;
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.userById));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'user_id': userId!});
 
@@ -108,10 +115,13 @@ class UserDetailsController extends GetxController
 
   Future<List<dynamic>> postFetchProductServicesApi({String? userId}) async {
     try {
-      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        return [];
+      }
+      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
       });
       if (userId == null || userId.isEmpty) {

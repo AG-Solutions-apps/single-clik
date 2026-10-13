@@ -110,6 +110,7 @@ class HomeTabBarScreenState extends State<HomeTabBarScreen>
   }
 
   Future<void> getUserData() async {
+    await homeController.checkAndInitializeData();
     await homeController.postFetchProfileApi().then(
       (value) async {
         debugPrint(homeController.userData['user_type'].toString());

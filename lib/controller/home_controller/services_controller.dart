@@ -13,10 +13,16 @@ class ServicesController extends GetxController {
   Future postSubCategoriesApi(String? categoryId) async {
     try {
       isLoading.value = true;
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isLoading.value = false;
+        return;
+      }
       final request =
           http.MultipartRequest('POST', Uri.parse(API.subcategories));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'category_id': categoryId!});
 

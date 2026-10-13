@@ -314,7 +314,14 @@ class SignDetailsController extends GetxController {
         }
       } else {
         isButtonLoading.value = false;
-        ShowToast.showToast(ConstantString.somethingWantWrongMsg, showSuccess: false);
+        String errorMsg = ConstantString.somethingWantWrongMsg;
+        try {
+          final errData = json.decode(responseDone.body);
+          if (errData is Map) {
+            errorMsg = errData['msg'] ?? errData['message'] ?? errData['error'] ?? ConstantString.somethingWantWrongMsg;
+          }
+        } catch (_) {}
+        ShowToast.showToast(errorMsg, showSuccess: false);
       }
     } catch (e) {
       isButtonLoading.value = false;
