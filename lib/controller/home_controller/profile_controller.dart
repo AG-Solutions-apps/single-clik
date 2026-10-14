@@ -115,12 +115,17 @@ class ProfileController extends GetxController {
     HomeController homeController = Get.put(HomeController());
 
     isLoading.value = true;
-    debugPrint("Token::::${await SharPreferences.getString(SharPreferences.token)}");
     try {
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isLoading.value = false;
+        return;
+      }
       final request =
           http.MultipartRequest('POST', Uri.parse(API.fetchProfile));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
@@ -172,8 +177,11 @@ class ProfileController extends GetxController {
           parsedProducts = productsList;
         }
 
-        parsedProfile['products'] = parsedProducts;
-        parsedProfile['product_services'] = parsedProducts;
+        if (responseData.containsKey('total_points')) parsedProfile['total_points'] = responseData['total_points'];
+        if (responseData.containsKey('claim_points')) parsedProfile['claim_points'] = responseData['claim_points'];
+        if (responseData.containsKey('history_points')) parsedProfile['history_points'] = responseData['history_points'];
+        if (responseData.containsKey('claim_history')) parsedProfile['claim_history'] = responseData['claim_history'];
+        if (responseData.containsKey('image_url')) parsedProfile['image_url'] = responseData['image_url'];
 
         profileMap.value = parsedProfile;
         filePath.value =
@@ -202,10 +210,13 @@ class ProfileController extends GetxController {
 
   Future<List<dynamic>> postFetchProductServicesApi({String? userId}) async {
     try {
-      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        return [];
+      }
+      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
       });
       if (userId == null || userId.isEmpty) {
@@ -233,6 +244,11 @@ class ProfileController extends GetxController {
   Future postUpdateProfileApi(Map<String, String> body, String photo) async {
     isButtonLoading.value = true;
     try {
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isButtonLoading.value = false;
+        throw 'Authentication error. Please login again.';
+      }
       HomeController homeController = Get.find<HomeController>();
       final isBusiness = (homeController.userData['user_type'].toString() == '2');
       final apiUrl = isBusiness ? API.updateProfile : API.updateUserProfile;
@@ -240,7 +256,8 @@ class ProfileController extends GetxController {
       final request =
           http.MultipartRequest('POST', Uri.parse(apiUrl));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll(body);
       (photo.isEmpty || photo.startsWith("http")) ? null : request.files.add(
@@ -288,9 +305,15 @@ class ProfileController extends GetxController {
   Future postDeveloperApi() async {
     isButtonLoading.value = true;
     try {
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isButtonLoading.value = false;
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.developer));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
@@ -330,10 +353,14 @@ class ProfileController extends GetxController {
   Future<dynamic> postCreateProductApi(String productName, String imagePath) async {
     isButtonLoading.value = true;
     try {
-      final request = http.MultipartRequest('POST', Uri.parse(API.createProductServices));
       final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isButtonLoading.value = false;
+        throw 'Authentication error. Please login again.';
+      }
+      final request = http.MultipartRequest('POST', Uri.parse(API.createProductServices));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
       });
       request.fields.addAll({
@@ -404,10 +431,14 @@ class ProfileController extends GetxController {
   Future<dynamic> postDeleteProductApi(String productId) async {
     isButtonLoading.value = true;
     try {
-      final request = http.MultipartRequest('POST', Uri.parse(API.deleteProductServices));
       final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isButtonLoading.value = false;
+        throw 'Authentication error. Please login again.';
+      }
+      final request = http.MultipartRequest('POST', Uri.parse(API.deleteProductServices));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
       });
       request.fields.addAll({

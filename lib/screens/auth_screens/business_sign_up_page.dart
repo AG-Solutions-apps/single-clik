@@ -867,14 +867,93 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
       children: [
         SizedBox(height: height * 0.03),
         Text("Referred Code", style: _textFieldLabelTextStyle),
-        TextFormField(
-          controller: businessSignUpController.txtReferredCode.value,
-          keyboardType: TextInputType.text,
-          textCapitalization: TextCapitalization.characters,
-          style: _textFieldTextStyle,
-          textInputAction: TextInputAction.next,
-          decoration: _inputDecoration(hintText: "Enter referral code (optional)"),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: businessSignUpController.txtReferredCode.value,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.characters,
+                style: _textFieldTextStyle,
+                textInputAction: TextInputAction.next,
+                onChanged: (val) {
+                  if (businessSignUpController.verifiedReferralCode.value.isNotEmpty &&
+                      val.trim() != businessSignUpController.verifiedReferralCode.value) {
+                    businessSignUpController.resetReferralStatus();
+                  } else if (businessSignUpController.referralMessage.value.isNotEmpty &&
+                      val.trim().isEmpty) {
+                    businessSignUpController.resetReferralStatus();
+                  }
+                },
+                decoration: _inputDecoration(hintText: "Enter referral code (optional)"),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Obx(() {
+              return businessSignUpController.isVerifyingReferral.value
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: ConstantColor.primary,
+                      ),
+                    )
+                  : TextButton(
+                      onPressed: () async {
+                        FocusScope.of(context).unfocus();
+                        await businessSignUpController.checkReferralApi(
+                          businessSignUpController.txtReferredCode.value.text,
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: ConstantColor.primary.withOpacity(0.1),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        "Verify",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: ConstantColor.primary,
+                        ),
+                      ),
+                    );
+            }),
+          ],
         ),
+        Obx(() {
+          if (businessSignUpController.referralMessage.value.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          final isSuccess = businessSignUpController.isReferralVerified.value;
+          return Padding(
+            padding: const EdgeInsets.only(top: 6, left: 2),
+            child: Row(
+              children: [
+                Icon(
+                  isSuccess ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                  color: isSuccess ? Colors.green : Colors.red,
+                  size: 16,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    businessSignUpController.referralMessage.value,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: isSuccess ? Colors.green : Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
       ],
     );
   }
@@ -1193,6 +1272,27 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
     try {
       final bool isUpdateProfile = widget.newAccount != true;
       
+      String referralCodeToSend = "";
+      if (isUpdateProfile) {
+        referralCodeToSend = homeController.userData['referred_by_code']?.toString() ?? '';
+      } else {
+        String enteredCode = businessSignUpController.txtReferredCode.value.text.trim();
+        if (enteredCode.isNotEmpty) {
+          if (businessSignUpController.isReferralVerified.value &&
+              enteredCode == businessSignUpController.verifiedReferralCode.value) {
+            referralCodeToSend = enteredCode;
+          } else {
+            bool isValid = await businessSignUpController.checkReferralApi(enteredCode);
+            if (isValid) {
+              referralCodeToSend = enteredCode;
+            } else {
+              // Invalid code: DO NOT send code to backend
+              referralCodeToSend = "";
+            }
+          }
+        }
+      }
+
       final Map<String, String> bodyParams = {
         'user_type': '2',
         'name': isUpdateProfile
@@ -1228,9 +1328,7 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
         'area': isUpdateProfile
             ? (homeController.userData['area']?.toString() ?? '')
             : businessSignUpController.txtArea.value.text.trim(),
-        'referred_by_code': isUpdateProfile
-            ? (homeController.userData['referred_by_code']?.toString() ?? '')
-            : businessSignUpController.txtReferredCode.value.text.trim(),
+        'referred_by_code': referralCodeToSend,
       };
       
       debugPrint('Request Body: $bodyParams');
@@ -1265,10 +1363,10 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
         await EasyLoading.dismiss();
         
         // Account created successfully
-        if (response['code'] == 200 || businessSignUpController.isAccountCreated.value) {
+        if (response['code'] == 200 && businessSignUpController.isAccountCreated.value) {
           // ✅ Mark locally so user cannot re-submit
           await BusinessSignUpController.markBusinessRequestSubmitted();
-          ShowToast.showToast("Account created successfully! Please login.", showSuccess: true);
+          ShowToast.showToast(response['msg'] ?? "Account created successfully! Please login.", showSuccess: true);
           
           // Get mobile number
           String mobileNumber = bodyParams['mobile'] ?? '';
@@ -1293,16 +1391,11 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
       await EasyLoading.dismiss();
       debugPrint('Submit Error: $error');
       
-      // Check if account was actually created despite error
-      if (businessSignUpController.isAccountCreated.value) {
-        ShowToast.showToast("Account created successfully! Please login.", showSuccess: true);
-        
-        if (mounted) {
-          Get.offAll(() => const MobileNumberScreen());
-        }
-      } else {
-        ShowToast.showToast(error.toString(), showSuccess: false);
+      String errorMsg = error.toString();
+      if (errorMsg.startsWith("Exception: ")) {
+        errorMsg = errorMsg.replaceFirst("Exception: ", "");
       }
+      ShowToast.showToast(errorMsg, showSuccess: false);
     }
   }
   

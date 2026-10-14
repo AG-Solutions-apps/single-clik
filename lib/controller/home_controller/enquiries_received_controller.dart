@@ -87,7 +87,8 @@ class EnquiriesReceivedController extends GetxController
 
       final request = http.MultipartRequest('POST', Uri.parse(API.received));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'enquiries_type': enquiriesType});
 

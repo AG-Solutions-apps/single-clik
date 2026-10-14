@@ -24,10 +24,17 @@ class FeedBackController extends GetxController {
       'feedback_description': descriptionController.value.text
     };
     try {
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        isButtonLoading.value = false;
+        ShowToast.showToast("Authentication error. Please login again.", showSuccess: false);
+        return;
+      }
       final request =
           http.MultipartRequest('POST', Uri.parse(API.createFeedback));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll(bodyParams);
       var res = await request.send();

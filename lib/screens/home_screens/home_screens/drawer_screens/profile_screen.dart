@@ -142,20 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   }
                                 }
                               },
-                              child: Container(
-                                height: 36,
-                                width: 36,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: ConstantColor.primary,
-                                  border: Border.all(color: Colors.white, width: 2),
-                                ),
-                                child: const Icon(
-                                  Icons.camera_alt_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
+                              
                             ),
                           ),
                         ],

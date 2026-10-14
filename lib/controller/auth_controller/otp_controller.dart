@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:single_clik/constants/constant_string.dart';
+import 'package:single_clik/constants/firebase_services.dart';
 import 'package:single_clik/services/api.dart';
 import 'package:single_clik/utils/shar_preferences.dart';
 
@@ -172,20 +173,32 @@ class OTPController extends GetxController {
   }
 
   Future<Map<String, dynamic>> postLoginApi(Map<String, String> bodyParams) async {
+    // Ensure valid FCM token is passed in device_id
+    String deviceId = bodyParams['device_id']?.trim() ?? '';
+    if (deviceId.isEmpty ||
+        deviceId == 'Unknown_Device' ||
+        deviceId.startsWith('Device_') ||
+        deviceId.length < 20) {
+      deviceId = await FirebaseService.getFcmToken();
+    }
+    bodyParams['device_id'] = deviceId;
+
     debugPrint('=== postLoginApi Called ===');
     debugPrint('Request body:');
     debugPrint('  mobile: ${bodyParams['mobile']}');
     debugPrint('  password: ${bodyParams['password']?.length ?? 0} characters');
-    debugPrint('  device_id: ${bodyParams['device_id']}');
+    debugPrint('  device_id (FCM Token): ${bodyParams['device_id']}');
     
     try {
       isButtonLoading.value = true;
       debugPrint('isButtonLoading set to true');
       
       final request = http.MultipartRequest('POST', Uri.parse(API.login));
+      request.headers['Accept'] = 'application/json';
       request.fields.addAll(bodyParams);
       debugPrint('Request URL: ${API.login}');
       debugPrint('Request fields count: ${request.fields.length}');
+      debugPrint('Request fields: ${request.fields}');
 
       debugPrint('Sending login request...');
       var res = await request.send();
@@ -202,7 +215,7 @@ class OTPController extends GetxController {
       isButtonLoading.value = false;
       debugPrint('isButtonLoading set to false');
 
-      if (res.statusCode == 200 && responseData['code'] == 200) {
+      if (res.statusCode == 200 && (responseData['code'] == 200 || responseData['code'] == '200')) {
         debugPrint('Login successful! Saving user data...');
         
         await SharPreferences.setBoolean(SharPreferences.isLogin, true);
@@ -224,6 +237,13 @@ class OTPController extends GetxController {
           responseData['data']['user']['id'].toString(),
         );
         debugPrint('Saved user id');
+        
+        // Save the active FCM token in preferences
+        if (bodyParams['device_id'] != null && bodyParams['device_id']!.trim().isNotEmpty) {
+          await SharPreferences.setString(SharPreferences.fcmToken, bodyParams['device_id']!.trim());
+          debugPrint('Saved active FCM token');
+        }
+        
         debugPrint('User ID: ${responseData['data']['user']['id']}');
         debugPrint('User name: ${responseData['data']['user']['name']}');
       } else {

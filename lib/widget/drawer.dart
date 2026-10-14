@@ -17,13 +17,14 @@ import 'package:single_clik/screens/home_screens/home_screens/drawer_screens/abo
 import 'package:single_clik/screens/home_screens/home_screens/drawer_screens/feedback_screen.dart';
 import 'package:single_clik/screens/home_screens/home_screens/drawer_screens/notification_screen.dart';
 import 'package:single_clik/screens/home_screens/home_screens/drawer_screens/profile_screen.dart';
+import 'package:single_clik/screens/home_screens/home_screens/drawer_screens/referral_rewards_screen.dart';
 import 'package:single_clik/services/api.dart';
 import 'package:single_clik/utils/shar_preferences.dart';
 import 'package:single_clik/utils/cache_manager.dart';
 import 'package:single_clik/widget/app_image_assets.dart';
-import 'package:single_clik/widget/app_button.dart';
 import 'package:single_clik/screens/home_tab_bar_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../constants/constant_string.dart';
 import '../constants/network_to_file_image.dart';
@@ -271,9 +272,12 @@ class AppDrawerState extends State<AppDrawer> {
                       Divider(color: ConstantColor.grayColor, thickness: 1),
                       drawerButton(
                         icon: "assets/icons/reward_dr_icon.png",
-                        title: "Reward Points",
-                        textColor: ConstantColor.grayColor,
+                        title: "Referral & Rewards",
                         padding: 4,
+                        onTap: () {
+                          Get.back();
+                          Get.to(() => const ReferralRewardsScreen());
+                        },
                       ),
                       Divider(color: ConstantColor.grayColor, thickness: 1),
                       drawerButton(
@@ -380,6 +384,16 @@ class AppDrawerState extends State<AppDrawer> {
                         },
                       ),
                       Divider(color: ConstantColor.grayColor, thickness: 1),
+                      drawerButton(
+                        iconData: Icons.group_add_rounded,
+                        title: "Invite your Friends",
+                        padding: 4,
+                        onTap: () {
+                          Get.back();
+                          _showInvitationBottomSheet(context);
+                        },
+                      ),
+                      Divider(color: ConstantColor.grayColor, thickness: 1),
                       SizedBox(height: height * 0.03),
                       Text(
                         "Version : $versionCode",
@@ -404,34 +418,46 @@ class AppDrawerState extends State<AppDrawer> {
 
   InkWell drawerButton({
     String? icon,
+    IconData? iconData,
     String? title,
     Function()? onTap,
     double? padding,
     Color? textColor,
     Color? iconColor,
   }) {
+    Widget iconWidget;
+    if (iconData != null) {
+      iconWidget = Icon(
+        iconData,
+        size: 25,
+        color: iconColor ?? const Color.fromARGB(255, 0, 47, 86),
+      );
+    } else if (icon != null && icon.contains(".svg")) {
+      iconWidget = SvgPicture.asset(
+        icon,
+        height: 25,
+        width: 25,
+        colorFilter: ColorFilter.mode(
+          iconColor ?? ConstantColor.primary,
+          BlendMode.srcIn,
+        ),
+      );
+    } else {
+      iconWidget = Image.asset(
+        icon ?? "",
+        height: 25,
+        width: 25,
+        color: iconColor,
+      );
+    }
+
     return InkWell(
       onTap: onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: padding ?? 10),
         child: Row(
           children: [
-            icon.toString().contains(".svg")
-                ? SvgPicture.asset(
-                    icon ?? "",
-                    height: 25,
-                    width: 25,
-                    colorFilter: ColorFilter.mode(
-                      iconColor ?? ConstantColor.primary,
-                      BlendMode.srcIn,
-                    ),
-                  )
-                : Image.asset(
-                    icon ?? "",
-                    height: 25,
-                    width: 25,
-                    color: iconColor,
-                  ),
+            iconWidget,
             const SizedBox(width: 15),
             Flexible(
               child: Text(
@@ -447,6 +473,131 @@ class AppDrawerState extends State<AppDrawer> {
           ],
         ),
       ),
+    );
+  }
+
+  String _buildWhatsAppMessage(String referrerName) {
+    final referLine = referrerName.isNotEmpty
+        ? '👤 *Invited by:* ${referrerName.trim()}'
+        : '';
+
+    return '''
+🌟 *SINGLE CLIK* 🌟
+_Digital Network & Directory_
+
+━━━━━━━━━━━━━━━━━━━━━
+
+👋 Hey! Check out *Single Clik* — the ultimate digital network & business directory!
+
+💼 *What is Single Clik?*
+A powerful business directory where you can:
+✅ Create your profile in minutes
+✅ List your services & products
+✅ Connect with clients instantly
+✅ Get discovered locally & beyond
+
+━━━━━━━━━━━━━━━━━━━━━
+${referLine.isNotEmpty ? '$referLine\n━━━━━━━━━━━━━━━━━━━━━\n' : ''}
+📲 *Join for FREE — Download Now:*
+🔗 https://play.google.com/store/apps/details?id=com.singleclick.agsolution
+
+_One tap. One profile. One click away._ ✨
+''';
+  }
+
+  void _showInvitationBottomSheet(BuildContext context) {
+    String referrerName = (homeController.userData['name'] ?? '').toString().trim();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Container(
+                width: 55,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Text(
+                'Invite to Single Clik',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: ConstantColor.blackColor,
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                'Share this preview with your contacts',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: ConstantColor.grayColor,
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              // ── Preview card ───────────────────
+              _DrawerInvitePreviewCard(
+                referrerName: referrerName,
+              ),
+
+              const SizedBox(height: 20),
+
+              // ── Universal Share Button ────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Share.share(_buildWhatsAppMessage(referrerName));
+                  },
+                  icon: const Icon(Icons.share_rounded, color: Colors.white, size: 20),
+                  label: const Text(
+                    'Share Invitation',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ConstantColor.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    elevation: 3,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -675,6 +826,202 @@ class AppDrawerState extends State<AppDrawer> {
   }
 }
 
+class _DrawerInvitePreviewCard extends StatelessWidget {
+  final String referrerName;
+
+  const _DrawerInvitePreviewCard({
+    required this.referrerName,
+  });
+
+  Widget _drawerFeatureLine(String emoji, String text) {
+    return Row(
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 12)),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.85),
+            fontSize: 12,
+            height: 1.3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [ConstantColor.primary, ConstantColor.primaryDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: ConstantColor.primary.withOpacity(0.35),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -20,
+            right: -20,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.06),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -30,
+            left: -10,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.05),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Header row: brand title + FREE JOIN badge (NO IMAGE) ──
+                Row(
+                  children: [
+                    const Text(
+                      'SINGLE CLIK',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                        ),
+                      ),
+                      child: const Text(
+                        'FREE JOIN',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 14),
+
+                // ── Divider ──────────────────────────────────────────────
+                Container(
+                  height: 1,
+                  color: Colors.white.withOpacity(0.15),
+                ),
+
+                const SizedBox(height: 14),
+
+                const Text(
+                  'Join Single Clik Today!',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Digital Network & Directory for all services and products',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.85),
+                    height: 1.3,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // ── Feature bullets ──────────────────────────────────────
+                _drawerFeatureLine('✅', 'Create profile in minutes'),
+                const SizedBox(height: 5),
+                _drawerFeatureLine('✅', 'List services & connect with clients'),
+                const SizedBox(height: 5),
+                _drawerFeatureLine('✅', 'Get discovered locally & beyond'),
+
+                if (referrerName.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  Container(
+                    height: 1,
+                    color: Colors.white.withOpacity(0.15),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.person_outline,
+                        color: Colors.white70,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Invited by ',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          referrerName.trim(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // Delete dialog function - moved outside AppDrawer for reuse
 Future deleteDialog(BuildContext context, double height, double width) {
   return showDialog(
@@ -780,9 +1127,15 @@ Future deleteDialog(BuildContext context, double height, double width) {
 
 Future postDeleteProfileApi() async {
   try {
+    final token = await SharPreferences.getString(SharPreferences.token);
+    if (token == null || token.trim().isEmpty) {
+      ShowToast.showToast("Authentication error. Please login again.", showSuccess: false);
+      return;
+    }
     final request = http.MultipartRequest('POST', Uri.parse(API.deleteProfile));
     request.headers.addAll({
-      'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+      'Authorization': 'Bearer ${token.trim()}',
+      'Accept': 'application/json',
     });
     var res = await request.send();
     var responseDone = await http.Response.fromStream(res);

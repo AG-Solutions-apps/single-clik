@@ -128,8 +128,8 @@ class EnquiriesSentController extends GetxController
       
       final request = http.MultipartRequest('POST', Uri.parse(API.sent));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'enquiries_type': enquiriesType!});
 
@@ -244,8 +244,8 @@ class EnquiriesSentController extends GetxController
       
       final request = http.MultipartRequest('POST', Uri.parse(API.sentClose));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'enquiry_id': enquiryId});
 

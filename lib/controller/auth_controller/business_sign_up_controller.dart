@@ -45,6 +45,204 @@ class BusinessSignUpController extends GetxController {
   RxString createdPassword = "".obs;
   RxInt createdUserId = 0.obs;
 
+  RxBool isVerifyingReferral = false.obs;
+  RxBool isReferralVerified = false.obs;
+  RxString referralMessage = "".obs;
+  RxString verifiedReferralCode = "".obs;
+
+  Future<bool> checkReferralApi(String code) async {
+    final cleanCode = code.trim();
+    if (cleanCode.isEmpty) {
+      referralMessage.value = "Please enter referral code";
+      isReferralVerified.value = false;
+      verifiedReferralCode.value = "";
+      return false;
+    }
+    try {
+      isVerifyingReferral.value = true;
+      referralMessage.value = "";
+
+      Map<String, String> headers = {
+        'Accept': 'application/json',
+      };
+      String? token = await SharPreferences.getString(SharPreferences.token);
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+
+      http.Response? response;
+
+      // Method 1: MultipartRequest POST with all parameter aliases
+      try {
+        final request = http.MultipartRequest('POST', Uri.parse(API.checkReferral));
+        request.headers.addAll(headers);
+        request.fields['referred_by_code'] = cleanCode;
+        request.fields['referral_code'] = cleanCode;
+        request.fields['code'] = cleanCode;
+
+        var streamedRes = await request.send().timeout(const Duration(seconds: 10));
+        var resDone = await http.Response.fromStream(streamedRes);
+        debugPrint('Method 1 (Multipart POST) status: ${resDone.statusCode}, body: ${resDone.body}');
+        if (resDone.statusCode == 200 && _isResponseSuccess(resDone.body)) {
+          response = resDone;
+        } else if (response == null) {
+          response = resDone;
+        }
+      } catch (e) {
+        debugPrint('Method 1 error: $e');
+      }
+
+      // Method 2: Standard http.post if Method 1 didn't succeed
+      if (response == null || response.statusCode != 200 || !_isResponseSuccess(response.body)) {
+        try {
+          final postRes = await http.post(
+            Uri.parse(API.checkReferral),
+            headers: headers,
+            body: {
+              'referred_by_code': cleanCode,
+              'referral_code': cleanCode,
+              'code': cleanCode,
+            },
+          ).timeout(const Duration(seconds: 10));
+          debugPrint('Method 2 (Standard POST) status: ${postRes.statusCode}, body: ${postRes.body}');
+          if (postRes.statusCode == 200 && _isResponseSuccess(postRes.body)) {
+            response = postRes;
+          }
+        } catch (e) {
+          debugPrint('Method 2 error: $e');
+        }
+      }
+
+      // Method 3: http.get (query parameters) if Method 1 & 2 didn't pass
+      if (response == null || response.statusCode != 200 || !_isResponseSuccess(response.body)) {
+        try {
+          final getUri = Uri.parse(API.checkReferral).replace(queryParameters: {
+            'referred_by_code': cleanCode,
+            'referral_code': cleanCode,
+            'code': cleanCode,
+          });
+          final getRes = await http.get(getUri, headers: headers).timeout(const Duration(seconds: 10));
+          debugPrint('Method 3 (GET) status: ${getRes.statusCode}, body: ${getRes.body}');
+          if (getRes.statusCode == 200 && _isResponseSuccess(getRes.body)) {
+            response = getRes;
+          }
+        } catch (e) {
+          debugPrint('Method 3 error: $e');
+        }
+      }
+
+      if (response != null && response.statusCode == 200) {
+        final bodyStr = response.body.trim();
+        Map<String, dynamic> responseData = {};
+        try {
+          final decoded = json.decode(bodyStr);
+          if (decoded is Map<String, dynamic>) {
+            responseData = decoded;
+          }
+        } catch (_) {}
+
+        if (_isResponseSuccess(bodyStr)) {
+          isReferralVerified.value = true;
+          verifiedReferralCode.value = cleanCode;
+
+          String msgStr = "Code applied successfully!";
+          final rawMsg = responseData['msg']?.toString() ??
+              responseData['message']?.toString() ??
+              responseData['data']?.toString();
+          if (rawMsg != null && rawMsg.trim().isNotEmpty && rawMsg.toLowerCase() != 'yes') {
+            msgStr = rawMsg;
+          }
+          referralMessage.value = msgStr;
+          isVerifyingReferral.value = false;
+          return true;
+        } else {
+          isReferralVerified.value = false;
+          verifiedReferralCode.value = "";
+
+          String msgStr = "Invalid referral code";
+          final rawMsg = responseData['msg']?.toString() ??
+              responseData['message']?.toString() ??
+              responseData['data']?.toString();
+          if (rawMsg != null && rawMsg.trim().isNotEmpty && rawMsg.toLowerCase() != 'no') {
+            msgStr = rawMsg;
+          }
+          referralMessage.value = msgStr;
+          isVerifyingReferral.value = false;
+          return false;
+        }
+      } else {
+        isReferralVerified.value = false;
+        verifiedReferralCode.value = "";
+        referralMessage.value = "Invalid referral code";
+        isVerifyingReferral.value = false;
+        return false;
+      }
+    } catch (e) {
+      isVerifyingReferral.value = false;
+      isReferralVerified.value = false;
+      verifiedReferralCode.value = "";
+      referralMessage.value = "Invalid referral code";
+      debugPrint("Check referral error: $e");
+      return false;
+    }
+  }
+
+  bool _isResponseSuccess(String bodyStr) {
+    final cleanBody = bodyStr.trim().toLowerCase();
+
+    if (cleanBody == 'yes' || cleanBody == '"yes"' || cleanBody == 'true' || cleanBody == '"true"') {
+      return true;
+    }
+    if (cleanBody == 'no' || cleanBody == '"no"' || cleanBody == 'false' || cleanBody == '"false"') {
+      return false;
+    }
+
+    try {
+      final decoded = json.decode(bodyStr);
+      if (decoded is Map<String, dynamic>) {
+        final code = decoded['code']?.toString().toLowerCase();
+        final status = decoded['status']?.toString().toLowerCase();
+        final success = decoded['success']?.toString().toLowerCase();
+        final msg = decoded['msg']?.toString().toLowerCase();
+        final message = decoded['message']?.toString().toLowerCase();
+        final data = decoded['data']?.toString().toLowerCase();
+
+        // Check for 'yes' in any field
+        if (code == 'yes' || status == 'yes' || success == 'yes' || msg == 'yes' || message == 'yes' || data == 'yes') {
+          return true;
+        }
+
+        // Check for 'no' in any field
+        if (code == 'no' || status == 'no' || success == 'no' || msg == 'no' || message == 'no' || data == 'no') {
+          return false;
+        }
+
+        if (code == '200' || status == 'true' || status == '200' || success == 'true' || decoded['status'] == true || decoded['success'] == true || decoded['code'] == 200) {
+          return true;
+        }
+
+        if (code == '400' || status == 'false' || status == '400' || success == 'false' || decoded['status'] == false || decoded['success'] == false || decoded['code'] == 400) {
+          return false;
+        }
+      } else if (decoded is String) {
+        final str = decoded.trim().toLowerCase();
+        if (str == 'yes' || str == 'true') return true;
+        if (str == 'no' || str == 'false') return false;
+      }
+    } catch (_) {
+      if (cleanBody.contains('"yes"') || cleanBody.contains(':yes') || cleanBody.contains(':"yes"')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void resetReferralStatus() {
+    isReferralVerified.value = false;
+    referralMessage.value = "";
+    verifiedReferralCode.value = "";
+  }
+
   @override
   void onClose() {
     txtFullName.value?.dispose();
@@ -100,6 +298,7 @@ class BusinessSignUpController extends GetxController {
     try {
       isLoadingCategories.value = true;
       final request = http.MultipartRequest('POST', Uri.parse(API.categories));
+      request.headers['Accept'] = 'application/json';
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
       if (res.statusCode == 200) {
@@ -129,6 +328,7 @@ class BusinessSignUpController extends GetxController {
   }) async {
     try {
       final request = http.MultipartRequest('POST', Uri.parse(API.subcategories));
+      request.headers['Accept'] = 'application/json';
       request.fields.addAll(parameters);
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
@@ -152,10 +352,47 @@ class BusinessSignUpController extends GetxController {
     }
   }
 
+  String _extractErrorMessage(dynamic data, {String? defaultMsg}) {
+    final fallback = defaultMsg ?? ConstantString.somethingWantWrongMsg;
+    if (data is Map) {
+      if (data['msg'] != null && data['msg'].toString().trim().isNotEmpty) {
+        return data['msg'].toString().trim();
+      }
+      if (data['message'] != null && data['message'].toString().trim().isNotEmpty) {
+        return data['message'].toString().trim();
+      }
+      if (data['error'] != null && data['error'].toString().trim().isNotEmpty) {
+        return data['error'].toString().trim();
+      }
+      if (data['errors'] != null) {
+        if (data['errors'] is Map) {
+          final errMap = data['errors'] as Map;
+          if (errMap.isNotEmpty) {
+            final firstVal = errMap.values.first;
+            if (firstVal is List && firstVal.isNotEmpty) {
+              return firstVal.first.toString().trim();
+            } else if (firstVal != null) {
+              return firstVal.toString().trim();
+            }
+          }
+        } else if (data['errors'] is List && (data['errors'] as List).isNotEmpty) {
+          return (data['errors'] as List).first.toString().trim();
+        } else {
+          return data['errors'].toString().trim();
+        }
+      }
+    } else if (data is String && data.trim().isNotEmpty) {
+      return data.trim();
+    }
+    return fallback;
+  }
+
   Future<Map<String, dynamic>> postBusinessSignUpApi(Map<String, String> bodyParams, String photo) async {
+    isAccountCreated.value = false;
     try {
       isButtonLoading.value = true;
       final request = http.MultipartRequest('POST', Uri.parse(API.businessSignUp));
+      request.headers['Accept'] = 'application/json';
       request.fields.addAll(bodyParams);
       
       if (photo.isNotEmpty && !photo.startsWith("http") && File(photo).existsSync()) {
@@ -168,50 +405,71 @@ class BusinessSignUpController extends GetxController {
       var responseDone = await http.Response.fromStream(res);
 
       debugPrint('Business SignUp Status Code: ${res.statusCode}');
+      debugPrint('Business SignUp Response: ${responseDone.body}');
 
-      if (res.statusCode == 200) {
-        try {
-          final responseData = json.decode(responseDone.body);
-          
-          if (responseData is Map<String, dynamic> && responseData.containsKey('code')) {
-            if (responseData['code'] == 200) {
-              if (responseData['data'] != null) {
-                createdPassword.value = responseData['data']['cpassword']?.toString() ?? '';
-                createdUserId.value = responseData['data']['id'] ?? 0;
-              }
-              isAccountCreated.value = true;
-              return Map<String, dynamic>.from(responseData);
-            } else {
-              throw responseData['msg'] ?? ConstantString.somethingWantWrongMsg;
-            }
-          } else {
-            // Account created but response format is different
-            isAccountCreated.value = true;
-            return {
-              'code': 200,
-              'msg': 'Account created successfully',
-              'data': {}
-            };
+      dynamic responseData;
+      try {
+        responseData = json.decode(responseDone.body);
+      } catch (jsonErr) {
+        debugPrint('JSON parsing error in business sign up: $jsonErr');
+      }
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (responseData is Map<String, dynamic>) {
+          final code = responseData['code'];
+          final status = responseData['status'];
+          final success = responseData['success'];
+
+          // Check if explicit failure from backend (e.g. Email already exists)
+          bool isFailed = (code != null && code != 200 && code != '200') ||
+              (status == false || status == 'false' || status == 0 || status == '0') ||
+              (success == false || success == 'false');
+
+          if (isFailed) {
+            isAccountCreated.value = false;
+            throw _extractErrorMessage(responseData);
           }
-        } catch (jsonError) {
-          debugPrint('JSON parsing error: $jsonError');
-          // Account might still be created
-          isAccountCreated.value = true;
-          return {
-            'code': 200,
-            'msg': 'Account created successfully',
-            'data': {}
-          };
+
+          if (code == 200 || code == '200' || status == true || status == 1 || success == true) {
+            if (responseData['data'] != null && responseData['data'] is Map) {
+              createdPassword.value = responseData['data']['cpassword']?.toString() ?? '';
+              createdUserId.value = responseData['data']['id'] ?? 0;
+            }
+            isAccountCreated.value = true;
+            return Map<String, dynamic>.from(responseData);
+          }
+
+          // If response contains data with user info, consider it success
+          if (responseData['data'] != null && responseData['data'] is Map) {
+            createdPassword.value = responseData['data']['cpassword']?.toString() ?? '';
+            createdUserId.value = responseData['data']['id'] ?? 0;
+            isAccountCreated.value = true;
+            return Map<String, dynamic>.from(responseData);
+          }
+
+          isAccountCreated.value = false;
+          throw _extractErrorMessage(responseData);
+        } else {
+          isAccountCreated.value = false;
+          throw ConstantString.somethingWantWrongMsg;
         }
       } else {
-        throw ConstantString.somethingWantWrongMsg;
+        isAccountCreated.value = false;
+        if (responseData != null) {
+          throw _extractErrorMessage(responseData);
+        } else {
+          throw ConstantString.somethingWantWrongMsg;
+        }
       }
     } on TimeoutException catch (e) {
+      isAccountCreated.value = false;
       throw e.message.toString();
-    } on SocketException catch (e) {
+    } on SocketException {
+      isAccountCreated.value = false;
       throw "No internet connection";
-    } on Error catch (e) {
-      throw e.toString();
+    } catch (e) {
+      isAccountCreated.value = false;
+      rethrow;
     } finally {
       isButtonLoading.value = false;
     }
@@ -222,10 +480,10 @@ class BusinessSignUpController extends GetxController {
       isButtonLoading.value = true;
       final request = http.MultipartRequest('POST', Uri.parse(API.updateProfile));
       String? token = await SharPreferences.getString(SharPreferences.token);
-      
-      request.headers.addAll({
-        'Authorization': 'Bearer $token',
-      });
+      if (token != null && token.trim().isNotEmpty) {
+        request.headers['Authorization'] = 'Bearer ${token.trim()}';
+      }
+      request.headers['Accept'] = 'application/json';
       request.fields.addAll(body);
       
       if (photo.isNotEmpty && !photo.startsWith("http") && File(photo).existsSync()) {
@@ -238,51 +496,64 @@ class BusinessSignUpController extends GetxController {
       var responseDone = await http.Response.fromStream(res);
       
       debugPrint('Update Profile Status Code: ${res.statusCode}');
+      debugPrint('Update Profile Response: ${responseDone.body}');
 
-      if (res.statusCode == 200) {
-        try {
-          final responseData = json.decode(responseDone.body);
-          if (responseData['code'] == 200) {
-            return Map<String, dynamic>.from(responseData);
-          } else {
-            throw responseData['msg'] ?? ConstantString.somethingWantWrongMsg;
+      dynamic responseData;
+      try {
+        responseData = json.decode(responseDone.body);
+      } catch (jsonErr) {
+        debugPrint('JSON parsing error in update profile: $jsonErr');
+      }
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (responseData is Map<String, dynamic>) {
+          final code = responseData['code'];
+          final status = responseData['status'];
+          final success = responseData['success'];
+
+          bool isFailed = (code != null && code != 200 && code != '200') ||
+              (status == false || status == 'false' || status == 0 || status == '0') ||
+              (success == false || success == 'false');
+
+          if (isFailed) {
+            throw _extractErrorMessage(responseData);
           }
-        } catch (jsonError) {
-          debugPrint('JSON parsing error in update profile: $jsonError');
-          return {
-            'code': 200,
-            'msg': 'Profile updated successfully wait for admin approval',
-            'data': {}
-          };
+
+          return Map<String, dynamic>.from(responseData);
+        } else {
+          throw ConstantString.somethingWantWrongMsg;
         }
       } else if (res.statusCode == 401) {
         throw "Session expired. Please login again.";
       } else {
+        if (responseData != null) {
+          throw _extractErrorMessage(responseData);
+        }
         throw ConstantString.somethingWantWrongMsg;
       }
     } on TimeoutException catch (e) {
       throw e.message.toString();
-    } on SocketException catch (e) {
+    } on SocketException {
       throw "No internet connection";
-    } on Error catch (e) {
-      throw e.toString();
+    } catch (e) {
+      rethrow;
     } finally {
       isButtonLoading.value = false;
     }
   }
   
   void clearFields() {
-    txtFullName.value?.clear();
-    txtCompanyName.value?.clear();
-    txtMobileNo.value?.clear();
-    txtEmailId.value?.clear();
-    txtWhatsappNo.value?.clear();
-    txtWebsite.value?.clear();
-    txtAbout.value?.clear();
-    txtArea.value?.clear();
-    txtReferredCode.value?.clear();
-    txtOtherCategory.value?.clear();
-    txtOtherSubCategory.value?.clear();
+    txtFullName.value.clear();
+    txtCompanyName.value.clear();
+    txtMobileNo.value.clear();
+    txtEmailId.value.clear();
+    txtWhatsappNo.value.clear();
+    txtWebsite.value.clear();
+    txtAbout.value.clear();
+    txtArea.value.clear();
+    txtReferredCode.value.clear();
+    txtOtherCategory.value.clear();
+    txtOtherSubCategory.value.clear();
     selectedProfileType.value = "";
     selectedCategory.clear();
     selectedSubCategory.clear();
@@ -291,6 +562,7 @@ class BusinessSignUpController extends GetxController {
     isAccountCreated.value = false;
     createdPassword.value = "";
     createdUserId.value = 0;
+    resetReferralStatus();
   }
 
   // ── Business Request Tracking ─────────────────────────────────────────────

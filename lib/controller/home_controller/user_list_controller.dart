@@ -15,10 +15,17 @@ class UserListController extends GetxController {
   Future postUserListApi(String? profileType) async {
     try {
       isLoading.value = true;
+      final token = await SharPreferences.getString(SharPreferences.token);
+      if (token == null || token.trim().isEmpty) {
+        debugPrint('UserList: No auth token');
+        isLoading.value = false;
+        return;
+      }
       final request = http.MultipartRequest(
           'POST', Uri.parse(API.dashboardProfileCategoryWise));
       request.headers.addAll({
-        'Authorization': 'Bearer ${await SharPreferences.getString(SharPreferences.token)}',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'categories': profileType!});
 

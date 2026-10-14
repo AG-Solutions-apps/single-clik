@@ -85,27 +85,45 @@ class HomeController extends GetxController
   }
 
   Future<void> _initializeData() async {
+    final isLogin = await SharPreferences.getBoolean(SharPreferences.isLogin) ?? false;
+    final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+    if (!isLogin || token.trim().isEmpty) {
+      debugPrint('User not logged in or token empty, skipping home data initialization.');
+      return;
+    }
     await _loadAllCachedData();
     await refreshAllData();
     isInitialLoadComplete.value = true;
     getDashboardTimer();
   }
 
+  Future<void> checkAndInitializeData() async {
+    if (!isInitialLoadComplete.value) {
+      await _initializeData();
+    }
+  }
+
   void getDashboardTimer() {
     countTimer = Timer.periodic(
       const Duration(seconds: 2),
-      (Timer timer) {
+      (Timer timer) async {
         if (!_isDisposed) {
-          getSentEnquiriesUnreadCount('1', forceRefresh: true);
+          final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+          if (token.trim().isNotEmpty) {
+            getSentEnquiriesUnreadCount('1', forceRefresh: true);
+          }
         }
       },
     );
 
     timer = Timer.periodic(
       const Duration(seconds: 25),
-      (Timer timer) {
+      (Timer timer) async {
         if (!_isDisposed) {
-          refreshDashboardAndProfile();
+          final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+          if (token.trim().isNotEmpty) {
+            refreshDashboardAndProfile();
+          }
         }
       },
     );
@@ -118,6 +136,8 @@ class HomeController extends GetxController
       return;
     }
     try {
+      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) return;
       final userId = await SharPreferences.getString(SharPreferences.userId) ?? '';
       if (userId.isNotEmpty) {
         await Future.wait([
@@ -299,11 +319,18 @@ class HomeController extends GetxController
       if (!forceRefresh) isLoading.value = true;
       
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        debugPrint('Dashboard API Error: Token is empty');
+        return;
+      }
+      if (userId.isEmpty) {
+        userId = await SharPreferences.getString(SharPreferences.userId) ?? '';
+      }
       
       final response = await http.post(
         Uri.parse(API.dashboard),
         headers: {
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer ${token.trim()}',
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -363,11 +390,15 @@ class HomeController extends GetxController
       if (!forceRefresh) isLoading.value = true;
       
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        debugPrint('Business Dashboard API Error: Token is empty');
+        return;
+      }
       
       final response = await http.post(
         Uri.parse(API.dashboardCategories),
         headers: {
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer ${token.trim()}',
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -435,9 +466,14 @@ class HomeController extends GetxController
     
     try {
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        debugPrint('Slider API: Token is empty');
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.slider));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'profile_type': profileType!});
 
@@ -470,9 +506,14 @@ class HomeController extends GetxController
     
     try {
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        debugPrint('AdvSlider API: Token is empty');
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.advSlider));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
 
       var res = await request.send().timeout(const Duration(seconds: 30));
@@ -498,9 +539,14 @@ class HomeController extends GetxController
     
     try {
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        debugPrint('AdvPopUpSlider API: Token is empty');
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.advPopUpSlider));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
 
       var res = await request.send().timeout(const Duration(seconds: 30));
@@ -540,6 +586,7 @@ class HomeController extends GetxController
       isOnBoardingLoading.value = true;
       
       final request = http.MultipartRequest('POST', Uri.parse(API.onboard));
+      request.headers['Accept'] = 'application/json';
       var res = await request.send().timeout(const Duration(seconds: 30));
       var responseDone = await http.Response.fromStream(res);
 
@@ -576,9 +623,14 @@ class HomeController extends GetxController
     try {
       isAddLoading.value = true;
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        debugPrint('Categories API: Token is empty');
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.categories));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
 
       var res = await request.send().timeout(const Duration(seconds: 30));
@@ -605,9 +657,14 @@ class HomeController extends GetxController
     try {
       isAddLoading.value = true;
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        debugPrint('Subcategories API: Token is empty');
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.subcategories));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'category_id': categoryId!});
 
@@ -629,9 +686,13 @@ class HomeController extends GetxController
     List subCategoryDataList = [];
     try {
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        return [];
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.subcategories));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'category_id': categoryId!});
 
@@ -772,9 +833,13 @@ class HomeController extends GetxController
     
     try {
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.enquirySentCount));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
 
       var res = await request.send().timeout(const Duration(seconds: 15));
@@ -800,9 +865,13 @@ class HomeController extends GetxController
   Future<void> getReceivedEnquiriesUnreadCount() async {
     try {
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.enquiryReceivedCount));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       request.fields.addAll({'enquiries_type': '1'});
 
@@ -838,9 +907,15 @@ class HomeController extends GetxController
     
     try {
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        debugPrint('FetchProfile API: Token is empty');
+        userData.value = {};
+        return;
+      }
       final request = http.MultipartRequest('POST', Uri.parse(API.fetchProfile));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
+        'Accept': 'application/json',
       });
       
       var res = await request.send().timeout(const Duration(seconds: 30));
@@ -912,10 +987,13 @@ class HomeController extends GetxController
 
   Future<List<dynamic>> postFetchProductServicesApi({String? userId}) async {
     try {
-      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
       final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      if (token.trim().isEmpty) {
+        return [];
+      }
+      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
       request.headers.addAll({
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
       });
       if (userId == null || userId.isEmpty) {

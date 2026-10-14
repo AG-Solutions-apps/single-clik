@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,7 +6,6 @@ import 'package:single_clik/constants/constant_color.dart';
 import 'package:single_clik/constants/show_toast.dart';
 import 'package:single_clik/controller/auth_controller/sign_details_controller.dart';
 import 'package:single_clik/widget/app_button.dart';
-import 'package:single_clik/widget/app_text_field.dart';
 
 class SignDetailsScreen extends StatefulWidget {
   final String name;
@@ -23,30 +21,12 @@ class SignDetailsScreen extends StatefulWidget {
   State<SignDetailsScreen> createState() => _SignDetailsScreenState();
 }
 
-class _SignDetailsScreenState extends State<SignDetailsScreen>
-    with SingleTickerProviderStateMixin {
+class _SignDetailsScreenState extends State<SignDetailsScreen> {
   SignDetailsController signDetailsController = Get.put(SignDetailsController());
-  late AnimationController _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 20),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: ConstantColor.whiteColor,
@@ -59,9 +39,6 @@ class _SignDetailsScreenState extends State<SignDetailsScreen>
               )
             : Stack(
                 children: [
-                  // ── Animated Background Bubbles ──────────────
-                  _buildAnimatedBackgroundBubbles(height, width),
-
                   // ── Main Content ─────────────────────────────
                   SingleChildScrollView(
                     child: Padding(
@@ -271,13 +248,46 @@ class _SignDetailsScreenState extends State<SignDetailsScreen>
                             ),
                           ),
                           SizedBox(height: height * 0.008),
-                          _buildTextField(
+                          _buildReferralTextField(
                             controller: signDetailsController.referredCodeController.value,
                             hint: "Enter referred code (if any)",
                             icon: Icons.card_giftcard_outlined,
-                            keyboardType: TextInputType.text,
-                            action: TextInputAction.done,
+                            onVerifyTap: () async {
+                              FocusScope.of(context).unfocus();
+                              await signDetailsController.checkReferralApi(
+                                signDetailsController.referredCodeController.value.text,
+                              );
+                            },
                           ),
+                          Obx(() {
+                            if (signDetailsController.referralMessage.value.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            final isSuccess = signDetailsController.isReferralVerified.value;
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 6, left: 4),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isSuccess ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                                    color: isSuccess ? Colors.green : Colors.red,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      signDetailsController.referralMessage.value,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: isSuccess ? Colors.green : Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
 
                           SizedBox(height: height * 0.025),
 
@@ -429,12 +439,30 @@ class _SignDetailsScreenState extends State<SignDetailsScreen>
                                 } else if (signDetailsController.areaController.value.text.isEmpty) {
                                   ShowToast.showToast("Please Enter Area", showSuccess: false);
                                 } else {
+                                  String referralCodeToSend = "";
+                                  String enteredCode = signDetailsController.referredCodeController.value.text.trim();
+
+                                  if (enteredCode.isNotEmpty) {
+                                    if (signDetailsController.isReferralVerified.value &&
+                                        enteredCode == signDetailsController.verifiedReferralCode.value) {
+                                      referralCodeToSend = enteredCode;
+                                    } else {
+                                      bool isValid = await signDetailsController.checkReferralApi(enteredCode);
+                                      if (isValid) {
+                                        referralCodeToSend = enteredCode;
+                                      } else {
+                                        // Invalid code: do NOT send code to backend
+                                        referralCodeToSend = "";
+                                      }
+                                    }
+                                  }
+
                                   Map<String, String> bodyParams = {
                                     'person_name': widget.name.trim(),
                                     'person_mobile': widget.phoneNumber.trim(),
                                     'person_email': signDetailsController.emailController.value.text.trim(),
                                     'person_area': signDetailsController.areaController.value.text.trim(),
-                                    'referred_by_code': signDetailsController.referredCodeController.value.text.trim(),
+                                    'referred_by_code': referralCodeToSend,
                                     'user_type': '1',
                                   };
                                   await signDetailsController.postSignUpApi(
@@ -463,6 +491,93 @@ class _SignDetailsScreenState extends State<SignDetailsScreen>
   }
 
   // ── Reusable text field ───────────────────────────────────────────────────
+
+  Widget _buildReferralTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    required VoidCallback onVerifyTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xffF7F8FA), Colors.white],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xffEBEFF2), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: ConstantColor.primary.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              textCapitalization: TextCapitalization.characters,
+              onChanged: (val) {
+                if (signDetailsController.verifiedReferralCode.value.isNotEmpty &&
+                    val.trim() != signDetailsController.verifiedReferralCode.value) {
+                  signDetailsController.resetReferralStatus();
+                } else if (signDetailsController.referralMessage.value.isNotEmpty &&
+                    val.trim().isEmpty) {
+                  signDetailsController.resetReferralStatus();
+                }
+              },
+              style: TextStyle(fontSize: 16, color: ConstantColor.blackColor),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(fontSize: 14, color: ConstantColor.grayColor),
+                prefixIcon: Icon(icon, color: ConstantColor.primary, size: 22),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+            ),
+          ),
+          Obx(() {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: signDetailsController.isVerifyingReferral.value
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: ConstantColor.primary,
+                      ),
+                    )
+                  : TextButton(
+                      onPressed: onVerifyTap,
+                      style: TextButton.styleFrom(
+                        backgroundColor: ConstantColor.primary.withOpacity(0.1),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        "Verify",
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: ConstantColor.primary,
+                        ),
+                      ),
+                    ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -531,371 +646,4 @@ class _SignDetailsScreenState extends State<SignDetailsScreen>
     );
   }
 
-  // ── Background bubbles ────────────────────────────────────────────────────
-
-  Widget _buildAnimatedBackgroundBubbles(double height, double width) {
-    return Stack(
-      children: [
-        // ════════════════════════════════════════════
-        // TOP SECTION — rich cluster of bubbles
-        // ════════════════════════════════════════════
-
-        // Large anchor blob — top left, bleeds off screen
-        _bubble(
-          left: -width * 0.18,
-          top: -height * 0.06,
-          size: height * 0.32,
-          color: ConstantColor.primary,
-          opacity: 0.10,
-        ),
-
-        // Large anchor blob — top right, bleeds off screen
-        _bubble(
-          right: -width * 0.14,
-          top: -height * 0.04,
-          size: height * 0.28,
-          color: ConstantColor.primaryDark,
-          opacity: 0.08,
-        ),
-
-        // Animated floating blob — top left mid
-        AnimatedBuilder(
-          animation: _animationController,
-          builder: (_, __) => Transform.translate(
-            offset: Offset(
-              sin(_animationController.value * 2 * pi) * 8,
-              cos(_animationController.value * 1.5 * pi) * 8,
-            ),
-            child: _bubble(
-              left: width * 0.04,
-              top: height * 0.04,
-              size: height * 0.16,
-              color: ConstantColor.primary,
-              opacity: 0.14,
-            ),
-          ),
-        ),
-
-        // Animated floating blob — top right mid
-        AnimatedBuilder(
-          animation: _animationController,
-          builder: (_, __) => Transform.translate(
-            offset: Offset(
-              cos(_animationController.value * 1.8 * pi) * 10,
-              sin(_animationController.value * 2.2 * pi) * 10,
-            ),
-            child: _bubble(
-              right: width * 0.06,
-              top: height * 0.06,
-              size: height * 0.14,
-              color: ConstantColor.primaryDark,
-              opacity: 0.12,
-            ),
-          ),
-        ),
-
-        // Medium bubble — upper left accent
-        AnimatedBuilder(
-          animation: _animationController,
-          builder: (_, __) => Transform.translate(
-            offset: Offset(
-              sin(_animationController.value * 2.5 * pi + 1) * 6,
-              cos(_animationController.value * 1.9 * pi + 1) * 6,
-            ),
-            child: _bubble(
-              left: width * 0.22,
-              top: height * 0.01,
-              size: height * 0.10,
-              color: ConstantColor.primary,
-              opacity: 0.16,
-            ),
-          ),
-        ),
-
-        // Medium bubble — upper right accent
-        AnimatedBuilder(
-          animation: _animationController,
-          builder: (_, __) => Transform.translate(
-            offset: Offset(
-              cos(_animationController.value * 2.1 * pi + 2) * 7,
-              sin(_animationController.value * 1.6 * pi + 2) * 7,
-            ),
-            child: _bubble(
-              right: width * 0.24,
-              top: height * 0.02,
-              size: height * 0.09,
-              color: ConstantColor.primaryDark,
-              opacity: 0.14,
-            ),
-          ),
-        ),
-
-        // Small sparkle — top left inner
-        AnimatedBuilder(
-          animation: _animationController,
-          builder: (_, __) => Transform.translate(
-            offset: Offset(
-              sin(_animationController.value * 3 * pi) * 4,
-              cos(_animationController.value * 2.8 * pi) * 4,
-            ),
-            child: _bubble(
-              left: width * 0.14,
-              top: height * 0.10,
-              size: height * 0.06,
-              color: ConstantColor.primary,
-              opacity: 0.22,
-            ),
-          ),
-        ),
-
-        // Small sparkle — top center
-        AnimatedBuilder(
-          animation: _animationController,
-          builder: (_, __) => Transform.translate(
-            offset: Offset(
-              cos(_animationController.value * 2.4 * pi + 0.5) * 5,
-              sin(_animationController.value * 1.8 * pi + 0.5) * 5,
-            ),
-            child: _bubble(
-              left: width * 0.42,
-              top: -height * 0.01,
-              size: height * 0.07,
-              color: ConstantColor.primary,
-              opacity: 0.13,
-            ),
-          ),
-        ),
-
-        // Small sparkle — top right inner
-        AnimatedBuilder(
-          animation: _animationController,
-          builder: (_, __) => Transform.translate(
-            offset: Offset(
-              sin(_animationController.value * 2.3 * pi + 1.5) * 5,
-              cos(_animationController.value * 3.1 * pi + 1.5) * 5,
-            ),
-            child: _bubble(
-              right: width * 0.14,
-              top: height * 0.12,
-              size: height * 0.055,
-              color: ConstantColor.primaryDark,
-              opacity: 0.20,
-            ),
-          ),
-        ),
-
-        // Tiny glowing dot — top far left
-        _tinyBubble(
-          left: width * 0.06,
-          top: height * 0.17,
-          size: height * 0.025,
-          color: ConstantColor.primary,
-          opacity: 0.45,
-        ),
-
-        // Tiny glowing dot — top center-left
-        _tinyBubble(
-          left: width * 0.32,
-          top: height * 0.07,
-          size: height * 0.020,
-          color: ConstantColor.primaryDark,
-          opacity: 0.38,
-        ),
-
-        // Tiny glowing dot — top center-right
-        _tinyBubble(
-          right: width * 0.30,
-          top: height * 0.08,
-          size: height * 0.022,
-          color: ConstantColor.primary,
-          opacity: 0.40,
-        ),
-
-        // Tiny glowing dot — top far right
-        _tinyBubble(
-          right: width * 0.07,
-          top: height * 0.18,
-          size: height * 0.024,
-          color: ConstantColor.primaryDark,
-          opacity: 0.42,
-        ),
-
-        // Extra tiny particles — top area
-        _particle(left: width * 0.26, top: height * 0.03, size: height * 0.008, color: ConstantColor.primary),
-        _particle(right: width * 0.28, top: height * 0.04, size: height * 0.007, color: ConstantColor.primaryDark),
-        _particle(left: width * 0.50, top: height * 0.06, size: height * 0.006, color: ConstantColor.primary),
-        _particle(right: width * 0.45, top: height * 0.14, size: height * 0.008, color: ConstantColor.primaryDark),
-        _particle(left: width * 0.08, top: height * 0.22, size: height * 0.007, color: ConstantColor.primary),
-        _particle(right: width * 0.10, top: height * 0.20, size: height * 0.006, color: ConstantColor.primaryDark),
-
-        // ════════════════════════════════════════════
-        // BOTTOM SECTION — light, minimal
-        // ════════════════════════════════════════════
-
-        // Bottom left
-        _bubble(
-          left: -width * 0.08,
-          bottom: height * 0.12,
-          size: height * 0.16,
-          color: ConstantColor.primary,
-          opacity: 0.08,
-        ),
-
-        // Bottom right
-        _bubble(
-          right: -width * 0.05,
-          bottom: height * 0.08,
-          size: height * 0.20,
-          color: ConstantColor.primaryDark,
-          opacity: 0.07,
-        ),
-
-        // Animated mid-right
-        AnimatedBuilder(
-          animation: _animationController,
-          builder: (_, __) => Transform.translate(
-            offset: Offset(
-              cos(_animationController.value * 1.3 * pi) * 7,
-              sin(_animationController.value * 2.1 * pi) * 7,
-            ),
-            child: _bubble(
-              right: width * 0.08,
-              top: height * 0.50,
-              size: height * 0.11,
-              color: ConstantColor.primaryDark,
-              opacity: 0.10,
-            ),
-          ),
-        ),
-
-        // Animated mid-left
-        AnimatedBuilder(
-          animation: _animationController,
-          builder: (_, __) => Transform.translate(
-            offset: Offset(
-              sin(_animationController.value * 2.5 * pi) * 6,
-              cos(_animationController.value * 1.2 * pi) * 6,
-            ),
-            child: _bubble(
-              left: width * 0.02,
-              top: height * 0.42,
-              size: height * 0.10,
-              color: ConstantColor.primary,
-              opacity: 0.09,
-            ),
-          ),
-        ),
-
-        _tinyBubble(
-          left: width * 0.22,
-          bottom: height * 0.18,
-          size: height * 0.018,
-          color: ConstantColor.primary,
-          opacity: 0.35,
-        ),
-
-        _tinyBubble(
-          right: width * 0.18,
-          bottom: height * 0.32,
-          size: height * 0.020,
-          color: ConstantColor.primaryDark,
-          opacity: 0.32,
-        ),
-
-        _particle(left: width * 0.15, bottom: height * 0.45, size: height * 0.007, color: ConstantColor.primary),
-        _particle(right: width * 0.25, bottom: height * 0.15, size: height * 0.008, color: ConstantColor.primaryDark),
-      ],
-    );
-  }
-
-  Widget _bubble({
-    double? left,
-    double? right,
-    double? top,
-    double? bottom,
-    required double size,
-    required Color color,
-    required double opacity,
-  }) {
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            center: const Alignment(-0.3, -0.3),
-            radius: 0.85,
-            colors: [
-              color.withOpacity(opacity),
-              color.withOpacity(0.01),
-            ],
-            stops: const [0.2, 1.0],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _tinyBubble({
-    double? left,
-    double? right,
-    double? top,
-    double? bottom,
-    required double size,
-    required Color color,
-    required double opacity,
-  }) {
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [color.withOpacity(opacity), color.withOpacity(0)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(opacity * 0.5),
-              blurRadius: size * 2,
-              spreadRadius: size * 0.5,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _particle({
-    double? left,
-    double? right,
-    double? top,
-    double? bottom,
-    required double size,
-    required Color color,
-  }) {
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color.withOpacity(0.55),
-        ),
-      ),
-    );
-  }
 }

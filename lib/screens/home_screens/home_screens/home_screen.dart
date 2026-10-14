@@ -1,7 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:new_version_plus/new_version_plus.dart';
 import 'package:single_clik/constants/constant_color.dart';
 import 'package:single_clik/constants/constant_string.dart';
 import 'package:single_clik/constants/show_toast.dart';
@@ -22,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late Animation<double> animation;
   late AnimationController _animationController;
-  bool _showUpdateBar = false;
   @override
   void initState() {
     super.initState();
@@ -37,9 +35,6 @@ class _HomeScreenState extends State<HomeScreen>
     )..addListener(() {
         scale.value = animation.value;
       });
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    _checkForUpdate();
-  });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getData();
       getServices();
@@ -71,21 +66,6 @@ class _HomeScreenState extends State<HomeScreen>
       }
     });
   }
-Future<void> _checkForUpdate() async {
-  final newVersion = NewVersionPlus(
-    androidId: "com.singleclick.agsolution",
-  );
-
-  final status = await newVersion.getVersionStatus();
-
-  if (status == null) return;
-
-  if (status.canUpdate && mounted) {
-    setState(() {
-      _showUpdateBar = true;
-    });
-  }
-}
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -619,94 +599,70 @@ Future<void> _checkForUpdate() async {
                                       const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 3,
                                     crossAxisSpacing: 10,
-                                    mainAxisSpacing: 10,
-                                    childAspectRatio: 0.95,
+                                    mainAxisSpacing: 12,
+                                    childAspectRatio: 0.82,
                                   ),
-                                  padding: const EdgeInsets.only(bottom: 80, top: 10),
+                                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
                                   itemCount: homeController.businessList.length,
                                   shrinkWrap: true,
-                                  itemBuilder: (context, index) =>
-                                      GestureDetector(
-                                    onTap: () {
-                                      Get.to(
-                                        () => UserListScreen(
-                                          categoryId: (homeController
-                                                          .businessList[index]
-                                                      ['id'] ??
-                                                  "")
-                                              .toString(),
-                                          categoryName: (homeController
-                                                          .businessList[index]
-                                                      ['category'] ??
-                                                  "")
-                                              .toString(),
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
+                                  itemBuilder: (context, index) {
+                                    final item = homeController.businessList[index];
+                                    final bool hasNoMembers =
+                                        item['member_count'] == null ||
+                                            item['member_count'] == 0;
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Get.to(
+                                          () => UserListScreen(
+                                            categoryId:
+                                                (item['id'] ?? "").toString(),
+                                            categoryName:
+                                                (item['category'] ?? "").toString(),
+                                          ),
+                                        );
+                                      },
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Container(
-                                            height: 80,
-                                            width: 80,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: const Color(0xffF6F5FA),
-                                                width: 2,
-                                              ),
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(10),
-                                              child: (homeController.businessList[index]['member_count'] == null ||
-                                                      homeController.businessList[index]['member_count'] == 0)
-                                                  ? ColorFiltered(
-                                                      colorFilter: const ColorFilter.matrix(<double>[
-                                                        0.2126, 0.7152, 0.0722, 0, 0,
-                                                        0.2126, 0.7152, 0.0722, 0, 0,
-                                                        0.2126, 0.7152, 0.0722, 0, 0,
-                                                        0,      0,      0,      0.5, 0,
-                                                      ]),
-                                                      child: AppImageAsset(
+                                          Expanded(
+                                            child: AspectRatio(
+                                              aspectRatio: 1.0,
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(18),
+                                                child: hasNoMembers
+                                                    ? ColorFiltered(
+                                                        colorFilter:
+                                                            const ColorFilter.matrix(<double>[
+                                                          0.2126, 0.7152, 0.0722, 0, 0,
+                                                          0.2126, 0.7152, 0.0722, 0, 0,
+                                                          0.2126, 0.7152, 0.0722, 0, 0,
+                                                          0,      0,      0,      0.5, 0,
+                                                        ]),
+                                                        child: AppImageAsset(
+                                                          image:
+                                                              "${ConstantString.categoriesImgUrlPath}${item['category_image']}",
+                                                          isFile: false,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      )
+                                                    : AppImageAsset(
                                                         image:
-                                                            "${ConstantString.categoriesImgUrlPath}${homeController.businessList[index]['category_image']}",
+                                                            "${ConstantString.categoriesImgUrlPath}${item['category_image']}",
                                                         isFile: false,
                                                         fit: BoxFit.cover,
-                                                        height: 80,
-                                                        width: 80,
                                                       ),
-                                                    )
-                                                  : AppImageAsset(
-                                                      image:
-                                                          "${ConstantString.categoriesImgUrlPath}${homeController.businessList[index]['category_image']}",
-                                                      isFile: false,
-                                                      fit: BoxFit.cover,
-                                                      height: 80,
-                                                      width: 80,
-                                                    ),
+                                              ),
                                             ),
                                           ),
-                                          const SizedBox(height: 8),
+                                          const SizedBox(height: 6),
                                           Text(
-                                            homeController.businessList[index]
-                                                    ['category'] ??
-                                                "",
+                                            item['category'] ?? "",
                                             style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: (homeController.businessList[
-                                                                  index][
-                                                              'member_count'] ==
-                                                          null ||
-                                                      homeController.businessList[
-                                                                  index][
-                                                              'member_count'] ==
-                                                          0)
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                              color: hasNoMembers
                                                   ? ConstantColor.grayColor
                                                   : ConstantColor.primary,
                                             ),
@@ -716,8 +672,8 @@ Future<void> _checkForUpdate() async {
                                           ),
                                         ],
                                       ),
-                                    ),
-                                  ),
+                                    );
+                                  },
                                 ),
                         ),
                         RefreshIndicator(
@@ -751,92 +707,70 @@ Future<void> _checkForUpdate() async {
                                       const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 3,
                                     crossAxisSpacing: 10,
-                                    mainAxisSpacing: 10,
-                                    childAspectRatio: 0.95,
+                                    mainAxisSpacing: 12,
+                                    childAspectRatio: 0.82,
                                   ),
                                   itemCount: homeController.servicesList.length,
-                                  padding: const EdgeInsets.only(bottom: 80, top: 10),
+                                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
                                   shrinkWrap: true,
-                                  itemBuilder: (context, index) =>
-                                      GestureDetector(
-                                    onTap: () {
-                                      Get.to(() => UserListScreen(
+                                  itemBuilder: (context, index) {
+                                    final item = homeController.servicesList[index];
+                                    final bool hasNoMembers =
+                                        item['member_count'] == null ||
+                                            item['member_count'] == 0;
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Get.to(
+                                          () => UserListScreen(
                                             categoryId:
-                                                (homeController.servicesList[
-                                                            index]['id'] ??
-                                                        "")
-                                                    .toString(),
-                                            categoryName: (homeController
-                                                            .servicesList[
-                                                        index]['category'] ??
-                                                    "")
-                                                .toString(),
-                                          ));
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
+                                                (item['id'] ?? "").toString(),
+                                            categoryName:
+                                                (item['category'] ?? "").toString(),
+                                          ),
+                                        );
+                                      },
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Container(
-                                            height: 80,
-                                            width: 80,
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: const Color(0xffF6F5FA),
-                                                width: 2,
-                                              ),
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(10),
-                                              child: (homeController.servicesList[index]['member_count'] == null ||
-                                                      homeController.servicesList[index]['member_count'] == 0)
-                                                  ? ColorFiltered(
-                                                      colorFilter: const ColorFilter.matrix(<double>[
-                                                        0.2126, 0.7152, 0.0722, 0, 0,
-                                                        0.2126, 0.7152, 0.0722, 0, 0,
-                                                        0.2126, 0.7152, 0.0722, 0, 0,
-                                                        0,      0,      0,      0.5, 0,
-                                                      ]),
-                                                      child: AppImageAsset(
+                                          Expanded(
+                                            child: AspectRatio(
+                                              aspectRatio: 1.0,
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(18),
+                                                child: hasNoMembers
+                                                    ? ColorFiltered(
+                                                        colorFilter:
+                                                            const ColorFilter.matrix(<double>[
+                                                          0.2126, 0.7152, 0.0722, 0, 0,
+                                                          0.2126, 0.7152, 0.0722, 0, 0,
+                                                          0.2126, 0.7152, 0.0722, 0, 0,
+                                                          0,      0,      0,      0.5, 0,
+                                                        ]),
+                                                        child: AppImageAsset(
+                                                          image:
+                                                              "${ConstantString.categoriesImgUrlPath}${item['category_image']}",
+                                                          isFile: false,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      )
+                                                    : AppImageAsset(
                                                         image:
-                                                            "${ConstantString.categoriesImgUrlPath}${homeController.servicesList[index]['category_image']}",
+                                                            "${ConstantString.categoriesImgUrlPath}${item['category_image']}",
                                                         isFile: false,
                                                         fit: BoxFit.cover,
-                                                        height: 80,
-                                                        width: 80,
                                                       ),
-                                                    )
-                                                  : AppImageAsset(
-                                                      image:
-                                                          "${ConstantString.categoriesImgUrlPath}${homeController.servicesList[index]['category_image']}",
-                                                      isFile: false,
-                                                      fit: BoxFit.cover,
-                                                      height: 80,
-                                                      width: 80,
-                                                    ),
+                                              ),
                                             ),
                                           ),
-                                          const SizedBox(height: 8),
+                                          const SizedBox(height: 6),
                                           Text(
-                                            homeController.servicesList[index]
-                                                    ['category'] ??
-                                                "",
+                                            item['category'] ?? "",
                                             style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: (homeController.servicesList[
-                                                                  index][
-                                                              'member_count'] ==
-                                                          null ||
-                                                      homeController.servicesList[
-                                                                  index][
-                                                              'member_count'] ==
-                                                          0)
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                              color: hasNoMembers
                                                   ? ConstantColor.grayColor
                                                   : ConstantColor.primary,
                                             ),
@@ -846,8 +780,8 @@ Future<void> _checkForUpdate() async {
                                           ),
                                         ],
                                       ),
-                                    ),
-                                  ),
+                                    );
+                                  },
                                 ),
                         ),
                       ],
