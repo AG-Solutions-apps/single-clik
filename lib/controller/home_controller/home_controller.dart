@@ -11,7 +11,7 @@ import 'package:single_clik/services/api.dart';
 import 'package:single_clik/utils/shar_preferences.dart';
 import 'package:single_clik/utils/cache_manager.dart';
 import 'package:single_clik/widget/app_image_assets.dart';
-import '../../Model/on_board_model.dart';
+import '../../model/on_board_model.dart';
 
 class HomeController extends GetxController
     with GetSingleTickerProviderStateMixin {
