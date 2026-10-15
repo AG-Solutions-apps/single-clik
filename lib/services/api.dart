@@ -1,5 +1,4 @@
 class API {
-
   static const baseUrl = "https://singleclik.com/api/public/api/"; // Live
 
   static const checkMobile = "${baseUrl}check-mobile";
@@ -39,6 +38,6 @@ class API {
   static const createProductServices = "${baseUrl}create-product-services";
   static const deleteProductServices = "${baseUrl}delete-product-services";
   static const fetchProductServices = "${baseUrl}fetch-product-services";
-  static const checkProfileBusinessProfile = "${baseUrl}check-profile-business-profile";
-
+  static const checkProfileBusinessProfile =
+      "${baseUrl}check-profile-business-profile";
 }

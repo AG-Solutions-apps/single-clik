@@ -24,7 +24,8 @@ class MobileNumberController extends GetxController {
     debugPrint('=== MobileNumberController Ready ===');
     debugPrint('Initial isLoading state: ${isLoading.value}');
     debugPrint('Initial isButtonLoading state: ${isButtonLoading.value}');
-    debugPrint('Initial password value: ${password.value.isEmpty ? "Empty" : "Set"}');
+    debugPrint(
+        'Initial password value: ${password.value.isEmpty ? "Empty" : "Set"}');
   }
 
   @override
@@ -47,7 +48,8 @@ class MobileNumberController extends GetxController {
   }
 
   void setPassword(String newPassword) {
-    debugPrint('Setting password - Old value: ${password.value.isEmpty ? "Empty" : "***"}');
+    debugPrint(
+        'Setting password - Old value: ${password.value.isEmpty ? "Empty" : "***"}');
     debugPrint('Setting password - New value length: ${newPassword.length}');
     password.value = newPassword;
     debugPrint('Password updated successfully');

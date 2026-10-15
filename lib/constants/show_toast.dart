@@ -1,25 +1,22 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 class ShowToast {
-
-  static void showToast(String message, {
-    EasyLoadingToastPosition position = EasyLoadingToastPosition.top, bool? showSuccess}) {
-    if(showSuccess == null) {
+  static void showToast(String message,
+      {EasyLoadingToastPosition position = EasyLoadingToastPosition.top,
+      bool? showSuccess}) {
+    if (showSuccess == null) {
       EasyLoading.showToast(
         message,
         toastPosition: position,
       );
-    }
-    else if(showSuccess) {
+    } else if (showSuccess) {
       EasyLoading.showSuccess(
         message,
       );
-    }
-    else {
+    } else {
       EasyLoading.showError(
         message,
       );
     }
   }
-
 }

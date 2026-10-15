@@ -82,7 +82,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                 ),
               )
             : SingleChildScrollView(
-              child: Padding(
+                child: Padding(
                   padding: EdgeInsets.all(0),
                   child: Container(
                     height: height,
@@ -123,7 +123,8 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                                     ),
                                   ),
                                   Text(
-                                    aboutUsData['company_sub_heading'] == null ||
+                                    aboutUsData['company_sub_heading'] ==
+                                                null ||
                                             aboutUsData['company_sub_heading']
                                                 .toString()
                                                 .trim()
@@ -198,10 +199,10 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                                     .isEmpty
                             ? const SizedBox()
                             : GestureDetector(
-                          onTap: () {
-                            Get.to(() => const FeedbackScreen());
-                          },
-                              child: Container(
+                                onTap: () {
+                                  Get.to(() => const FeedbackScreen());
+                                },
+                                child: Container(
                                   width: width,
                                   decoration: BoxDecoration(
                                     color: ConstantColor.primaryDark,
@@ -228,12 +229,12 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                                     ),
                                   ),
                                 ),
-                            ),
+                              ),
                       ],
                     ),
                   ),
                 ),
-            ),
+              ),
       ),
     );
   }

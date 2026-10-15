@@ -56,14 +56,16 @@ class UserDetailsController extends GetxController
           if (dataField.isNotEmpty) {
             var firstItem = dataField[0];
             if (firstItem is Map) {
-              if (firstItem.containsKey('product_name') || firstItem.containsKey('product_status')) {
+              if (firstItem.containsKey('product_name') ||
+                  firstItem.containsKey('product_status')) {
                 parsedProducts = dataField;
               } else {
                 parsedProfile = Map<String, dynamic>.from(firstItem);
                 if (firstItem.containsKey('products')) {
                   parsedProducts = List.from(firstItem['products'] ?? []);
                 } else if (firstItem.containsKey('product_services')) {
-                  parsedProducts = List.from(firstItem['product_services'] ?? []);
+                  parsedProducts =
+                      List.from(firstItem['product_services'] ?? []);
                 }
               }
             }
@@ -93,20 +95,19 @@ class UserDetailsController extends GetxController
         parsedProfile['product_services'] = parsedProducts;
 
         userDetails = parsedProfile;
-        
+
         // Ensure products are also in the userDetailsProduct map for compatibility
         final updatedResponseData = Map<String, dynamic>.from(responseData);
         updatedResponseData['products'] = parsedProducts;
         updatedResponseData['product_services'] = parsedProducts;
         userDetailsProduct = updatedResponseData;
-        
+
         isLoading.value = false;
       } else {
         isLoading.value = false;
         // ShowToast.showToast(responseData['msg'] ?? 'Something went wrong.',showSuccess: false,);
       }
-    }
-    catch (e) {
+    } catch (e) {
       isLoading.value = false;
       // ShowToast.showToast('Something went wrong.',showSuccess: false,);
       debugPrint(e.toString());
@@ -115,11 +116,13 @@ class UserDetailsController extends GetxController
 
   Future<List<dynamic>> postFetchProductServicesApi({String? userId}) async {
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         return [];
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -132,8 +135,10 @@ class UserDetailsController extends GetxController
       }
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
-      debugPrint('Fetch Product Services UserDetails Response Code: ${res.statusCode}');
-      debugPrint('Fetch Product Services UserDetails Response: ${responseDone.body}');
+      debugPrint(
+          'Fetch Product Services UserDetails Response Code: ${res.statusCode}');
+      debugPrint(
+          'Fetch Product Services UserDetails Response: ${responseDone.body}');
       if (res.statusCode == 200) {
         final responseData = json.decode(responseDone.body);
         if (responseData['data'] is List) {

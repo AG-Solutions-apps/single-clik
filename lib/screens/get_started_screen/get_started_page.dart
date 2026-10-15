@@ -16,7 +16,6 @@ class GetStartedPage extends StatefulWidget {
 }
 
 class _GetStartedPageState extends State<GetStartedPage> {
-
   HomeController homeController = Get.put(HomeController());
   bool isTrue = false;
   @override
@@ -34,9 +33,12 @@ class _GetStartedPageState extends State<GetStartedPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: Get.width/30,),
+          padding: EdgeInsets.symmetric(
+            horizontal: Get.width / 30,
+          ),
           child: SingleChildScrollView(
-            child: Obx(() =>  Column(
+              child: Obx(
+            () => Column(
               children: [
                 SizedBox(
                   height: Get.width,
@@ -81,34 +83,41 @@ class _GetStartedPageState extends State<GetStartedPage> {
                           ],
                         ),
                       ),
-
                       Center(
                         child: CircularAnimation(
                           radius: 70,
                           images: [
-                            buildCircularAnimation( homeController.onBoardList.value.data?[1].photo ?? "",),
+                            buildCircularAnimation(
+                              homeController.onBoardList.value.data?[1].photo ??
+                                  "",
+                            ),
                             Container(
-                              height: Get.width/22,
-                              width: Get.width/22,
+                              height: Get.width / 22,
+                              width: Get.width / 22,
                               decoration: BoxDecoration(
                                 color: ConstantColor.blackColor,
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            buildCircularAnimation( homeController.onBoardList.value.data?[2].photo ?? "",),
+                            buildCircularAnimation(
+                              homeController.onBoardList.value.data?[2].photo ??
+                                  "",
+                            ),
                             Container(
-                              height: Get.width/22,
-                              width: Get.width/22,
+                              height: Get.width / 22,
+                              width: Get.width / 22,
                               decoration: BoxDecoration(
                                 color: ConstantColor.blackColor,
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            buildCircularAnimation( homeController.onBoardList.value.data?[3].photo ?? "",),
-
+                            buildCircularAnimation(
+                              homeController.onBoardList.value.data?[3].photo ??
+                                  "",
+                            ),
                             Container(
-                              height: Get.width/22,
-                              width: Get.width/22,
+                              height: Get.width / 22,
+                              width: Get.width / 22,
                               decoration: BoxDecoration(
                                 color: ConstantColor.primary,
                                 shape: BoxShape.circle,
@@ -123,45 +132,53 @@ class _GetStartedPageState extends State<GetStartedPage> {
                           radius: 140,
                           images: [
                             Container(
-                              height: Get.width/11,
-                              width: Get.width/11,
+                              height: Get.width / 11,
+                              width: Get.width / 11,
                               decoration: BoxDecoration(
                                 color: ConstantColor.blackColor,
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            buildCircularAnimation( homeController.onBoardList.value.data?[4].photo ?? "",),
-
+                            buildCircularAnimation(
+                              homeController.onBoardList.value.data?[4].photo ??
+                                  "",
+                            ),
                             Container(
-                              height: Get.width/12,
-                              width: Get.width/12,
+                              height: Get.width / 12,
+                              width: Get.width / 12,
                               decoration: BoxDecoration(
                                 color: ConstantColor.primary,
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            buildCircularAnimation( homeController.onBoardList.value.data?[5].photo ?? "",),
-
+                            buildCircularAnimation(
+                              homeController.onBoardList.value.data?[5].photo ??
+                                  "",
+                            ),
                             Container(
-                              height: Get.width/12,
-                              width: Get.width/12,
+                              height: Get.width / 12,
+                              width: Get.width / 12,
                               decoration: BoxDecoration(
                                 color: ConstantColor.blackColor,
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            buildCircularAnimation( homeController.onBoardList.value.data?[6].photo ?? "",),
-
+                            buildCircularAnimation(
+                              homeController.onBoardList.value.data?[6].photo ??
+                                  "",
+                            ),
                             Container(
-                              height: Get.width/12,
-                              width: Get.width/12,
+                              height: Get.width / 12,
+                              width: Get.width / 12,
                               decoration: BoxDecoration(
-                                color:ConstantColor.primary,
+                                color: ConstantColor.primary,
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            buildCircularAnimation( homeController.onBoardList.value.data?[6].photo ?? "",),
-
+                            buildCircularAnimation(
+                              homeController.onBoardList.value.data?[6].photo ??
+                                  "",
+                            ),
                           ],
                           animationDuration: const Duration(seconds: 20),
                         ),
@@ -170,16 +187,19 @@ class _GetStartedPageState extends State<GetStartedPage> {
                   ),
                 ),
                 Text(
-                (homeController.onBoardList.value.categories?.category ?? "").toString().toUpperCase(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: ConstantColor.blackColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 23,
+                  (homeController.onBoardList.value.categories?.category ?? "")
+                      .toString()
+                      .toUpperCase(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: ConstantColor.blackColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 23,
+                  ),
                 ),
-              ),
-
-            SizedBox(height: Get.height*0.07,),
+                SizedBox(
+                  height: Get.height * 0.07,
+                ),
                 Center(
                   child: Text(
                     "The best place to meet \nyour day to day needs.",
@@ -191,7 +211,9 @@ class _GetStartedPageState extends State<GetStartedPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: Get.width/20,),
+                SizedBox(
+                  height: Get.width / 20,
+                ),
                 Center(
                   child: Text(
                     "Discover new opportunities with our SINGLE CLIK! Connect, network, and generate business leads within your community effortlessly. Stay ahead, grow your network, and boost your business with ease.",
@@ -202,14 +224,18 @@ class _GetStartedPageState extends State<GetStartedPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: Get.width/20,),
+                SizedBox(
+                  height: Get.width / 20,
+                ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: Get.width/8,),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Get.width / 8,
+                  ),
                   child: GestureDetector(
                     onTap: () async {
                       Get.offNamed('login');
 
-                     /* EasyLoading.show(status:"Please wait..",);
+                      /* EasyLoading.show(status:"Please wait..",);
                       await Future.delayed(Duration(milliseconds: 200,),);
                       bool login = await SharPreferences.getBoolean(SharPreferences.isLogin) ?? false;
 
@@ -226,7 +252,6 @@ class _GetStartedPageState extends State<GetStartedPage> {
                           Get.offNamed('login');
                         }
                       });*/
-
                     },
                     child: Container(
                       width: Get.width,
@@ -235,7 +260,9 @@ class _GetStartedPageState extends State<GetStartedPage> {
                         borderRadius: BorderRadius.circular(50),
                       ),
                       alignment: Alignment.center,
-                      padding: EdgeInsets.symmetric(vertical: Get.width/30,),
+                      padding: EdgeInsets.symmetric(
+                        vertical: Get.width / 30,
+                      ),
                       child: Text(
                         'Get Started',
                         style: TextStyle(
@@ -247,36 +274,43 @@ class _GetStartedPageState extends State<GetStartedPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: Get.width/20,),
+                SizedBox(
+                  height: Get.width / 20,
+                ),
               ],
-            ),)
-          ),
+            ),
+          )),
         ),
       ),
     );
   }
-
 }
+
 Widget buildImageCircle(String imageUrl, double size) {
   return ClipOval(
     child: Image.network(
       imageUrl,
       width: size,
-      height:size,
+      height: size,
       fit: BoxFit.cover,
-      errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
-        return
-          Image.network("https://singleclik.com/api/storage/app/public/no_image.jpg",  width: size,
-          height: size,);
+      errorBuilder:
+          (BuildContext context, Object error, StackTrace? stackTrace) {
+        return Image.network(
+          "https://singleclik.com/api/storage/app/public/no_image.jpg",
+          width: size,
+          height: size,
+        );
       },
-      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+      loadingBuilder: (BuildContext context, Widget child,
+          ImageChunkEvent? loadingProgress) {
         if (loadingProgress == null) {
           return child;
         }
         return Center(
           child: CircularProgressIndicator(
             value: loadingProgress.expectedTotalBytes != null
-                ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                ? loadingProgress.cumulativeBytesLoaded /
+                    (loadingProgress.expectedTotalBytes ?? 1)
                 : null,
           ),
         );
@@ -284,32 +318,38 @@ Widget buildImageCircle(String imageUrl, double size) {
     ),
   );
 }
+
 Widget buildCircularAnimation(String imageUrls) {
-  return
-         ClipOval(
-          child: Image.network(
-            ConstantString.userImgUrlPath + imageUrls,
-            width: Get.width / 8,
-            height: Get.width / 8,
-            fit: BoxFit.cover,
-            errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
-              return Image.network("https://singleclik.com/api/storage/app/public/no_image.jpg",  width: Get.width / 13,
-                height: Get.width / 8,);
-            },
-            loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-              if (loadingProgress == null) {
-                return child;
-              }
-              return Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                      : null,
-                ),
-              );
-            },
-          ));
+  return ClipOval(
+      child: Image.network(
+    ConstantString.userImgUrlPath + imageUrls,
+    width: Get.width / 8,
+    height: Get.width / 8,
+    fit: BoxFit.cover,
+    errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+      return Image.network(
+        "https://singleclik.com/api/storage/app/public/no_image.jpg",
+        width: Get.width / 13,
+        height: Get.width / 8,
+      );
+    },
+    loadingBuilder:
+        (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+      if (loadingProgress == null) {
+        return child;
+      }
+      return Center(
+        child: CircularProgressIndicator(
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  (loadingProgress.expectedTotalBytes ?? 1)
+              : null,
+        ),
+      );
+    },
+  ));
 }
+
 class CircularAnimation extends StatefulWidget {
   final List<Widget> images;
   final Duration animationDuration;
@@ -326,7 +366,8 @@ class CircularAnimation extends StatefulWidget {
   CircularAnimationState createState() => CircularAnimationState();
 }
 
-class CircularAnimationState extends State<CircularAnimation> with TickerProviderStateMixin {
+class CircularAnimationState extends State<CircularAnimation>
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   RxDouble animationValue = 0.0.obs;

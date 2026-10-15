@@ -27,7 +27,8 @@ class FeedBackController extends GetxController {
       final token = await SharPreferences.getString(SharPreferences.token);
       if (token == null || token.trim().isEmpty) {
         isButtonLoading.value = false;
-        ShowToast.showToast("Authentication error. Please login again.", showSuccess: false);
+        ShowToast.showToast("Authentication error. Please login again.",
+            showSuccess: false);
         return;
       }
       final request =

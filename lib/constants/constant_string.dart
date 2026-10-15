@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ConstantString {
-
   static String dataNotFoundLabel = 'Data Not Found....';
   static String pleaseWaitLabel = 'Please wait...';
   static String loadingLabel = 'Loading...';
@@ -35,9 +34,9 @@ class ConstantString {
   static String noImgUrlPath = '${imgBaseUrlPath}no_image.jpg';
   static String aboutUsBGPath = '${notificationImgUrlPath}background.png';
 
-
   static String loginTermsUrl = 'https://singleclik.com/draft/tclogin.html';
-  static String businessTermsUrl = 'https://singleclik.com/draft/tcbusiness.html';
+  static String businessTermsUrl =
+      'https://singleclik.com/draft/tcbusiness.html';
 
   static Future<bool> checkInternet() async {
     try {
@@ -45,7 +44,8 @@ class ConstantString {
       final connectivityResults = await Connectivity().checkConnectivity();
 
       // If none of the connectivity options are active, return false
-      if (connectivityResults.every((result) => result == ConnectivityResult.none)) {
+      if (connectivityResults
+          .every((result) => result == ConnectivityResult.none)) {
         return false;
       }
 
@@ -56,5 +56,4 @@ class ConstantString {
       return false;
     }
   }
-
 }

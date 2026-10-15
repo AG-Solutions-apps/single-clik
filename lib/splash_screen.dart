@@ -175,8 +175,8 @@ class SplashScreenState extends State<SplashScreen>
                     opacity: _mainController.drive(
                       Tween<double>(begin: 0.0, end: 1.0).chain(
                         CurveTween(
-                          curve: const Interval(0.75, 1.0,
-                              curve: Curves.easeIn),
+                          curve:
+                              const Interval(0.75, 1.0, curve: Curves.easeIn),
                         ),
                       ),
                     ),

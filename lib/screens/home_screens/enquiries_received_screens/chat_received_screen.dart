@@ -177,7 +177,7 @@ class ChatReceivedScreenState extends State<ChatReceivedScreen> {
             children: [
               /// ── HEADER CARD ──
               GestureDetector(
-                    onTap: () => _showFullMessageDialog(enqText),
+                onTap: () => _showFullMessageDialog(enqText),
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   decoration: BoxDecoration(
@@ -205,7 +205,7 @@ class ChatReceivedScreenState extends State<ChatReceivedScreen> {
                             painter: _TopArcPainter(),
                           ),
                         ),
-                
+
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 20.0),
@@ -238,7 +238,7 @@ class ChatReceivedScreenState extends State<ChatReceivedScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                
+
                               /// Name
                               Text(
                                 name,
@@ -250,7 +250,7 @@ class ChatReceivedScreenState extends State<ChatReceivedScreen> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                
+
                               /// Category
                               Text(
                                 "$category ($subCategory)",
@@ -262,7 +262,7 @@ class ChatReceivedScreenState extends State<ChatReceivedScreen> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                
+
                               /// Enquiry Text (Clickable)
                               GestureDetector(
                                 onTap: () => _showFullMessageDialog(enqText),
@@ -279,7 +279,7 @@ class ChatReceivedScreenState extends State<ChatReceivedScreen> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                
+
                               /// Date
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -292,7 +292,8 @@ class ChatReceivedScreenState extends State<ChatReceivedScreen> {
                                   const SizedBox(width: 6),
                                   Text(
                                     DateFormat('dd MMM yyyy').format(
-                                        DateTime.parse(widget.userData['created_at']
+                                        DateTime.parse(widget
+                                                .userData['created_at']
                                                 ?.toString() ??
                                             DateTime.now().toString())),
                                     style: const TextStyle(
@@ -387,7 +388,7 @@ class ChatReceivedScreenState extends State<ChatReceivedScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      
+
                       /// Circular Send Button
                       GestureDetector(
                         onTap: () {
@@ -445,10 +446,10 @@ class ChatReceivedScreenState extends State<ChatReceivedScreen> {
             isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Container(
-            constraints: BoxConstraints(
-                maxWidth: Responsive.width(70, context)),
-            padding: const EdgeInsets.symmetric(
-                horizontal: 16.0, vertical: 12.0),
+            constraints:
+                BoxConstraints(maxWidth: Responsive.width(70, context)),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             decoration: BoxDecoration(
               color: isMe
                   ? const Color(0xffDDE8FF) // Sender blue tint
@@ -562,13 +563,13 @@ class _TopArcPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final path = Path();
     path.moveTo(0, size.height * 0.7);
-    path.quadraticBezierTo(
-        size.width * 0.5, 0, size.width, size.height * 0.7);
+    path.quadraticBezierTo(size.width * 0.5, 0, size.width, size.height * 0.7);
     path.lineTo(size.width, 0);
     path.lineTo(0, 0);
     path.close();
 
-    canvas.drawPath(path, Paint()..color = const Color.fromARGB(255, 255, 255, 255));
+    canvas.drawPath(
+        path, Paint()..color = const Color.fromARGB(255, 255, 255, 255));
   }
 
   @override

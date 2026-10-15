@@ -146,7 +146,11 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
   String _getReferralCode() {
     String code = referralController.userReferralCode.value.trim();
     if ((code.isEmpty || code == 'N/A') && Get.isRegistered<HomeController>()) {
-      final hcCode = Get.find<HomeController>().userData['referral_code']?.toString().trim() ?? '';
+      final hcCode = Get.find<HomeController>()
+              .userData['referral_code']
+              ?.toString()
+              .trim() ??
+          '';
       if (hcCode.isNotEmpty && hcCode.toLowerCase() != 'null') {
         code = hcCode;
       }
@@ -246,14 +250,16 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.verified_rounded, color: Colors.white, size: 14),
+                    const Icon(Icons.verified_rounded,
+                        color: Colors.white, size: 14),
                     const SizedBox(width: 4),
                     Text(
                       "Earned: ${_formatNumber(int.tryParse(referralController.totalPoints.value) ?? 0)}",
@@ -290,7 +296,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
@@ -313,7 +320,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                             GestureDetector(
                               onTap: () {
                                 Clipboard.setData(ClipboardData(text: code));
-                                ShowToast.showToast("Referral code copied!", showSuccess: true);
+                                ShowToast.showToast("Referral code copied!",
+                                    showSuccess: true);
                               },
                               child: const Icon(
                                 Icons.copy_rounded,
@@ -336,7 +344,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                   backgroundColor: Colors.white,
                   foregroundColor: ConstantColor.primaryDark,
                   elevation: 4,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -377,7 +386,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
         labelColor: ConstantColor.primary,
         unselectedLabelColor: Colors.grey[600],
         labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-        unselectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.normal),
+        unselectedLabelStyle:
+            const TextStyle(fontSize: 13, fontWeight: FontWeight.normal),
         tabs: [
           Tab(
             text: " Rewards (${referralController.products.length})",
@@ -396,10 +406,13 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
   // ── Tab 1: Products List ────────────────────────────────────────────────────
 
   Widget _buildProductsTab(double height, double width) {
-    final products = List<Map<String, dynamic>>.from(referralController.products);
+    final products =
+        List<Map<String, dynamic>>.from(referralController.products);
     products.sort((a, b) {
-      final ptsA = int.tryParse(a['refferal_products_points']?.toString() ?? '0') ?? 0;
-      final ptsB = int.tryParse(b['refferal_products_points']?.toString() ?? '0') ?? 0;
+      final ptsA =
+          int.tryParse(a['refferal_products_points']?.toString() ?? '0') ?? 0;
+      final ptsB =
+          int.tryParse(b['refferal_products_points']?.toString() ?? '0') ?? 0;
       return ptsA.compareTo(ptsB);
     });
 
@@ -412,9 +425,12 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
       itemCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
-        final prodName = product['refferal_products']?.toString() ?? 'Reward Product';
-        final prodDesc = product['refferal_products_description']?.toString() ?? '';
-        final prodPointsStr = product['refferal_products_points']?.toString() ?? '0';
+        final prodName =
+            product['refferal_products']?.toString() ?? 'Reward Product';
+        final prodDesc =
+            product['refferal_products_description']?.toString() ?? '';
+        final prodPointsStr =
+            product['refferal_products_points']?.toString() ?? '0';
         final prodPoints = int.tryParse(prodPointsStr) ?? 0;
         final prodImage = product['refferal_products_image']?.toString() ?? '';
         final fullImageUrl = "${referralController.imageUrl.value}$prodImage";
@@ -422,7 +438,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
         final availablePts = referralController.availablePoints;
         final bool canClaim = availablePts >= prodPoints;
         final int neededPts = prodPoints - availablePts;
-        final int neededBusinesses = (neededPts > 0) ? (neededPts / 1000).ceil() : 0;
+        final int neededBusinesses =
+            (neededPts > 0) ? (neededPts / 1000).ceil() : 0;
         final int neededUsers = (neededPts > 0) ? (neededPts / 500).ceil() : 0;
 
         return Container(
@@ -469,7 +486,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                         ),
                         const SizedBox(height: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: ConstantColor.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
@@ -477,7 +495,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.stars_rounded, color: Color(0xffFFB800), size: 16),
+                              const Icon(Icons.stars_rounded,
+                                  color: Color(0xffFFB800), size: 16),
                               const SizedBox(width: 4),
                               Text(
                                 "${_formatNumber(prodPoints)} Pts",
@@ -524,7 +543,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                         child: Image.network(
                           fullImageUrl,
                           fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => Container(
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
                             width: 80,
                             height: 80,
                             alignment: Alignment.center,
@@ -550,7 +570,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                   child: ElevatedButton(
                     onPressed: referralController.isClaiming.value
                         ? null
-                        : () => _showConfirmClaimDialog(product, prodPoints, availablePts),
+                        : () => _showConfirmClaimDialog(
+                            product, prodPoints, availablePts),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ConstantColor.primary,
                       foregroundColor: Colors.white,
@@ -600,7 +621,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                       onTap: () => _shareReferralCode(),
                       borderRadius: BorderRadius.circular(14),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 14),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -654,7 +676,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
   Widget _buildReferralHistoryTab() {
     final history = referralController.historyPoints;
     if (history.isEmpty) {
-      return _buildEmptyState("No referral history found.\nShare your referral code to start earning points!");
+      return _buildEmptyState(
+          "No referral history found.\nShare your referral code to start earning points!");
     }
 
     return ListView.builder(
@@ -731,7 +754,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -757,7 +781,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
   Widget _buildClaimHistoryTab() {
     final claims = referralController.claimHistory;
     if (claims.isEmpty) {
-      return _buildEmptyState("No rewards claimed yet.\nClaim your first item from the Rewards tab!");
+      return _buildEmptyState(
+          "No rewards claimed yet.\nClaim your first item from the Rewards tab!");
     }
 
     return ListView.builder(
@@ -842,7 +867,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                           ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.green.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(6),
@@ -878,7 +904,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
 
   // ── Confirmation Dialog for Claim ──────────────────────────────────────────
 
-  void _showConfirmClaimDialog(Map<String, dynamic> product, int prodPoints, int availablePts) {
+  void _showConfirmClaimDialog(
+      Map<String, dynamic> product, int prodPoints, int availablePts) {
     final prodName = product['refferal_products']?.toString() ?? 'Reward Item';
     final prodImg = product['refferal_products_image']?.toString() ?? '';
     final fullImageUrl = "${referralController.imageUrl.value}$prodImg";
@@ -887,7 +914,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: const EdgeInsets.all(20),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -925,7 +953,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
               Text(
                 "Are you sure you want to claim \"$prodName\" using ${_formatNumber(prodPoints)} points?",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.4),
+                style: TextStyle(
+                    fontSize: 14, color: Colors.grey[700], height: 1.4),
               ),
               const SizedBox(height: 16),
               Container(
@@ -937,7 +966,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Remaining Points:", style: TextStyle(fontSize: 13, color: Colors.grey)),
+                    const Text("Remaining Points:",
+                        style: TextStyle(fontSize: 13, color: Colors.grey)),
                     Text(
                       "${_formatNumber(availablePts - prodPoints)} Pts",
                       style: TextStyle(
@@ -957,7 +987,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                       onPressed: () => Get.back(),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
                       ),
                       child: const Text("Cancel"),
                     ),
@@ -967,7 +998,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                     child: ElevatedButton(
                       onPressed: () async {
                         Get.back();
-                        final isSuccess = await referralController.postCreateReferralClaimApi(product['id']);
+                        final isSuccess = await referralController
+                            .postCreateReferralClaimApi(product['id']);
                         if (isSuccess && mounted) {
                           _showSuccessClaimDialog(product, prodPoints);
                         }
@@ -976,7 +1008,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                         backgroundColor: ConstantColor.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
                       ),
                       child: const Text("Confirm"),
                     ),
@@ -1002,7 +1035,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
       barrierDismissible: false,
       builder: (ctx) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           elevation: 10,
           backgroundColor: Colors.white,
           insetPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1074,7 +1108,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                         ),
                       ),
                       const TextSpan(
-                        text: " has been successfully submitted. Our team will verify your claim and contact you shortly regarding fulfillment and delivery.",
+                        text:
+                            " has been successfully submitted. Our team will verify your claim and contact you shortly regarding fulfillment and delivery.",
                       ),
                     ],
                   ),
@@ -1087,7 +1122,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                   decoration: BoxDecoration(
                     color: const Color(0xffF8F9FD),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xffE8ECF4), width: 1),
+                    border:
+                        Border.all(color: const Color(0xffE8ECF4), width: 1),
                   ),
                   child: Row(
                     children: [
@@ -1101,7 +1137,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                               ? Image.network(
                                   fullImageUrl,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Icon(
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Icon(
                                     Icons.card_giftcard_rounded,
                                     color: ConstantColor.primary,
                                   ),
@@ -1140,7 +1177,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: const Color(0xffE8F5E9),
                           borderRadius: BorderRadius.circular(8),
@@ -1187,7 +1225,8 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                       child: ElevatedButton(
                         onPressed: () {
                           Get.back();
-                          _tabController.animateTo(2); // Switch to "Claimed" tab
+                          _tabController
+                              .animateTo(2); // Switch to "Claimed" tab
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ConstantColor.primary,

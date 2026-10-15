@@ -4,9 +4,11 @@
 
 import 'dart:convert';
 
-AllUserDataModel allUserDataModelFromJson(String str) => AllUserDataModel.fromJson(json.decode(str));
+AllUserDataModel allUserDataModelFromJson(String str) =>
+    AllUserDataModel.fromJson(json.decode(str));
 
-String allUserDataModelToJson(AllUserDataModel data) => json.encode(data.toJson());
+String allUserDataModelToJson(AllUserDataModel data) =>
+    json.encode(data.toJson());
 
 class AllUserDataModel {
   int? id;
@@ -35,33 +37,44 @@ class AllUserDataModel {
     this.userSubCategories,
   });
 
-  factory AllUserDataModel.fromJson(Map<String, dynamic> json) => AllUserDataModel(
-    id: json["id"],
-    name: json["name"],
-    companyName: json["company_name"],
-    mobile: json["mobile"],
-    email: json["email"],
-    whatsapp: json["whatsapp"],
-    area: json["area"],
-    photo: json["photo"],
-    profileType: json["profile_type"],
-    userCategories: json["user_categories"] == null ? [] : List<UserCategory>.from(json["user_categories"]!.map((x) => UserCategory.fromJson(x))),
-    userSubCategories: json["user_sub_categories"] == null ? [] : List<UserSubCategory>.from(json["user_sub_categories"]!.map((x) => UserSubCategory.fromJson(x))),
-  );
+  factory AllUserDataModel.fromJson(Map<String, dynamic> json) =>
+      AllUserDataModel(
+        id: json["id"],
+        name: json["name"],
+        companyName: json["company_name"],
+        mobile: json["mobile"],
+        email: json["email"],
+        whatsapp: json["whatsapp"],
+        area: json["area"],
+        photo: json["photo"],
+        profileType: json["profile_type"],
+        userCategories: json["user_categories"] == null
+            ? []
+            : List<UserCategory>.from(
+                json["user_categories"]!.map((x) => UserCategory.fromJson(x))),
+        userSubCategories: json["user_sub_categories"] == null
+            ? []
+            : List<UserSubCategory>.from(json["user_sub_categories"]!
+                .map((x) => UserSubCategory.fromJson(x))),
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "company_name": companyName,
-    "mobile": mobile,
-    "email": email,
-    "whatsapp": whatsapp,
-    "area": area,
-    "photo": photo,
-    "profile_type": profileType,
-    "user_categories": userCategories == null ? [] : List<dynamic>.from(userCategories!.map((x) => x.toJson())),
-    "user_sub_categories": userSubCategories == null ? [] : List<dynamic>.from(userSubCategories!.map((x) => x.toJson())),
-  };
+        "id": id,
+        "name": name,
+        "company_name": companyName,
+        "mobile": mobile,
+        "email": email,
+        "whatsapp": whatsapp,
+        "area": area,
+        "photo": photo,
+        "profile_type": profileType,
+        "user_categories": userCategories == null
+            ? []
+            : List<dynamic>.from(userCategories!.map((x) => x.toJson())),
+        "user_sub_categories": userSubCategories == null
+            ? []
+            : List<dynamic>.from(userSubCategories!.map((x) => x.toJson())),
+      };
 }
 
 class UserCategory {
@@ -78,18 +91,20 @@ class UserCategory {
   });
 
   factory UserCategory.fromJson(Map<String, dynamic> json) => UserCategory(
-    uId: json["u_id"],
-    id: json["id"],
-    uCategoryId: json["u_catg_id"],
-    categories: json["categories"] == null ? null : Categories.fromJson(json["categories"]),
-  );
+        uId: json["u_id"],
+        id: json["id"],
+        uCategoryId: json["u_catg_id"],
+        categories: json["categories"] == null
+            ? null
+            : Categories.fromJson(json["categories"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "u_id": uId,
-    "id": id,
-    "u_catg_id": uCategoryId,
-    "categories": categories?.toJson(),
-  };
+        "u_id": uId,
+        "id": id,
+        "u_catg_id": uCategoryId,
+        "categories": categories?.toJson(),
+      };
 }
 
 class Categories {
@@ -102,14 +117,14 @@ class Categories {
   });
 
   factory Categories.fromJson(Map<String, dynamic> json) => Categories(
-    id: json["id"],
-    category: json["category"],
-  );
+        id: json["id"],
+        category: json["category"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "category": category,
-  };
+        "id": id,
+        "category": category,
+      };
 }
 
 class UserSubCategory {
@@ -125,19 +140,22 @@ class UserSubCategory {
     this.subCategories,
   });
 
-  factory UserSubCategory.fromJson(Map<String, dynamic> json) => UserSubCategory(
-    uId: json["u_id"],
-    id: json["id"],
-    uSubcatgId: json["u_subcatg_id"],
-    subCategories: json["sub_categories"] == null ? null : SubCategories.fromJson(json["sub_categories"]),
-  );
+  factory UserSubCategory.fromJson(Map<String, dynamic> json) =>
+      UserSubCategory(
+        uId: json["u_id"],
+        id: json["id"],
+        uSubcatgId: json["u_subcatg_id"],
+        subCategories: json["sub_categories"] == null
+            ? null
+            : SubCategories.fromJson(json["sub_categories"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "u_id": uId,
-    "id": id,
-    "u_subcatg_id": uSubcatgId,
-    "sub_categories": subCategories?.toJson(),
-  };
+        "u_id": uId,
+        "id": id,
+        "u_subcatg_id": uSubcatgId,
+        "sub_categories": subCategories?.toJson(),
+      };
 }
 
 class SubCategories {
@@ -150,12 +168,12 @@ class SubCategories {
   });
 
   factory SubCategories.fromJson(Map<String, dynamic> json) => SubCategories(
-    id: json["id"],
-    subcategory: json["subcategory"],
-  );
+        id: json["id"],
+        subcategory: json["subcategory"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "subcategory": subcategory,
-  };
+        "id": id,
+        "subcategory": subcategory,
+      };
 }

@@ -141,11 +141,16 @@ class UpdateProfileScreenState extends State<UpdateProfileScreen> {
                                           borderRadius:
                                               BorderRadius.circular(7),
                                         ),
-                                        child: updateProfileController.filePath.value.isNotEmpty
+                                        child: updateProfileController
+                                                .filePath.value.isNotEmpty
                                             ? AppImageAsset(
-                                                key: ValueKey('update_profile_photo_${Get.find<HomeController>().photoVersion.value}'),
-                                                image: updateProfileController.filePath.value,
-                                                isFile: !updateProfileController.filePath.value.startsWith("http"),
+                                                key: ValueKey(
+                                                    'update_profile_photo_${Get.find<HomeController>().photoVersion.value}'),
+                                                image: updateProfileController
+                                                    .filePath.value,
+                                                isFile: !updateProfileController
+                                                    .filePath.value
+                                                    .startsWith("http"),
                                                 fit: BoxFit.cover,
                                                 height: 100,
                                                 width: 100,
@@ -174,11 +179,16 @@ class UpdateProfileScreenState extends State<UpdateProfileScreen> {
                                           await updateProfileController
                                               .cropImage(image);
                                           if (updateProfileController
-                                              .croppedProfileFile!.value.path
+                                              .croppedProfileFile!
+                                              .value
+                                              .path
                                               .isNotEmpty) {
-                                            updateProfileController.filePath.value =
+                                            updateProfileController
+                                                    .filePath.value =
                                                 updateProfileController
-                                                    .croppedProfileFile!.value.path;
+                                                    .croppedProfileFile!
+                                                    .value
+                                                    .path;
                                             await updateProfileController
                                                 .autoUploadProfilePhoto();
                                           }
@@ -813,7 +823,9 @@ class UpdateProfileScreenState extends State<UpdateProfileScreen> {
                                   'area': updateProfileController
                                       .areaController.value.text,
                                 },
-                                updateProfileController.croppedProfileFile!.value.path.trim(),
+                                updateProfileController
+                                    .croppedProfileFile!.value.path
+                                    .trim(),
                               );
                             }
                           },

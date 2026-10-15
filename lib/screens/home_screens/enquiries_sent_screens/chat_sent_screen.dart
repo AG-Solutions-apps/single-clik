@@ -28,20 +28,21 @@ class ChatSentScreen extends StatefulWidget {
 class _ChatSentScreenState extends State<ChatSentScreen> {
   late ChatSentController chatSentController;
   final FocusNode _focusNode = FocusNode();
-  
+
   @override
   void initState() {
     super.initState();
     // Initialize controller
     chatSentController = Get.put(ChatSentController());
-    
+
     // Set user ID immediately
     _setUserId();
   }
-  
+
   Future<void> _setUserId() async {
     try {
-      final userDataString = await SharPreferences.getString(SharPreferences.userData);
+      final userDataString =
+          await SharPreferences.getString(SharPreferences.userData);
       if (userDataString != null) {
         final userData = jsonDecode(userDataString);
         chatSentController.userId.value = userData['id'].toString();
@@ -89,7 +90,8 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
               ),
               child: ClipOval(
                 child: AppImageAsset(
-                  image: "${ConstantString.userImgUrlPath}${widget.userData['photo']}",
+                  image:
+                      "${ConstantString.userImgUrlPath}${widget.userData['photo']}",
                   isFile: false,
                   fit: BoxFit.cover,
                   height: 38,
@@ -98,6 +100,7 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
               ),
             ),
             const SizedBox(width: 12),
+
             /// Title and Online Status
             Expanded(
               child: Column(
@@ -114,7 +117,6 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
-                 
                 ],
               ),
             ),
@@ -125,14 +127,14 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
         () {
           // Get messages instantly from cache
           final messages = chatSentController.getDisplayMessages();
-          
+
           // Show loading ONLY if no messages and still loading first time
           if (chatSentController.isLoading.value && messages.isEmpty) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
-          
+
           return Column(
             children: [
               Expanded(
@@ -143,18 +145,20 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
                         itemCount: messages.length,
                         controller: chatSentController.scrollController,
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, 
+                          horizontal: 16.0,
                           vertical: 20,
                         ),
                         itemBuilder: (context, index) {
-                          final chatItem = messages[messages.length - 1 - index];
-                          final isMe = chatItem['user_id']?.toString() == 
-                                      chatSentController.userId.value;
-                          final isOptimistic = chatItem['is_optimistic'] == true;
-                          
+                          final chatItem =
+                              messages[messages.length - 1 - index];
+                          final isMe = chatItem['user_id']?.toString() ==
+                              chatSentController.userId.value;
+                          final isOptimistic =
+                              chatItem['is_optimistic'] == true;
+
                           return _buildChatBubble(
-                            context, 
-                            isMe, 
+                            context,
+                            isMe,
                             chatItem,
                             isOptimistic: isOptimistic,
                           );
@@ -168,7 +172,7 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
       ),
     );
   }
-  
+
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -203,7 +207,8 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
   Widget _buildMessageInput(double width) {
     return Obx(
       () => Container(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24), // Extra bottom padding for safe area
+        padding: const EdgeInsets.fromLTRB(
+            16, 12, 16, 24), // Extra bottom padding for safe area
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -220,7 +225,8 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xffF1F5F9), // Light gray pill background from image
+                  color: const Color(
+                      0xffF1F5F9), // Light gray pill background from image
                   borderRadius: BorderRadius.circular(30.0),
                 ),
                 child: TextFormField(
@@ -261,8 +267,8 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
                 height: 48,
                 width: 48,
                 decoration: BoxDecoration(
-                  color: chatSentController.isSending.value 
-                      ? Colors.grey 
+                  color: chatSentController.isSending.value
+                      ? Colors.grey
                       : const Color(0xff1E40AF), // Dark blue from image
                   shape: BoxShape.circle,
                 ),
@@ -287,10 +293,11 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
     );
   }
 
-  Widget _buildChatBubble(BuildContext context, bool isMe, dynamic data, {bool isOptimistic = false}) {
+  Widget _buildChatBubble(BuildContext context, bool isMe, dynamic data,
+      {bool isOptimistic = false}) {
     final message = data['text'] ?? "";
     final createdAt = data['created_at'];
-    
+
     String timeString = "";
     if (createdAt != null && createdAt.toString().isNotEmpty && !isOptimistic) {
       try {
@@ -317,7 +324,7 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
     } else if (!isOptimistic) {
       timeString = DateFormat('hh:mm a').format(DateTime.now());
     }
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Align(
@@ -327,13 +334,13 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
             maxWidth: MediaQuery.of(context).size.width * 0.75,
           ),
           padding: const EdgeInsets.symmetric(
-            horizontal: 14.0, 
+            horizontal: 14.0,
             vertical: 10.0,
           ),
           decoration: BoxDecoration(
-            color: isMe 
-                ? (isOptimistic 
-                    ? const Color(0xffDDE8FF).withOpacity(0.6) 
+            color: isMe
+                ? (isOptimistic
+                    ? const Color(0xffDDE8FF).withOpacity(0.6)
                     : const Color(0xffDDE8FF)) // Light blue from image
                 : Colors.white,
             borderRadius: BorderRadius.only(
@@ -382,6 +389,7 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
                 ],
               ),
               const SizedBox(height: 4),
+
               /// Inner Timestamp & Read Receipt
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -392,7 +400,8 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
                       fontWeight: FontWeight.w500,
                       fontSize: 10,
                       color: const Color(0xff64748B),
-                      fontStyle: isOptimistic ? FontStyle.italic : FontStyle.normal,
+                      fontStyle:
+                          isOptimistic ? FontStyle.italic : FontStyle.normal,
                     ),
                   ),
                   if (isMe && !isOptimistic) ...[
@@ -411,7 +420,7 @@ class _ChatSentScreenState extends State<ChatSentScreen> {
       ),
     );
   }
-  
+
   Future<void> _sendMessage() async {
     await chatSentController.postSendChatApi();
     // Keep focus for continuous typing

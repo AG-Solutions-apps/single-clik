@@ -5,9 +5,9 @@ import 'package:flutter/foundation.dart';
 
 class CacheManager {
   static const String _PREFIX = 'app_cache_';
-  
+
   /// Save data to cache with timestamp
-  /// 
+  ///
   /// [key] - Unique identifier for the cached data
   /// [value] - Data to be cached (will be JSON encoded)
   static Future<void> set(String key, dynamic value) async {
@@ -24,9 +24,9 @@ class CacheManager {
       }
     }
   }
-  
+
   /// Get data from cache
-  /// 
+  ///
   /// [key] - Unique identifier for the cached data
   /// Returns decoded JSON data or null if not found
   static Future<dynamic> get(String key) async {
@@ -43,9 +43,9 @@ class CacheManager {
     }
     return null;
   }
-  
+
   /// Remove specific cache entry
-  /// 
+  ///
   /// [key] - Unique identifier for the cached data to remove
   static Future<void> remove(String key) async {
     try {
@@ -60,7 +60,7 @@ class CacheManager {
       }
     }
   }
-  
+
   /// Clear all app cache
   /// Removes all entries with the app cache prefix
   static Future<void> clearAll() async {
@@ -79,9 +79,9 @@ class CacheManager {
       }
     }
   }
-  
+
   /// Check if cache exists and is still valid (not expired)
-  /// 
+  ///
   /// [key] - Unique identifier for the cached data
   /// [maxAge] - Maximum allowed age of the cache
   /// Returns true if cache exists and is within maxAge
@@ -89,7 +89,8 @@ class CacheManager {
     try {
       final cachedData = await get(key);
       if (cachedData != null && cachedData['timestamp'] != null) {
-        final age = DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
+        final age =
+            DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
         return age < maxAge;
       }
     } catch (e) {
@@ -99,16 +100,17 @@ class CacheManager {
     }
     return false;
   }
-  
+
   /// Get the age of cached data
-  /// 
+  ///
   /// [key] - Unique identifier for the cached data
   /// Returns Duration of cache age or null if not found
   static Future<Duration?> getCacheAge(String key) async {
     try {
       final cachedData = await get(key);
       if (cachedData != null && cachedData['timestamp'] != null) {
-        return DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
+        return DateTime.now()
+            .difference(DateTime.parse(cachedData['timestamp']));
       }
     } catch (e) {
       if (kDebugMode) {
@@ -117,9 +119,9 @@ class CacheManager {
     }
     return null;
   }
-  
+
   /// Check if cache exists (regardless of age)
-  /// 
+  ///
   /// [key] - Unique identifier for the cached data
   /// Returns true if cache exists
   static Future<bool> exists(String key) async {
@@ -133,23 +135,23 @@ class CacheManager {
       return false;
     }
   }
-  
+
   /// Get cache size information
-  /// 
+  ///
   /// Returns a map with total entries and total size in bytes
   static Future<Map<String, dynamic>> getCacheInfo() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final keys = prefs.getKeys().where((key) => key.startsWith(_PREFIX));
       int totalSize = 0;
-      
+
       for (final key in keys) {
         final value = prefs.getString(key);
         if (value != null) {
           totalSize += value.length * 2; // Approximate size in bytes (UTF-16)
         }
       }
-      
+
       return {
         'entryCount': keys.length,
         'totalSizeBytes': totalSize,
@@ -168,9 +170,9 @@ class CacheManager {
       };
     }
   }
-  
+
   /// Clear expired cache entries
-  /// 
+  ///
   /// [maxAge] - Maximum allowed age for cache entries
   /// Returns number of entries cleared
   static Future<int> clearExpired(Duration maxAge) async {
@@ -178,14 +180,15 @@ class CacheManager {
     try {
       final prefs = await SharedPreferences.getInstance();
       final keys = prefs.getKeys().where((key) => key.startsWith(_PREFIX));
-      
+
       for (final key in keys) {
         final jsonString = prefs.getString(key);
         if (jsonString != null) {
           try {
             final data = jsonDecode(jsonString);
             if (data != null && data['timestamp'] != null) {
-              final age = DateTime.now().difference(DateTime.parse(data['timestamp']));
+              final age =
+                  DateTime.now().difference(DateTime.parse(data['timestamp']));
               if (age >= maxAge) {
                 await prefs.remove(key);
                 clearedCount++;
@@ -198,7 +201,7 @@ class CacheManager {
           }
         }
       }
-      
+
       if (kDebugMode) {
         debugPrint('✅ Cleared $clearedCount expired cache entries');
       }
@@ -209,22 +212,23 @@ class CacheManager {
     }
     return clearedCount;
   }
-  
+
   /// Helper method to save data with automatic timestamp
-  /// 
+  ///
   /// [key] - Unique identifier for the cached data
   /// [data] - Data to be cached
   /// [customTimestamp] - Optional custom timestamp (defaults to now)
-  static Future<void> saveWithTimestamp(String key, dynamic data, {DateTime? customTimestamp}) async {
+  static Future<void> saveWithTimestamp(String key, dynamic data,
+      {DateTime? customTimestamp}) async {
     final cacheData = {
       'data': data,
       'timestamp': (customTimestamp ?? DateTime.now()).toIso8601String(),
     };
     await set(key, cacheData);
   }
-  
+
   /// Helper method to get data from timestamped cache
-  /// 
+  ///
   /// [key] - Unique identifier for the cached data
   /// Returns just the data part, or null if not found
   static Future<dynamic> getData(String key) async {
@@ -234,9 +238,9 @@ class CacheManager {
     }
     return null;
   }
-  
+
   /// Update only the timestamp of cached data (refresh without changing data)
-  /// 
+  ///
   /// [key] - Unique identifier for the cached data
   static Future<void> refreshTimestamp(String key) async {
     try {

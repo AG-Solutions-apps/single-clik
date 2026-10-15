@@ -34,7 +34,7 @@ class MobileNumberScreen extends StatefulWidget {
 class _MobileNumberScreenState extends State<MobileNumberScreen> {
   final controller = WebViewController();
   RxBool checkTermsCondition = false.obs;
-  
+
   late BusinessSignUpController businessSignUpController;
   late OTPController otpController;
   late MobileNumberController mobileNumberController;
@@ -60,57 +60,61 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
     try {
       if (!checkTermsCondition.value) {
         debugPrint('Terms & Conditions not accepted');
-        ShowToast.showToast("Please agree to terms & conditions", showSuccess: false);
+        ShowToast.showToast("Please agree to terms & conditions",
+            showSuccess: false);
         return;
       }
 
-      String mobileNumber = mobileNumberController.mobileNumberController.value.text.trim();
+      String mobileNumber =
+          mobileNumberController.mobileNumberController.value.text.trim();
       debugPrint('Mobile Number entered: $mobileNumber');
-      
+
       if (mobileNumber.isEmpty) {
         debugPrint('Mobile number is empty');
         ShowToast.showToast("Please Enter Mobile Number", showSuccess: false);
         return;
       }
-      
+
       if (mobileNumber.length < 10) {
         debugPrint('Mobile number length: ${mobileNumber.length} - Invalid');
-        ShowToast.showToast("Please Enter Valid Mobile Number", showSuccess: false);
+        ShowToast.showToast("Please Enter Valid Mobile Number",
+            showSuccess: false);
         return;
       }
-      
+
       if (!(await ConstantString.checkInternet())) {
         debugPrint('No internet connection');
-        Get.snackbar("Check Internet", 'You lost your connection', snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar("Check Internet", 'You lost your connection',
+            snackPosition: SnackPosition.BOTTOM);
         return;
       }
-      
+
       debugPrint('Starting login process for: $mobileNumber');
       mobileNumberController.isButtonLoading.value = true;
       await Future.delayed(const Duration(milliseconds: 200));
-      
+
       // Check if the number exists in API
       debugPrint('Calling postCheckMobileApi for: $mobileNumber');
-      final response = await otpController.postCheckMobileApi({"mobile": mobileNumber});
-      
+      final response =
+          await otpController.postCheckMobileApi({"mobile": mobileNumber});
+
       debugPrint('CheckMobile Response: $response');
       debugPrint('Response code: ${response['code']}');
       debugPrint('Response data: ${response['data']}');
-      
+
       if (response['code'] == 182) {
         debugPrint('Error 182: ${response['msg']}');
         mobileNumberController.isButtonLoading.value = false;
         ShowToast.showToast(response['msg'].toString(), showSuccess: false);
         return;
-      } 
-      else if (response['code'] == 200) {
+      } else if (response['code'] == 200) {
         // Existing user - store password and send OTP
-        debugPrint('Existing user detected. Password from API: ${response['data']}');
+        debugPrint(
+            'Existing user detected. Password from API: ${response['data']}');
         mobileNumberController.password.value = response['data'].toString();
         await _sendOTP(mobileNumber);
         debugPrint('OTP sending initiated');
-      } 
-      else {
+      } else {
         // New user - navigate to signup
         debugPrint('New user detected. Navigating to SignNameScreen');
         mobileNumberController.isButtonLoading.value = false;
@@ -121,18 +125,19 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
       debugPrint('Error: $e');
       debugPrint('Stack trace: ${StackTrace.current}');
       mobileNumberController.isButtonLoading.value = false;
-      ShowToast.showToast("Something went wrong. Try again.", showSuccess: false);
+      ShowToast.showToast("Something went wrong. Try again.",
+          showSuccess: false);
     }
   }
 
   Future<void> _sendOTP(String mobileNumber) async {
     debugPrint('=== _sendOTP Started for: $mobileNumber ===');
     debugPrint('Starting OTP sending process for real users');
-    
+
     try {
       // REMOVED the problematic line - No setSettings needed for production
       // Just call verifyPhoneNumber directly for real users
-      
+
       debugPrint('Calling verifyPhoneNumber for: +91$mobileNumber');
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: "+91$mobileNumber",
@@ -145,9 +150,8 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
             debugPrint('Auto-login successful');
             // Auto login successful
             await _performLogin(
-              mobileNumberController.mobileNumberController.value.text.trim(), 
-              mobileNumberController.password.value
-            );
+                mobileNumberController.mobileNumberController.value.text.trim(),
+                mobileNumberController.password.value);
           } catch (e) {
             debugPrint('Auto verification error: $e');
             debugPrint('Stack trace: ${StackTrace.current}');
@@ -159,25 +163,32 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
           debugPrint('Error message: ${e.message}');
           debugPrint('Full error: $e');
           mobileNumberController.isButtonLoading.value = false;
-          
+
           if (e.code == 'invalid-phone-number') {
             debugPrint('Invalid phone number');
             ShowToast.showToast("Invalid phone number", showSuccess: false);
           } else if (e.code == 'too-many-requests') {
             debugPrint('Too many requests');
-            ShowToast.showToast("Too many requests, try again later.", showSuccess: false);
+            ShowToast.showToast("Too many requests, try again later.",
+                showSuccess: false);
           } else if (e.code == 'network-error') {
             debugPrint('Network error');
-            ShowToast.showToast("Network error. Check your connection.", showSuccess: false);
+            ShowToast.showToast("Network error. Check your connection.",
+                showSuccess: false);
           } else if (e.code == 'firebase_error') {
             debugPrint('Firebase configuration error');
-            ShowToast.showToast("Firebase configuration error. Please check app settings.", showSuccess: false);
+            ShowToast.showToast(
+                "Firebase configuration error. Please check app settings.",
+                showSuccess: false);
           } else if (e.code == 'app-not-authorized') {
             debugPrint('App not authorized - Check Firebase console');
-            ShowToast.showToast("App authorization failed. Please contact support.", showSuccess: false);
+            ShowToast.showToast(
+                "App authorization failed. Please contact support.",
+                showSuccess: false);
           } else {
             debugPrint('Unknown verification error');
-            ShowToast.showToast("Verification failed: ${e.message}", showSuccess: false);
+            ShowToast.showToast("Verification failed: ${e.message}",
+                showSuccess: false);
           }
         },
         codeSent: (String verificationId, int? resendToken) {
@@ -185,14 +196,16 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
           debugPrint('Verification ID: $verificationId');
           debugPrint('Resend Token: $resendToken');
           debugPrint('Mobile Number: $mobileNumber');
-          
+
           otpController.resendToken.value = resendToken ?? 0;
           otpController.verify.value = verificationId;
           mobileNumberController.isButtonLoading.value = false;
-          
-          debugPrint('Stored verificationId in OTPController: ${otpController.verify.value}');
-          debugPrint('Stored resendToken in OTPController: ${otpController.resendToken.value}');
-          
+
+          debugPrint(
+              'Stored verificationId in OTPController: ${otpController.verify.value}');
+          debugPrint(
+              'Stored resendToken in OTPController: ${otpController.resendToken.value}');
+
           ShowToast.showToast("OTP Sent Successfully", showSuccess: true);
           debugPrint('Navigating to OtpScreen');
           Get.to(() => const OtpScreen());
@@ -208,7 +221,8 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
       debugPrint('Error: $e');
       debugPrint('Stack trace: ${StackTrace.current}');
       mobileNumberController.isButtonLoading.value = false;
-      ShowToast.showToast("Failed to send OTP. Please try again.", showSuccess: false);
+      ShowToast.showToast("Failed to send OTP. Please try again.",
+          showSuccess: false);
     }
   }
 
@@ -216,7 +230,7 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
     debugPrint('=== _performLogin Started ===');
     debugPrint('Mobile: $mobileNumber');
     debugPrint('Password: $password');
-    
+
     try {
       final fcmToken = await FirebaseService.getFcmToken();
       debugPrint('Calling postLoginApi with FCM Token: $fcmToken');
@@ -225,24 +239,26 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
         "password": password,
         "device_id": fcmToken,
       });
-      
+
       debugPrint('Login API Response: $response');
       debugPrint('Response code: ${response['code']}');
       debugPrint('Response message: ${response['msg']}');
-      
+
       if (response['code'] == 200) {
         debugPrint('Login successful! Navigating to HomeTabBarScreen');
         ShowToast.showToast("Login Successful!", showSuccess: true);
         Get.offAll(() => const HomeTabBarScreen());
       } else {
         debugPrint('Login failed with code: ${response['code']}');
-        ShowToast.showToast(response['msg'] ?? "Login failed", showSuccess: false);
+        ShowToast.showToast(response['msg'] ?? "Login failed",
+            showSuccess: false);
       }
     } catch (e) {
       debugPrint('=== Error in _performLogin ===');
       debugPrint('Error: $e');
       debugPrint('Stack trace: ${StackTrace.current}');
-      ShowToast.showToast("Login failed. Please try again.", showSuccess: false);
+      ShowToast.showToast("Login failed. Please try again.",
+          showSuccess: false);
     }
   }
 
@@ -266,7 +282,8 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 0),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,7 +291,6 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                             SizedBox(height: height * 0.045),
                             Center(
                               child: Container(
-                                
                                 padding: const EdgeInsets.all(12),
                                 child: Image.asset(
                                   "assets/images/sc_logo_new.png",
@@ -385,8 +401,8 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                                 textInputAction: TextInputAction.done,
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 0, vertical: 5),
-                                controller:
-                                    mobileNumberController.mobileNumberController.value,
+                                controller: mobileNumberController
+                                    .mobileNumberController.value,
                               ),
                             ),
                             SizedBox(height: height * 0.018),
@@ -396,42 +412,52 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                                 Checkbox(
                                   value: checkTermsCondition.value,
                                   activeColor: ConstantColor.primary,
-                                  onChanged: (value) =>
-                                      checkTermsCondition.value = value ?? false,
+                                  onChanged: (value) => checkTermsCondition
+                                      .value = value ?? false,
                                 ),
                                 GestureDetector(
                                   onTap: () {
                                     controller
-                                      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-                                      ..loadRequest(Uri.parse(ConstantString.loginTermsUrl));
+                                      ..setJavaScriptMode(
+                                          JavaScriptMode.unrestricted)
+                                      ..loadRequest(Uri.parse(
+                                          ConstantString.loginTermsUrl));
                                     showDialog(
                                       barrierDismissible: false,
                                       context: context,
                                       builder: (context) {
                                         return AlertDialog(
-                                          titlePadding: const EdgeInsets.only(top: 10, right: 10, bottom: 0),
+                                          titlePadding: const EdgeInsets.only(
+                                              top: 10, right: 10, bottom: 0),
                                           title: Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
                                             children: [
                                               GestureDetector(
                                                 onTap: () {
                                                   Navigator.pop(context);
                                                 },
                                                 child: Container(
-                                                  padding: const EdgeInsets.all(3),
+                                                  padding:
+                                                      const EdgeInsets.all(3),
                                                   decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: ConstantColor.grayColor.withAlpha(128)
-                                                  ),
-                                                  child: Icon(Icons.close, color: ConstantColor.blackColor),
+                                                      shape: BoxShape.circle,
+                                                      color: ConstantColor
+                                                          .grayColor
+                                                          .withAlpha(128)),
+                                                  child: Icon(Icons.close,
+                                                      color: ConstantColor
+                                                          .blackColor),
                                                 ),
                                               ),
                                             ],
                                           ),
-                                          contentPadding: const EdgeInsets.all(0),
+                                          contentPadding:
+                                              const EdgeInsets.all(0),
                                           content: SizedBox(
                                             width: 430,
-                                            child: WebViewWidget(controller: controller),
+                                            child: WebViewWidget(
+                                                controller: controller),
                                           ),
                                         );
                                       },
@@ -452,7 +478,8 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                                             color: ConstantColor.primary,
                                             fontSize: Get.width * 0.032,
                                             fontWeight: FontWeight.w600,
-                                            decoration: TextDecoration.underline,
+                                            decoration:
+                                                TextDecoration.underline,
                                           ),
                                         ),
                                       ],
@@ -466,7 +493,8 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                               child: AppButton(
                                 onTap: _handleLogin,
                                 title: "Next",
-                                isLoading: mobileNumberController.isButtonLoading.value,
+                                isLoading: mobileNumberController
+                                    .isButtonLoading.value,
                                 myWidth: Get.width / 1.8,
                               ),
                             ),
@@ -475,7 +503,8 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(12),
                                 onTap: () async {
-                                  debugPrint('=== Business/Service Signup Started ===');
+                                  debugPrint(
+                                      '=== Business/Service Signup Started ===');
                                   EasyLoading.show(
                                     status: ConstantString.pleaseWaitLabel,
                                   );
@@ -483,8 +512,7 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                                       .isButtonLoading.value = false;
                                   businessSignUpController.txtFullName.value
                                       .clear();
-                                  businessSignUpController
-                                      .txtCompanyName.value
+                                  businessSignUpController.txtCompanyName.value
                                       .clear();
                                   businessSignUpController.txtMobileNo.value
                                       .clear();
@@ -498,8 +526,7 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                                       .clear();
                                   businessSignUpController.txtArea.value
                                       .clear();
-                                  businessSignUpController
-                                      .txtReferredCode.value
+                                  businessSignUpController.txtReferredCode.value
                                       .clear();
                                   businessSignUpController
                                       .txtOtherCategory.value
@@ -513,20 +540,21 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                                       .selectedCategory.value = {};
                                   businessSignUpController
                                       .selectedSubCategory.value = {};
-                                  businessSignUpController.filePath.value =
-                                      '';
+                                  businessSignUpController.filePath.value = '';
                                   try {
                                     debugPrint('Fetching category data');
                                     businessSignUpController
-                                        .categoryDataList.value =
-                                    await businessSignUpController
-                                        .getCategoryDataApi();
+                                            .categoryDataList.value =
+                                        await businessSignUpController
+                                            .getCategoryDataApi();
                                     businessSignUpController
                                         .subCategoryDataList.value = [];
-                                    debugPrint('Category data fetched successfully');
+                                    debugPrint(
+                                        'Category data fetched successfully');
                                     EasyLoading.dismiss();
                                   } on TimeoutException catch (error) {
-                                    debugPrint('Timeout error: ${error.message}');
+                                    debugPrint(
+                                        'Timeout error: ${error.message}');
                                     businessSignUpController
                                         .categoryDataList.value = [];
                                     businessSignUpController
@@ -537,7 +565,8 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                                       showSuccess: false,
                                     );
                                   } on SocketException catch (error) {
-                                    debugPrint('Socket error: ${error.message}');
+                                    debugPrint(
+                                        'Socket error: ${error.message}');
                                     businessSignUpController
                                         .categoryDataList.value = [];
                                     businessSignUpController
@@ -561,7 +590,8 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                                     );
                                   }
 
-                                  debugPrint('Navigating to BusinessSignUpPage');
+                                  debugPrint(
+                                      'Navigating to BusinessSignUpPage');
                                   Get.to(
                                     BusinessSignUpPage(
                                       newAccount: true,
@@ -570,12 +600,14 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
                                   EasyLoading.dismiss();
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(30),
                                     border: Border.all(
-                                      color: ConstantColor.primaryDark.withOpacity(0.1),
+                                      color: ConstantColor.primaryDark
+                                          .withOpacity(0.1),
                                     ),
                                     boxShadow: [
                                       BoxShadow(
@@ -620,5 +652,4 @@ class _MobileNumberScreenState extends State<MobileNumberScreen> {
       ),
     );
   }
-
 }

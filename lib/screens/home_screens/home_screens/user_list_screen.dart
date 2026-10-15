@@ -47,16 +47,17 @@ class UserListScreenState extends State<UserListScreen> {
       // First try to fetch from HomeController
       HomeController homeController = Get.find<HomeController>();
       String name = (homeController.userData['name'] ?? '').toString().trim();
-      
+
       // If it's empty, try to get from SharedPreferences
       if (name.isEmpty) {
-        String? userJson = await SharPreferences.getString(SharPreferences.userData);
+        String? userJson =
+            await SharPreferences.getString(SharPreferences.userData);
         if (userJson != null && userJson.isNotEmpty) {
           var userMap = jsonDecode(userJson);
           name = (userMap['name'] ?? '').toString().trim();
         }
       }
-      
+
       if (mounted) {
         setState(() {
           _referrerName = name;
@@ -99,9 +100,8 @@ _One tap. One profile. One click away._ ✨
 
   // ── Plain message for SMS / Email / Copy ────────────────────────────────
   String _buildPlainMessage() {
-    final referLine = _referrerName.isNotEmpty
-        ? 'Invited by: ${_referrerName.trim()}\n'
-        : '';
+    final referLine =
+        _referrerName.isNotEmpty ? 'Invited by: ${_referrerName.trim()}\n' : '';
 
     return '''SINGLE CLIK — Digital Network & Directory
 
@@ -137,9 +137,11 @@ One tap. One profile. One click away.''';
 
     try {
       if (Platform.isIOS) {
-        await launchUrl(Uri.parse(iosUrl), mode: LaunchMode.externalApplication);
+        await launchUrl(Uri.parse(iosUrl),
+            mode: LaunchMode.externalApplication);
       } else {
-        await launchUrl(Uri.parse(androidUrl), mode: LaunchMode.externalApplication);
+        await launchUrl(Uri.parse(androidUrl),
+            mode: LaunchMode.externalApplication);
       }
     } catch (_) {
       Share.share(msg);
@@ -215,7 +217,8 @@ One tap. One profile. One click away.''';
                     Navigator.pop(context);
                     Share.share(_buildWhatsAppMessage());
                   },
-                  icon: const Icon(Icons.share_rounded, color: Colors.white, size: 20),
+                  icon: const Icon(Icons.share_rounded,
+                      color: Colors.white, size: 20),
                   label: const Text(
                     'Share Invitation',
                     style: TextStyle(
@@ -325,8 +328,8 @@ One tap. One profile. One click away.''';
                                   color: ConstantColor.bgColor,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color:
-                                        ConstantColor.grayColor.withOpacity(0.2),
+                                    color: ConstantColor.grayColor
+                                        .withOpacity(0.2),
                                   ),
                                 ),
                                 child: Text(
@@ -334,8 +337,8 @@ One tap. One profile. One click away.''';
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color:
-                                        ConstantColor.blackColor.withOpacity(0.8),
+                                    color: ConstantColor.blackColor
+                                        .withOpacity(0.8),
                                     fontStyle: FontStyle.italic,
                                     height: 1.4,
                                   ),
@@ -438,7 +441,8 @@ One tap. One profile. One click away.''';
                                               shape: BoxShape.circle,
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withAlpha(20),
+                                                  color: Colors.black
+                                                      .withAlpha(20),
                                                   blurRadius: 6,
                                                   offset: const Offset(0, 2),
                                                 ),
@@ -468,8 +472,9 @@ One tap. One profile. One click away.''';
                                                 color: const Color(0xffF0F4FF),
                                                 boxShadow: [
                                                   BoxShadow(
-                                                    color: const Color(0xff0B3C9B)
-                                                        .withAlpha(38),
+                                                    color:
+                                                        const Color(0xff0B3C9B)
+                                                            .withAlpha(38),
                                                     blurRadius: 10,
                                                     offset: const Offset(0, 3),
                                                   ),
@@ -510,12 +515,14 @@ One tap. One profile. One click away.''';
                                                             .trim(),
                                                     style: const TextStyle(
                                                       fontSize: 17,
-                                                      fontWeight: FontWeight.w800,
+                                                      fontWeight:
+                                                          FontWeight.w800,
                                                       color: Color(0xff0F172A),
                                                       letterSpacing: -0.2,
                                                     ),
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
 
                                                   const SizedBox(height: 3),
@@ -524,21 +531,25 @@ One tap. One profile. One click away.''';
                                                   Text(
                                                     (userItem['company_name'] ==
                                                                 null ||
-                                                            userItem['company_name']
+                                                            userItem[
+                                                                    'company_name']
                                                                 .toString()
                                                                 .trim()
                                                                 .isEmpty)
                                                         ? 'Company Name ${ConstantString.naLabel}'
-                                                        : userItem['company_name']
+                                                        : userItem[
+                                                                'company_name']
                                                             .toString()
                                                             .trim(),
                                                     style: const TextStyle(
                                                       fontSize: 13,
-                                                      fontWeight: FontWeight.w500,
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                       color: Color(0xff64748B),
                                                     ),
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
 
                                                   const SizedBox(height: 8),
@@ -546,19 +557,22 @@ One tap. One profile. One click away.''';
                                                   /// Category chip
                                                   Container(
                                                     decoration: BoxDecoration(
-                                                      color: const Color(0xffEEF2FF),
+                                                      color: const Color(
+                                                          0xffEEF2FF),
                                                       borderRadius:
-                                                          BorderRadius.circular(8),
+                                                          BorderRadius.circular(
+                                                              8),
                                                     ),
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
                                                       horizontal: 10,
                                                       vertical: 4,
                                                     ),
                                                     child: Text(
                                                       userItem['category'] ==
                                                                   null ||
-                                                              userItem['category']
+                                                              userItem[
+                                                                      'category']
                                                                   .toString()
                                                                   .trim()
                                                                   .isEmpty
@@ -568,8 +582,10 @@ One tap. One profile. One click away.''';
                                                               .toUpperCase(),
                                                       style: const TextStyle(
                                                         fontSize: 11,
-                                                        fontWeight: FontWeight.w800,
-                                                        color: Color(0xff0B3C9B),
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                        color:
+                                                            Color(0xff0B3C9B),
                                                         letterSpacing: 1.1,
                                                       ),
                                                     ),
@@ -581,21 +597,25 @@ One tap. One profile. One click away.''';
                                                   Text(
                                                     userItem['subcategory'] ==
                                                                 null ||
-                                                            userItem['subcategory']
+                                                            userItem[
+                                                                    'subcategory']
                                                                 .toString()
                                                                 .trim()
                                                                 .isEmpty
                                                         ? 'Sub Category ${ConstantString.naLabel}'
-                                                        : userItem['subcategory']
+                                                        : userItem[
+                                                                'subcategory']
                                                             .toString()
                                                             .trim(),
                                                     style: const TextStyle(
                                                       fontSize: 13,
-                                                      fontWeight: FontWeight.w500,
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                       color: Color(0xff94A3B8),
                                                     ),
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                 ],
                                               ),
@@ -805,9 +825,7 @@ class _InvitePreviewCard extends StatelessWidget {
                       child: RichText(
                         text: TextSpan(
                           style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 13,
-                              height: 1.4),
+                              color: Colors.white70, fontSize: 13, height: 1.4),
                           children: [
                             const TextSpan(text: 'Looking for '),
                             TextSpan(
@@ -818,7 +836,8 @@ class _InvitePreviewCard extends StatelessWidget {
                               ),
                             ),
                             const TextSpan(
-                                text: ' providers? They\'re not on Single Clik yet!'),
+                                text:
+                                    ' providers? They\'re not on Single Clik yet!'),
                           ],
                         ),
                       ),
@@ -875,8 +894,8 @@ class _InvitePreviewCard extends StatelessWidget {
                 // ── CTA strip ────────────────────────────────────────────
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
@@ -966,9 +985,12 @@ class _WavePainter extends CustomPainter {
     final pathMiddle = Path();
     pathMiddle.moveTo(size.width * 0.28, size.height);
     pathMiddle.cubicTo(
-      size.width * 0.6, size.height * 0.78,
-      size.width * 0.68, size.height * 0.35,
-      size.width, size.height * 0.35,
+      size.width * 0.6,
+      size.height * 0.78,
+      size.width * 0.68,
+      size.height * 0.35,
+      size.width,
+      size.height * 0.35,
     );
     pathMiddle.lineTo(size.width, size.height);
     pathMiddle.close();
@@ -1001,8 +1023,10 @@ class _LeftWavePainter extends CustomPainter {
     final path = Path();
     path.moveTo(0, size.height * 0.1);
     path.quadraticBezierTo(
-      size.width * 0.2, size.height * 1.2,
-      size.width, size.height,
+      size.width * 0.2,
+      size.height * 1.2,
+      size.width,
+      size.height,
     );
     path.lineTo(0, size.height);
     path.close();

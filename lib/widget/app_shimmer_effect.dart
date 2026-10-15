@@ -6,7 +6,8 @@ class AppShimmerEffectView extends StatelessWidget {
   final double? width;
   final double? borderRadius;
 
-  const AppShimmerEffectView({super.key, this.height, this.width, this.borderRadius});
+  const AppShimmerEffectView(
+      {super.key, this.height, this.width, this.borderRadius});
 
   @override
   Widget build(BuildContext context) {
@@ -23,5 +24,4 @@ class AppShimmerEffectView extends StatelessWidget {
       ),
     );
   }
-
 }

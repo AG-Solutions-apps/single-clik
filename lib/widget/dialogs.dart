@@ -54,8 +54,7 @@ class Dialogs {
                   backgroundColor: ConstantColor.whiteColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
-                  )
-              ),
+                  )),
               child: Text(
                 ConstantString.noLabel,
                 style: TextStyle(
@@ -69,8 +68,7 @@ class Dialogs {
                   backgroundColor: ConstantColor.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
-                  )
-              ),
+                  )),
               child: Text(
                 ConstantString.yesLabel,
                 style: TextStyle(
@@ -78,7 +76,9 @@ class Dialogs {
                 ),
               ),
             ),
-            SizedBox(width: Get.width/90,),
+            SizedBox(
+              width: Get.width / 90,
+            ),
           ],
         );
       },

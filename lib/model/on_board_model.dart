@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-OnBoardModel onboardModelFromJson(String str) => OnBoardModel.fromJson(json.decode(str));
+OnBoardModel onboardModelFromJson(String str) =>
+    OnBoardModel.fromJson(json.decode(str));
 
 String onboardModelToJson(OnBoardModel data) => json.encode(data.toJson());
 
@@ -27,16 +28,23 @@ class OnBoardModel {
       );
 
   factory OnBoardModel.fromJson(Map<String, dynamic> json) => OnBoardModel(
-    code: json["code"],
-    categories: json["categories"] == null ? null : Categories.fromJson(json["categories"]),
-    data: json["data"] == null ? [] : List<OnBoardData>.from(json["data"]!.map((x) => OnBoardData.fromJson(x))),
-  );
+        code: json["code"],
+        categories: json["categories"] == null
+            ? null
+            : Categories.fromJson(json["categories"]),
+        data: json["data"] == null
+            ? []
+            : List<OnBoardData>.from(
+                json["data"]!.map((x) => OnBoardData.fromJson(x))),
+      );
 
   Map<String, dynamic> toJson() => {
-    "code": code,
-    "categories": categories?.toJson(),
-    "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
-  };
+        "code": code,
+        "categories": categories?.toJson(),
+        "data": data == null
+            ? []
+            : List<dynamic>.from(data!.map((x) => x.toJson())),
+      };
 }
 
 class Categories {
@@ -58,14 +66,14 @@ class Categories {
       );
 
   factory Categories.fromJson(Map<String, dynamic> json) => Categories(
-    category: json["category"],
-    categoryImage: json["category_image"],
-  );
+        category: json["category"],
+        categoryImage: json["category_image"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "category": category,
-    "category_image": categoryImage,
-  };
+        "category": category,
+        "category_image": categoryImage,
+      };
 }
 
 class OnBoardData {
@@ -87,12 +95,12 @@ class OnBoardData {
       );
 
   factory OnBoardData.fromJson(Map<String, dynamic> json) => OnBoardData(
-    name: json["name"],
-    photo: json["photo"],
-  );
+        name: json["name"],
+        photo: json["photo"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "name": name,
-    "photo": photo,
-  };
+        "name": name,
+        "photo": photo,
+      };
 }

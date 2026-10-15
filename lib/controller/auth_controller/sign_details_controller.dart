@@ -52,15 +52,18 @@ class SignDetailsController extends GetxController {
 
       // Method 1: MultipartRequest POST with all parameter aliases
       try {
-        final request = http.MultipartRequest('POST', Uri.parse(API.checkReferral));
+        final request =
+            http.MultipartRequest('POST', Uri.parse(API.checkReferral));
         request.headers.addAll(headers);
         request.fields['referred_by_code'] = cleanCode;
         request.fields['referral_code'] = cleanCode;
         request.fields['code'] = cleanCode;
 
-        var streamedRes = await request.send().timeout(const Duration(seconds: 10));
+        var streamedRes =
+            await request.send().timeout(const Duration(seconds: 10));
         var resDone = await http.Response.fromStream(streamedRes);
-        debugPrint('Method 1 (Multipart POST) status: ${resDone.statusCode}, body: ${resDone.body}');
+        debugPrint(
+            'Method 1 (Multipart POST) status: ${resDone.statusCode}, body: ${resDone.body}');
         if (resDone.statusCode == 200 && _isResponseSuccess(resDone.body)) {
           response = resDone;
         } else if (response == null) {
@@ -71,7 +74,9 @@ class SignDetailsController extends GetxController {
       }
 
       // Method 2: Standard http.post if Method 1 didn't succeed
-      if (response == null || response.statusCode != 200 || !_isResponseSuccess(response.body)) {
+      if (response == null ||
+          response.statusCode != 200 ||
+          !_isResponseSuccess(response.body)) {
         try {
           final postRes = await http.post(
             Uri.parse(API.checkReferral),
@@ -82,7 +87,8 @@ class SignDetailsController extends GetxController {
               'code': cleanCode,
             },
           ).timeout(const Duration(seconds: 10));
-          debugPrint('Method 2 (Standard POST) status: ${postRes.statusCode}, body: ${postRes.body}');
+          debugPrint(
+              'Method 2 (Standard POST) status: ${postRes.statusCode}, body: ${postRes.body}');
           if (postRes.statusCode == 200 && _isResponseSuccess(postRes.body)) {
             response = postRes;
           }
@@ -92,15 +98,20 @@ class SignDetailsController extends GetxController {
       }
 
       // Method 3: http.get (query parameters) if Method 1 & 2 didn't pass
-      if (response == null || response.statusCode != 200 || !_isResponseSuccess(response.body)) {
+      if (response == null ||
+          response.statusCode != 200 ||
+          !_isResponseSuccess(response.body)) {
         try {
           final getUri = Uri.parse(API.checkReferral).replace(queryParameters: {
             'referred_by_code': cleanCode,
             'referral_code': cleanCode,
             'code': cleanCode,
           });
-          final getRes = await http.get(getUri, headers: headers).timeout(const Duration(seconds: 10));
-          debugPrint('Method 3 (GET) status: ${getRes.statusCode}, body: ${getRes.body}');
+          final getRes = await http
+              .get(getUri, headers: headers)
+              .timeout(const Duration(seconds: 10));
+          debugPrint(
+              'Method 3 (GET) status: ${getRes.statusCode}, body: ${getRes.body}');
           if (getRes.statusCode == 200 && _isResponseSuccess(getRes.body)) {
             response = getRes;
           }
@@ -127,7 +138,9 @@ class SignDetailsController extends GetxController {
           final rawMsg = responseData['msg']?.toString() ??
               responseData['message']?.toString() ??
               responseData['data']?.toString();
-          if (rawMsg != null && rawMsg.trim().isNotEmpty && rawMsg.toLowerCase() != 'yes') {
+          if (rawMsg != null &&
+              rawMsg.trim().isNotEmpty &&
+              rawMsg.toLowerCase() != 'yes') {
             msgStr = rawMsg;
           }
           referralMessage.value = msgStr;
@@ -141,7 +154,9 @@ class SignDetailsController extends GetxController {
           final rawMsg = responseData['msg']?.toString() ??
               responseData['message']?.toString() ??
               responseData['data']?.toString();
-          if (rawMsg != null && rawMsg.trim().isNotEmpty && rawMsg.toLowerCase() != 'no') {
+          if (rawMsg != null &&
+              rawMsg.trim().isNotEmpty &&
+              rawMsg.toLowerCase() != 'no') {
             msgStr = rawMsg;
           }
           referralMessage.value = msgStr;
@@ -168,10 +183,16 @@ class SignDetailsController extends GetxController {
   bool _isResponseSuccess(String bodyStr) {
     final cleanBody = bodyStr.trim().toLowerCase();
 
-    if (cleanBody == 'yes' || cleanBody == '"yes"' || cleanBody == 'true' || cleanBody == '"true"') {
+    if (cleanBody == 'yes' ||
+        cleanBody == '"yes"' ||
+        cleanBody == 'true' ||
+        cleanBody == '"true"') {
       return true;
     }
-    if (cleanBody == 'no' || cleanBody == '"no"' || cleanBody == 'false' || cleanBody == '"false"') {
+    if (cleanBody == 'no' ||
+        cleanBody == '"no"' ||
+        cleanBody == 'false' ||
+        cleanBody == '"false"') {
       return false;
     }
 
@@ -186,20 +207,42 @@ class SignDetailsController extends GetxController {
         final data = decoded['data']?.toString().toLowerCase();
 
         // Check for 'yes' in any field
-        if (code == 'yes' || status == 'yes' || success == 'yes' || msg == 'yes' || message == 'yes' || data == 'yes') {
+        if (code == 'yes' ||
+            status == 'yes' ||
+            success == 'yes' ||
+            msg == 'yes' ||
+            message == 'yes' ||
+            data == 'yes') {
           return true;
         }
 
         // Check for 'no' in any field
-        if (code == 'no' || status == 'no' || success == 'no' || msg == 'no' || message == 'no' || data == 'no') {
+        if (code == 'no' ||
+            status == 'no' ||
+            success == 'no' ||
+            msg == 'no' ||
+            message == 'no' ||
+            data == 'no') {
           return false;
         }
 
-        if (code == '200' || status == 'true' || status == '200' || success == 'true' || decoded['status'] == true || decoded['success'] == true || decoded['code'] == 200) {
+        if (code == '200' ||
+            status == 'true' ||
+            status == '200' ||
+            success == 'true' ||
+            decoded['status'] == true ||
+            decoded['success'] == true ||
+            decoded['code'] == 200) {
           return true;
         }
 
-        if (code == '400' || status == 'false' || status == '400' || success == 'false' || decoded['status'] == false || decoded['success'] == false || decoded['code'] == 400) {
+        if (code == '400' ||
+            status == 'false' ||
+            status == '400' ||
+            success == 'false' ||
+            decoded['status'] == false ||
+            decoded['success'] == false ||
+            decoded['code'] == 400) {
           return false;
         }
       } else if (decoded is String) {
@@ -208,7 +251,9 @@ class SignDetailsController extends GetxController {
         if (str == 'no' || str == 'false') return false;
       }
     } catch (_) {
-      if (cleanBody.contains('"yes"') || cleanBody.contains(':yes') || cleanBody.contains(':"yes"')) {
+      if (cleanBody.contains('"yes"') ||
+          cleanBody.contains(':yes') ||
+          cleanBody.contains(':"yes"')) {
         return true;
       }
     }
@@ -255,55 +300,53 @@ class SignDetailsController extends GetxController {
     update();
   }
 
- 
   Future postSignUpApi(Map<String, String> bodyParams, String photo) async {
     try {
       isButtonLoading.value = true;
       final request = http.MultipartRequest('POST', Uri.parse(API.signUp));
       request.fields.addAll(bodyParams);
-      
+
       if (photo.isNotEmpty && !photo.startsWith("http")) {
         request.files.add(
           await http.MultipartFile.fromPath('photo', photo),
         );
       }
-      
+
       debugPrint('bodyParams: $bodyParams');
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
-      
+
       if (res.statusCode == 200) {
         final responseData = json.decode(responseDone.body);
         debugPrint('SignUp Response: ${responseDone.body}');
-        
+
         if (responseData['code'] == 200) {
           ShowToast.showToast(
             responseData['msg'] ?? ConstantString.dataSubmittedSuccessfullyMsg,
             showSuccess: true,
           );
-          
+
           // Store the password from response
           String userPassword = responseData['data']['cpassword'].toString();
-          
+
           // Navigate to MobileNumberScreen with necessary data
           Get.offAll(() => const MobileNumberScreen());
-          
+
           // Get controllers
-          MobileNumberController mobileNumberController = Get.find<MobileNumberController>();
+          MobileNumberController mobileNumberController =
+              Get.find<MobileNumberController>();
           OTPController otpController = Get.find<OTPController>();
-          
+
           // Set mobile number
-          mobileNumberController.mobileNumberController.value = 
-              TextEditingController(text: bodyParams['person_mobile'].toString());
+          mobileNumberController.mobileNumberController.value =
+              TextEditingController(
+                  text: bodyParams['person_mobile'].toString());
           mobileNumberController.password.value = userPassword;
-          
+
           // Auto-trigger OTP after successful signup
-          await _triggerOTPVerification(
-            mobileNumberController, 
-            otpController, 
-            bodyParams['person_mobile'].toString()
-          );
-          
+          await _triggerOTPVerification(mobileNumberController, otpController,
+              bodyParams['person_mobile'].toString());
+
           isButtonLoading.value = false;
         } else {
           isButtonLoading.value = false;
@@ -318,7 +361,10 @@ class SignDetailsController extends GetxController {
         try {
           final errData = json.decode(responseDone.body);
           if (errData is Map) {
-            errorMsg = errData['msg'] ?? errData['message'] ?? errData['error'] ?? ConstantString.somethingWantWrongMsg;
+            errorMsg = errData['msg'] ??
+                errData['message'] ??
+                errData['error'] ??
+                ConstantString.somethingWantWrongMsg;
           }
         } catch (_) {}
         ShowToast.showToast(errorMsg, showSuccess: false);
@@ -331,10 +377,9 @@ class SignDetailsController extends GetxController {
   }
 
   Future<void> _triggerOTPVerification(
-    MobileNumberController mobileNumberController,
-    OTPController otpController,
-    String mobileNumber
-  ) async {
+      MobileNumberController mobileNumberController,
+      OTPController otpController,
+      String mobileNumber) async {
     try {
       // Bypassing / setting appVerificationDisabledForTesting to true causes verification to fail on real devices.
       // We call verifyPhoneNumber directly to allow standard Play Integrity / reCAPTCHA fallback verification.
@@ -355,7 +400,8 @@ class SignDetailsController extends GetxController {
               ShowToast.showToast("Login Successful!", showSuccess: true);
               Get.offAll(() => const HomeTabBarScreen());
             } else {
-              ShowToast.showToast(response['msg'] ?? "Login failed", showSuccess: false);
+              ShowToast.showToast(response['msg'] ?? "Login failed",
+                  showSuccess: false);
             }
           } catch (e) {
             debugPrint('Auto verification error: $e');
@@ -363,7 +409,9 @@ class SignDetailsController extends GetxController {
         },
         verificationFailed: (FirebaseAuthException e) {
           debugPrint('Verification Failed: ${e.code} - ${e.message}');
-          ShowToast.showToast("OTP verification failed. Please try login manually.", showSuccess: false);
+          ShowToast.showToast(
+              "OTP verification failed. Please try login manually.",
+              showSuccess: false);
         },
         codeSent: (String verificationId, int? resendToken) {
           otpController.resendToken.value = resendToken ?? 0;
@@ -377,8 +425,8 @@ class SignDetailsController extends GetxController {
       );
     } catch (e) {
       debugPrint('Error triggering OTP: $e');
-      ShowToast.showToast("Failed to send OTP. Please try login manually.", showSuccess: false);
+      ShowToast.showToast("Failed to send OTP. Please try login manually.",
+          showSuccess: false);
     }
   }
 }
-

@@ -30,7 +30,8 @@ class FirebaseService {
   Future<void> initNotification() async {
     try {
       // 1. Register background message handler
-      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
 
       // 2. Setup Local Notifications for Android & iOS system banners
       const AndroidInitializationSettings initializationSettingsAndroid =
@@ -43,7 +44,8 @@ class FirebaseService {
         requestSoundPermission: true,
       );
 
-      const InitializationSettings initializationSettings = InitializationSettings(
+      const InitializationSettings initializationSettings =
+          InitializationSettings(
         android: initializationSettingsAndroid,
         iOS: initializationSettingsDarwin,
       );
@@ -74,7 +76,8 @@ class FirebaseService {
       if (settings.authorizationStatus == AuthorizationStatus.denied) {
         debugPrint("❌ Notification permission denied.");
       } else {
-        debugPrint("✅ Notification permission status: ${settings.authorizationStatus}");
+        debugPrint(
+            "✅ Notification permission status: ${settings.authorizationStatus}");
       }
 
       // Enable Auto Initialization first
@@ -101,7 +104,8 @@ class FirebaseService {
       // Listen for token refreshes and update storage on all platforms
       firebaseMessaging.onTokenRefresh.listen((String newToken) async {
         debugPrint("🔄 FCM Token Refreshed: ${newToken.trim()}");
-        await SharPreferences.setString(SharPreferences.fcmToken, newToken.trim());
+        await SharPreferences.setString(
+            SharPreferences.fcmToken, newToken.trim());
       });
 
       // Configure Foreground Notifications Presentation Options
@@ -113,8 +117,9 @@ class FirebaseService {
 
       // 5. Handle Foreground Messages (Display System Banner + Toast)
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint("📩 Foreground Message Received: ${message.notification?.title}");
-        
+        debugPrint(
+            "📩 Foreground Message Received: ${message.notification?.title}");
+
         RemoteNotification? notification = message.notification;
         if (notification != null) {
           // Trigger local system banner
@@ -150,7 +155,8 @@ class FirebaseService {
 
       // Handle Notification Click / Open App from background
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-        debugPrint("🔔 Notification Clicked from Background: ${message.notification?.title}");
+        debugPrint(
+            "🔔 Notification Clicked from Background: ${message.notification?.title}");
       });
 
       debugPrint("✅ Firebase Notifications Initialized Successfully");
@@ -183,7 +189,8 @@ class FirebaseService {
 
     // 2. Check SharedPreferences cached token (must be a valid FCM token format)
     try {
-      String? cachedToken = await SharPreferences.getString(SharPreferences.fcmToken);
+      String? cachedToken =
+          await SharPreferences.getString(SharPreferences.fcmToken);
       if (cachedToken != null &&
           cachedToken.trim().isNotEmpty &&
           cachedToken != "Unknown_Device" &&
@@ -220,8 +227,10 @@ class FirebaseService {
         }
       } else if (Platform.isIOS) {
         IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        if (iosInfo.identifierForVendor != null && iosInfo.identifierForVendor!.isNotEmpty) {
-          debugPrint("ℹ️ Using iOS Device ID fallback: ${iosInfo.identifierForVendor}");
+        if (iosInfo.identifierForVendor != null &&
+            iosInfo.identifierForVendor!.isNotEmpty) {
+          debugPrint(
+              "ℹ️ Using iOS Device ID fallback: ${iosInfo.identifierForVendor}");
           return iosInfo.identifierForVendor!;
         }
       }

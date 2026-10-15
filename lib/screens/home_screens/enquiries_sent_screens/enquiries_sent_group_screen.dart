@@ -93,10 +93,11 @@ class EnquiriesSentGroupScreenState extends State<EnquiriesSentGroupScreen> {
                                 .sentGroupList.length,
                             itemBuilder: (context, index) {
                               // Safely cast the dynamic map to Map<String, dynamic> here
-                              final Map<String, dynamic> groupData = 
+                              final Map<String, dynamic> groupData =
                                   Map<String, dynamic>.from(
-                                      enquiriesSentGroupController.sentGroupList[index] as Map);
-                              
+                                      enquiriesSentGroupController
+                                          .sentGroupList[index] as Map);
+
                               return _buildGroupListItem(groupData);
                             },
                           ),
@@ -125,8 +126,8 @@ class EnquiriesSentGroupScreenState extends State<EnquiriesSentGroupScreen> {
 
     String formattedDate = "";
     try {
-      formattedDate = DateFormat('dd MMM yyyy').format(
-          DateTime.parse(widget.userData['created_at'].toString()));
+      formattedDate = DateFormat('dd MMM yyyy')
+          .format(DateTime.parse(widget.userData['created_at'].toString()));
     } catch (e) {
       formattedDate = DateFormat('dd MMM yyyy').format(DateTime.now());
     }
@@ -276,7 +277,10 @@ class EnquiriesSentGroupScreenState extends State<EnquiriesSentGroupScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: hasUnread
-              ? Border.all(color: const Color.fromARGB(255, 56, 245, 141).withOpacity(0.5), width: 1)
+              ? Border.all(
+                  color:
+                      const Color.fromARGB(255, 56, 245, 141).withOpacity(0.5),
+                  width: 1)
               : Border.all(color: Colors.transparent, width: 1),
           boxShadow: [
             BoxShadow(

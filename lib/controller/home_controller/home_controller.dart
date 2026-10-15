@@ -20,8 +20,10 @@ class HomeController extends GetxController
   final isOnBoardingLoading = false.obs;
   final isButtonLoading = false.obs;
   final isRefreshing = false.obs;
+
   /// True while a full app refresh (cache bust + re-fetch) is running
   final isFullRefreshing = false.obs;
+
   /// Incremented each time the profile photo is force-refreshed.
   /// Used as a ValueKey on image widgets so Flutter recreates them after refresh.
   final photoVersion = 0.obs;
@@ -44,7 +46,7 @@ class HomeController extends GetxController
   static const String CACHE_CATEGORIES = 'categories_data';
   static const String CACHE_USER_PROFILE = 'user_profile';
   static const String CACHE_ENQUIRY_COUNTS = 'enquiry_counts';
-  
+
   static const Duration CACHE_DURATION = Duration(minutes: 30);
 
   final allList = <dynamic>[].obs;
@@ -72,7 +74,7 @@ class HomeController extends GetxController
 
   RxBool isInitialLoadComplete = false.obs;
   final _requestLocks = <String, bool>{};
-  
+
   late Timer timer;
   late Timer countTimer;
   bool _isDisposed = false;
@@ -85,10 +87,12 @@ class HomeController extends GetxController
   }
 
   Future<void> _initializeData() async {
-    final isLogin = await SharPreferences.getBoolean(SharPreferences.isLogin) ?? false;
+    final isLogin =
+        await SharPreferences.getBoolean(SharPreferences.isLogin) ?? false;
     final token = await SharPreferences.getString(SharPreferences.token) ?? '';
     if (!isLogin || token.trim().isEmpty) {
-      debugPrint('User not logged in or token empty, skipping home data initialization.');
+      debugPrint(
+          'User not logged in or token empty, skipping home data initialization.');
       return;
     }
     await _loadAllCachedData();
@@ -108,7 +112,8 @@ class HomeController extends GetxController
       const Duration(seconds: 2),
       (Timer timer) async {
         if (!_isDisposed) {
-          final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+          final token =
+              await SharPreferences.getString(SharPreferences.token) ?? '';
           if (token.trim().isNotEmpty) {
             getSentEnquiriesUnreadCount('1', forceRefresh: true);
           }
@@ -120,7 +125,8 @@ class HomeController extends GetxController
       const Duration(seconds: 25),
       (Timer timer) async {
         if (!_isDisposed) {
-          final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+          final token =
+              await SharPreferences.getString(SharPreferences.token) ?? '';
           if (token.trim().isNotEmpty) {
             refreshDashboardAndProfile();
           }
@@ -136,9 +142,11 @@ class HomeController extends GetxController
       return;
     }
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) return;
-      final userId = await SharPreferences.getString(SharPreferences.userId) ?? '';
+      final userId =
+          await SharPreferences.getString(SharPreferences.userId) ?? '';
       if (userId.isNotEmpty) {
         await Future.wait([
           postFetchProfileApi(forceRefresh: true),
@@ -180,7 +188,8 @@ class HomeController extends GetxController
       final cachedData = await CacheManager.get(CACHE_BUSINESS);
       if (cachedData != null) {
         businessList.value = cachedData['data'] ?? [];
-        debugPrint('✅ Loaded business data from cache: ${businessList.length} items');
+        debugPrint(
+            '✅ Loaded business data from cache: ${businessList.length} items');
       }
     } catch (e) {
       debugPrint('Error loading cached business data: $e');
@@ -192,7 +201,8 @@ class HomeController extends GetxController
       final cachedData = await CacheManager.get(CACHE_SERVICES);
       if (cachedData != null) {
         servicesList.value = cachedData['data'] ?? [];
-        debugPrint('✅ Loaded services data from cache: ${servicesList.length} items');
+        debugPrint(
+            '✅ Loaded services data from cache: ${servicesList.length} items');
       }
     } catch (e) {
       debugPrint('Error loading cached services data: $e');
@@ -251,12 +261,13 @@ class HomeController extends GetxController
 
   Future<void> refreshAllData() async {
     if (isRefreshing.value) return;
-    
+
     isRefreshing.value = true;
-    
+
     try {
-      final userId = await SharPreferences.getString(SharPreferences.userId) ?? '';
-      
+      final userId =
+          await SharPreferences.getString(SharPreferences.userId) ?? '';
+
       await Future.wait([
         postDashboardApi(userId, forceRefresh: true),
         postBusinessDashboardApi("0", forceRefresh: true),
@@ -265,7 +276,7 @@ class HomeController extends GetxController
         postFetchProfileApi(forceRefresh: true),
         getSentEnquiriesUnreadCount('1', forceRefresh: true),
       ]);
-      
+
       debugPrint('✅ All data refreshed successfully');
     } catch (e) {
       debugPrint('❌ Error refreshing data: $e');
@@ -276,7 +287,7 @@ class HomeController extends GetxController
 
   void searchProduct(String query) {
     if (searchAllList.isEmpty) return;
-    
+
     isLoading(true);
     try {
       if (query.isEmpty) {
@@ -284,10 +295,30 @@ class HomeController extends GetxController
       } else {
         allList.value = searchAllList
             .where((item) =>
-                (item['name']?.toString().trim().toLowerCase().contains(query.toString().trim().toLowerCase()) ?? false) ||
-                (item['company_name']?.toString().trim().toLowerCase().contains(query.toString().trim().toLowerCase()) ?? false) ||
-                (item['category']?.toString().trim().toLowerCase().contains(query.toString().trim().toLowerCase()) ?? false) ||
-                (item['subcategory']?.toString().trim().toLowerCase().contains(query.toString().trim().toLowerCase()) ?? false))
+                (item['name']
+                        ?.toString()
+                        .trim()
+                        .toLowerCase()
+                        .contains(query.toString().trim().toLowerCase()) ??
+                    false) ||
+                (item['company_name']
+                        ?.toString()
+                        .trim()
+                        .toLowerCase()
+                        .contains(query.toString().trim().toLowerCase()) ??
+                    false) ||
+                (item['category']
+                        ?.toString()
+                        .trim()
+                        .toLowerCase()
+                        .contains(query.toString().trim().toLowerCase()) ??
+                    false) ||
+                (item['subcategory']
+                        ?.toString()
+                        .trim()
+                        .toLowerCase()
+                        .contains(query.toString().trim().toLowerCase()) ??
+                    false))
             .toList();
       }
       debugPrint('Search results: ${allList.length}');
@@ -298,27 +329,31 @@ class HomeController extends GetxController
     }
   }
 
-  Future<void> postDashboardApi(String userId, {bool forceRefresh = false}) async {
+  Future<void> postDashboardApi(String userId,
+      {bool forceRefresh = false}) async {
     if (!forceRefresh) {
       final cachedData = await CacheManager.get(CACHE_DASHBOARD);
       if (cachedData != null && cachedData['timestamp'] != null) {
-        final age = DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
+        final age =
+            DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
         if (age < CACHE_DURATION) {
           allList.value = cachedData['data'] ?? [];
           searchAllList.value = cachedData['data'] ?? [];
-          debugPrint('✅ Using cached dashboard data (age: ${age.inMinutes} min)');
+          debugPrint(
+              '✅ Using cached dashboard data (age: ${age.inMinutes} min)');
           return;
         }
       }
     }
-    
+
     if (_requestLocks['dashboard'] == true) return;
     _requestLocks['dashboard'] = true;
-    
+
     try {
       if (!forceRefresh) isLoading.value = true;
-      
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         debugPrint('Dashboard API Error: Token is empty');
         return;
@@ -326,7 +361,7 @@ class HomeController extends GetxController
       if (userId.isEmpty) {
         userId = await SharPreferences.getString(SharPreferences.userId) ?? '';
       }
-      
+
       final response = await http.post(
         Uri.parse(API.dashboard),
         headers: {
@@ -336,20 +371,20 @@ class HomeController extends GetxController
         },
         body: {"user_id": userId},
       ).timeout(const Duration(seconds: 30));
-      
-      if (response.body.trim().startsWith('<!DOCTYPE') || 
+
+      if (response.body.trim().startsWith('<!DOCTYPE') ||
           response.body.trim().startsWith('<html')) {
         debugPrint('❌ ERROR: Server returned HTML instead of JSON');
         return;
       }
-      
+
       final data = json.decode(response.body);
-      
+
       if (data['code'] == 200) {
         final dashboardData = data['data'] ?? [];
         allList.value = dashboardData;
         searchAllList.value = dashboardData;
-        
+
         await CacheManager.set(CACHE_DASHBOARD, {
           'data': dashboardData,
           'timestamp': DateTime.now().toIso8601String(),
@@ -364,37 +399,41 @@ class HomeController extends GetxController
     }
   }
 
-  Future<void> postBusinessDashboardApi(String? profileType, {bool forceRefresh = false}) async {
+  Future<void> postBusinessDashboardApi(String? profileType,
+      {bool forceRefresh = false}) async {
     if (!forceRefresh) {
       final cacheKey = profileType == "0" ? CACHE_BUSINESS : CACHE_SERVICES;
       final cachedData = await CacheManager.get(cacheKey);
       if (cachedData != null && cachedData['timestamp'] != null) {
-        final age = DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
+        final age =
+            DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
         if (age < CACHE_DURATION) {
           if (profileType == "0") {
             businessList.value = cachedData['data'];
           } else if (profileType == "1") {
             servicesList.value = cachedData['data'];
           }
-          debugPrint('✅ Using cached ${profileType == "0" ? "business" : "services"} data');
+          debugPrint(
+              '✅ Using cached ${profileType == "0" ? "business" : "services"} data');
           return;
         }
       }
     }
-    
+
     final lockKey = 'business_${profileType}';
     if (_requestLocks[lockKey] == true) return;
     _requestLocks[lockKey] = true;
-    
+
     try {
       if (!forceRefresh) isLoading.value = true;
-      
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         debugPrint('Business Dashboard API Error: Token is empty');
         return;
       }
-      
+
       final response = await http.post(
         Uri.parse(API.dashboardCategories),
         headers: {
@@ -404,27 +443,25 @@ class HomeController extends GetxController
         },
         body: {'categories_type': profileType!},
       ).timeout(const Duration(seconds: 30));
-      
-      if (response.body.trim().startsWith('<!DOCTYPE') || 
+
+      if (response.body.trim().startsWith('<!DOCTYPE') ||
           response.body.trim().startsWith('<html')) {
         debugPrint('❌ ERROR: Server returned HTML instead of JSON');
         return;
       }
-      
+
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        
+
         if (responseData['code'] == 200 && responseData['data'] != null) {
           List dataList = List.from(responseData['data']);
           List finalDataList = [];
-          
-          dataList.removeWhere((element) => 
-            element['member_count'] == null || 
-            element['member_count'] == 0
-          );
-          
+
+          dataList.removeWhere((element) =>
+              element['member_count'] == null || element['member_count'] == 0);
+
           finalDataList.addAll(dataList);
-          
+
           if (profileType == "0") {
             businessList.value = finalDataList;
             await CacheManager.set(CACHE_BUSINESS, {
@@ -448,11 +485,13 @@ class HomeController extends GetxController
     }
   }
 
-  Future<void> postDashboardSliderApi(String? profileType, {bool forceRefresh = false}) async {
+  Future<void> postDashboardSliderApi(String? profileType,
+      {bool forceRefresh = false}) async {
     if (!forceRefresh) {
       final cachedData = await CacheManager.get(CACHE_SLIDER);
       if (cachedData != null && cachedData['timestamp'] != null) {
-        final age = DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
+        final age =
+            DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
         if (age < CACHE_DURATION) {
           allSliderList.value = cachedData['data'];
           searchAllSliderList.value = cachedData['data'];
@@ -460,12 +499,13 @@ class HomeController extends GetxController
         }
       }
     }
-    
+
     if (_requestLocks['slider'] == true) return;
     _requestLocks['slider'] = true;
-    
+
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         debugPrint('Slider API: Token is empty');
         return;
@@ -486,7 +526,7 @@ class HomeController extends GetxController
           final sliderData = responseData['data'] ?? [];
           allSliderList.value = sliderData;
           searchAllSliderList.value = sliderData;
-          
+
           await CacheManager.set(CACHE_SLIDER, {
             'data': sliderData,
             'timestamp': DateTime.now().toIso8601String(),
@@ -503,9 +543,10 @@ class HomeController extends GetxController
   Future<void> postDashboardAdvSliderApi() async {
     if (_requestLocks['advSlider'] == true) return;
     _requestLocks['advSlider'] = true;
-    
+
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         debugPrint('AdvSlider API: Token is empty');
         return;
@@ -536,14 +577,16 @@ class HomeController extends GetxController
   Future<void> postDashboardAdvPopUpSliderApi() async {
     if (_requestLocks['advPopUp'] == true) return;
     _requestLocks['advPopUp'] = true;
-    
+
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         debugPrint('AdvPopUpSlider API: Token is empty');
         return;
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.advPopUpSlider));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.advPopUpSlider));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -566,25 +609,26 @@ class HomeController extends GetxController
   }
 
   Rx<OnBoardModel> onBoardList = OnBoardModel().obs;
-  
+
   Future<void> fetchOnboardApi({bool forceRefresh = false}) async {
     if (!forceRefresh) {
       final cachedData = await CacheManager.get(CACHE_ONBOARD);
       if (cachedData != null && cachedData['timestamp'] != null) {
-        final age = DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
+        final age =
+            DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
         if (age < CACHE_DURATION) {
           onBoardList.value = OnBoardModel.fromJson(cachedData['data']);
           return;
         }
       }
     }
-    
+
     if (_requestLocks['onboard'] == true) return;
     _requestLocks['onboard'] = true;
-    
+
     try {
       isOnBoardingLoading.value = true;
-      
+
       final request = http.MultipartRequest('POST', Uri.parse(API.onboard));
       request.headers['Accept'] = 'application/json';
       var res = await request.send().timeout(const Duration(seconds: 30));
@@ -593,7 +637,7 @@ class HomeController extends GetxController
       if (res.statusCode == 200) {
         final responseData = json.decode(responseDone.body);
         onBoardList.value = OnBoardModel.fromJson(responseData);
-        
+
         await CacheManager.set(CACHE_ONBOARD, {
           'data': responseData,
           'timestamp': DateTime.now().toIso8601String(),
@@ -610,19 +654,21 @@ class HomeController extends GetxController
   Future<void> postCategoriesApi() async {
     final cachedData = await CacheManager.get(CACHE_CATEGORIES);
     if (cachedData != null && cachedData['timestamp'] != null) {
-      final age = DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
+      final age =
+          DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
       if (age < CACHE_DURATION) {
         categoryList.value = cachedData['data'];
         return;
       }
     }
-    
+
     if (_requestLocks['categories'] == true) return;
     _requestLocks['categories'] = true;
-    
+
     try {
       isAddLoading.value = true;
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         debugPrint('Categories API: Token is empty');
         return;
@@ -635,11 +681,11 @@ class HomeController extends GetxController
 
       var res = await request.send().timeout(const Duration(seconds: 30));
       var responseDone = await http.Response.fromStream(res);
-      
+
       if (res.statusCode == 200) {
         final responseData = json.decode(responseDone.body);
         categoryList.value = responseData['data'];
-        
+
         await CacheManager.set(CACHE_CATEGORIES, {
           'data': responseData['data'],
           'timestamp': DateTime.now().toIso8601String(),
@@ -656,12 +702,14 @@ class HomeController extends GetxController
   Future<void> postSubCategoriesApi(String? categoryId) async {
     try {
       isAddLoading.value = true;
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         debugPrint('Subcategories API: Token is empty');
         return;
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.subcategories));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.subcategories));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -670,7 +718,7 @@ class HomeController extends GetxController
 
       var res = await request.send().timeout(const Duration(seconds: 30));
       var responseDone = await http.Response.fromStream(res);
-      
+
       if (res.statusCode == 200) {
         final responseData = json.decode(responseDone.body);
         subCategoryList.value = responseData['data'];
@@ -685,11 +733,13 @@ class HomeController extends GetxController
   Future<List> postSubCategoriesListApiLis(String? categoryId) async {
     List subCategoryDataList = [];
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         return [];
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.subcategories));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.subcategories));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -698,7 +748,7 @@ class HomeController extends GetxController
 
       var res = await request.send().timeout(const Duration(seconds: 30));
       var responseDone = await http.Response.fromStream(res);
-      
+
       if (res.statusCode == 200) {
         final responseData = json.decode(responseDone.body);
         subCategoryDataList = responseData['data'];
@@ -712,15 +762,18 @@ class HomeController extends GetxController
   Future<bool> postCreateEnquiryApi(Map<String, String> bodyParams) async {
     try {
       isButtonLoading.value = true;
-      
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.isEmpty) {
-        ShowToast.showToast('Authentication error. Please login again.', showSuccess: false);
+        ShowToast.showToast('Authentication error. Please login again.',
+            showSuccess: false);
         isButtonLoading.value = false;
         return false;
       }
-      
-      final request = http.MultipartRequest('POST', Uri.parse(API.createEnquiry));
+
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.createEnquiry));
       request.headers.addAll({
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -728,83 +781,102 @@ class HomeController extends GetxController
       });
       request.fields.addAll(bodyParams);
 
-      final response = await request.send().timeout(const Duration(seconds: 30));
+      final response =
+          await request.send().timeout(const Duration(seconds: 30));
       final responseBody = await response.stream.bytesToString();
-      
+
       if (responseBody.trim().isEmpty) {
-        ShowToast.showToast('Server returned empty response', showSuccess: false);
+        ShowToast.showToast('Server returned empty response',
+            showSuccess: false);
         isButtonLoading.value = false;
         return false;
       }
-      
-      if (responseBody.trim().startsWith('<!DOCTYPE') || 
+
+      if (responseBody.trim().startsWith('<!DOCTYPE') ||
           responseBody.trim().startsWith('<html')) {
-        ShowToast.showToast('Server error. Please try again later.', showSuccess: false);
+        ShowToast.showToast('Server error. Please try again later.',
+            showSuccess: false);
         isButtonLoading.value = false;
         return false;
       }
-      
+
       try {
         final responseData = json.decode(responseBody);
-        
+
         bool enquiryCreated = false;
         String successMessage = '';
-        
-        if (responseData['enquiry_id'] != null || 
-            responseData['id'] != null || 
+
+        if (responseData['enquiry_id'] != null ||
+            responseData['id'] != null ||
             responseData['data'] != null ||
-            (responseData['message'] != null && responseData['message'].toString().contains('Connection could not be established'))) {
+            (responseData['message'] != null &&
+                responseData['message']
+                    .toString()
+                    .contains('Connection could not be established'))) {
           enquiryCreated = true;
           successMessage = 'Enquiry created successfully';
         }
-        
+
         if (responseData['code'] != null) {
           if (responseData['code'] is int) {
-            enquiryCreated = enquiryCreated || (responseData['code'] == 200 || responseData['code'] == 201);
+            enquiryCreated = enquiryCreated ||
+                (responseData['code'] == 200 || responseData['code'] == 201);
           } else if (responseData['code'] is String) {
-            enquiryCreated = enquiryCreated || (responseData['code'] == '200' || responseData['code'] == '201');
+            enquiryCreated = enquiryCreated ||
+                (responseData['code'] == '200' ||
+                    responseData['code'] == '201');
           }
           if (responseData['msg'] != null) successMessage = responseData['msg'];
         }
-        
-        if (response.statusCode == 500 && responseBody.contains('mail.singleclik.in')) {
+
+        if (response.statusCode == 500 &&
+            responseBody.contains('mail.singleclik.in')) {
           enquiryCreated = true;
           successMessage = 'Enquiry created successfully';
         }
-        
+
         if (enquiryCreated) {
           await getSentEnquiriesUnreadCount('1', forceRefresh: true);
           ShowToast.showToast(
-            successMessage.isNotEmpty ? successMessage : ConstantString.dataSubmittedSuccessfullyMsg,
+            successMessage.isNotEmpty
+                ? successMessage
+                : ConstantString.dataSubmittedSuccessfullyMsg,
             showSuccess: true,
           );
           isButtonLoading.value = false;
           return true;
         } else {
           ShowToast.showToast(
-            successMessage.isNotEmpty ? successMessage : 'Failed to create enquiry',
+            successMessage.isNotEmpty
+                ? successMessage
+                : 'Failed to create enquiry',
             showSuccess: false,
           );
           isButtonLoading.value = false;
           return false;
         }
       } catch (e) {
-        if (responseBody.contains('success') || 
-            responseBody.contains('created') || 
+        if (responseBody.contains('success') ||
+            responseBody.contains('created') ||
             responseBody.contains('mail.singleclik.in') ||
             response.statusCode == 500) {
           await getSentEnquiriesUnreadCount('1', forceRefresh: true);
-          ShowToast.showToast('Enquiry created successfully', showSuccess: true);
+          ShowToast.showToast('Enquiry created successfully',
+              showSuccess: true);
           isButtonLoading.value = false;
           return true;
         }
-        
-        ShowToast.showToast('Server response error. Please check if enquiry was created.', showSuccess: false);
+
+        ShowToast.showToast(
+            'Server response error. Please check if enquiry was created.',
+            showSuccess: false);
         isButtonLoading.value = false;
         return false;
       }
     } on TimeoutException catch (e) {
-      ShowToast.showToast('Connection timeout. Please check if enquiry was created.', showSuccess: false);
+      ShowToast.showToast(
+          'Connection timeout. Please check if enquiry was created.',
+          showSuccess: false);
       isButtonLoading.value = false;
       return false;
     } on SocketException catch (e) {
@@ -812,17 +884,21 @@ class HomeController extends GetxController
       isButtonLoading.value = false;
       return false;
     } catch (e) {
-      ShowToast.showToast('Something went wrong. Please check if enquiry was created.', showSuccess: false);
+      ShowToast.showToast(
+          'Something went wrong. Please check if enquiry was created.',
+          showSuccess: false);
       isButtonLoading.value = false;
       return false;
     }
   }
 
-  Future<void> getSentEnquiriesUnreadCount(String? enquiriesType, {bool forceRefresh = false}) async {
+  Future<void> getSentEnquiriesUnreadCount(String? enquiriesType,
+      {bool forceRefresh = false}) async {
     if (!forceRefresh) {
       final cachedData = await CacheManager.get(CACHE_ENQUIRY_COUNTS);
       if (cachedData != null && cachedData['timestamp'] != null) {
-        final age = DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
+        final age =
+            DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
         if (age < const Duration(minutes: 5)) {
           pendingOpenInquiriesCount.value = cachedData['pending'] ?? 0;
           receivedUnreadCount.value = cachedData['received'] ?? 0;
@@ -830,13 +906,15 @@ class HomeController extends GetxController
         }
       }
     }
-    
+
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         return;
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.enquirySentCount));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.enquirySentCount));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -854,7 +932,7 @@ class HomeController extends GetxController
     }
 
     await getReceivedEnquiriesUnreadCount();
-    
+
     await CacheManager.set(CACHE_ENQUIRY_COUNTS, {
       'pending': pendingOpenInquiriesCount.value,
       'received': receivedUnreadCount.value,
@@ -864,11 +942,13 @@ class HomeController extends GetxController
 
   Future<void> getReceivedEnquiriesUnreadCount() async {
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         return;
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.enquiryReceivedCount));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.enquiryReceivedCount));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -877,7 +957,7 @@ class HomeController extends GetxController
 
       var res = await request.send().timeout(const Duration(seconds: 15));
       var responseDone = await http.Response.fromStream(res);
-      
+
       if (res.statusCode == 200) {
         final responseData = json.decode(responseDone.body);
         receivedUnreadCount.value = ((responseData['data'] ?? 0) as int);
@@ -893,7 +973,8 @@ class HomeController extends GetxController
     if (!forceRefresh) {
       final cachedData = await CacheManager.get(CACHE_USER_PROFILE);
       if (cachedData != null && cachedData['timestamp'] != null) {
-        final age = DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
+        final age =
+            DateTime.now().difference(DateTime.parse(cachedData['timestamp']));
         if (age < CACHE_DURATION) {
           userData.value = cachedData['data'];
           debugPrint('✅ Using cached profile data (age: ${age.inMinutes} min)');
@@ -901,23 +982,25 @@ class HomeController extends GetxController
         }
       }
     }
-    
+
     if (_requestLocks['profile'] == true) return;
     _requestLocks['profile'] = true;
-    
+
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         debugPrint('FetchProfile API: Token is empty');
         userData.value = {};
         return;
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProfile));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.fetchProfile));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
       });
-      
+
       var res = await request.send().timeout(const Duration(seconds: 30));
       var responseDone = await http.Response.fromStream(res);
 
@@ -931,14 +1014,16 @@ class HomeController extends GetxController
           if (dataField.isNotEmpty) {
             var firstItem = dataField[0];
             if (firstItem is Map) {
-              if (firstItem.containsKey('product_name') || firstItem.containsKey('product_status')) {
+              if (firstItem.containsKey('product_name') ||
+                  firstItem.containsKey('product_status')) {
                 parsedProducts = dataField;
               } else {
                 parsedProfile = Map<String, dynamic>.from(firstItem);
                 if (firstItem.containsKey('products')) {
                   parsedProducts = List.from(firstItem['products'] ?? []);
                 } else if (firstItem.containsKey('product_services')) {
-                  parsedProducts = List.from(firstItem['product_services'] ?? []);
+                  parsedProducts =
+                      List.from(firstItem['product_services'] ?? []);
                 }
               }
             }
@@ -968,7 +1053,7 @@ class HomeController extends GetxController
         parsedProfile['product_services'] = parsedProducts;
 
         userData.value = parsedProfile;
-        
+
         await CacheManager.set(CACHE_USER_PROFILE, {
           'data': parsedProfile,
           'timestamp': DateTime.now().toIso8601String(),
@@ -987,11 +1072,13 @@ class HomeController extends GetxController
 
   Future<List<dynamic>> postFetchProductServicesApi({String? userId}) async {
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         return [];
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -1042,7 +1129,8 @@ class HomeController extends GetxController
       photoVersion.value++;
 
       // 4. Re-fetch all data fresh from server
-      final userId = await SharPreferences.getString(SharPreferences.userId) ?? '';
+      final userId =
+          await SharPreferences.getString(SharPreferences.userId) ?? '';
       await Future.wait([
         postFetchProfileApi(forceRefresh: true),
         postDashboardApi(userId, forceRefresh: true),
@@ -1057,7 +1145,8 @@ class HomeController extends GetxController
       ShowToast.showToast('App refreshed!', showSuccess: true);
     } catch (e) {
       debugPrint('❌ Full refresh error: $e');
-      ShowToast.showToast('Refresh failed. Please try again.', showSuccess: false);
+      ShowToast.showToast('Refresh failed. Please try again.',
+          showSuccess: false);
     } finally {
       isFullRefreshing.value = false;
     }
