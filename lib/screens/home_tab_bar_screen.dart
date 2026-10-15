@@ -1349,7 +1349,7 @@ class HomeTabBarScreenState extends State<HomeTabBarScreen>
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 16),
-                      hintText: "Need Photographer for one day for birthday celebration.",
+                      hintText: "Add your requirement details here...",
                       hintStyle: TextStyle(
                           fontSize: 14,
                           color: Colors.grey.shade500,
