@@ -18,35 +18,36 @@ class ChatSentController extends GetxController {
   final isLoading = false.obs;
   final isSending = false.obs;
   final userId = "".obs;
-  
+
   // Use RxString instead of Rx<TextEditingController> to avoid dispose issues
   final messageText = "".obs;
   final scrollController = ScrollController();
   final chatList = <dynamic>[].obs;
-  
+
   // Local cache for instant display
   final localMessages = <Map<String, dynamic>>[].obs;
   late Timer timer;
   bool isFirstLoad = true;
   String _lastMessageId = "";
-  
+
   // Cache key for storing messages
-  String get _cacheKey => "chat_messages_${Get.arguments['enquiry_id'] ?? ''}_${Get.arguments['user_id'] ?? ''}";
-  
+  String get _cacheKey =>
+      "chat_messages_${Get.arguments['enquiry_id'] ?? ''}_${Get.arguments['user_id'] ?? ''}";
+
   // Track if controller is disposed
   bool _isDisposed = false;
-  
+
   // Track optimistic messages that are being sent
   final Map<String, Timer> _optimisticTimers = {};
-  
+
   // Reference to TextEditingController for proper management
   TextEditingController? _textController;
-  
+
   TextEditingController get textController {
     _textController ??= TextEditingController();
     return _textController!;
   }
-  
+
   void getChatTimer() {
     const oneSec = Duration(seconds: 1);
     timer = Timer.periodic(
@@ -69,7 +70,7 @@ class ChatSentController extends GetxController {
     postChatApi();
     _triggerAllRefresh();
   }
-  
+
   // Load messages from cache instantly
   Future<void> _loadCachedMessages() async {
     try {
@@ -96,16 +97,17 @@ class ChatSentController extends GetxController {
             }
             return true;
           }).toList();
-          
+
           if (validMessages.isNotEmpty) {
             chatList.value = validMessages;
             localMessages.value = List.from(validMessages);
-            
+
             // Update last message ID
             if (validMessages.isNotEmpty && validMessages.last is Map) {
-              _lastMessageId = (validMessages.last as Map)['id']?.toString() ?? "";
+              _lastMessageId =
+                  (validMessages.last as Map)['id']?.toString() ?? "";
             }
-            
+
             // Scroll to bottom after cache loads
             Future.delayed(const Duration(milliseconds: 50), () {
               scrollToBottom();
@@ -117,7 +119,7 @@ class ChatSentController extends GetxController {
       debugPrint('Error loading cached messages: $e');
     }
   }
-  
+
   // Save messages to cache
   Future<void> _saveMessagesToCache(List<dynamic> messages) async {
     try {
@@ -128,7 +130,7 @@ class ChatSentController extends GetxController {
         }
         return true;
       }).toList();
-      
+
       await SharPreferences.setString(_cacheKey, json.encode(messagesToCache));
     } catch (e) {
       debugPrint('Error saving messages to cache: $e');
@@ -139,13 +141,13 @@ class ChatSentController extends GetxController {
   void onClose() {
     _isDisposed = true;
     timer.cancel();
-    
+
     // Cancel all optimistic timers
     for (var timer in _optimisticTimers.values) {
       timer.cancel();
     }
     _optimisticTimers.clear();
-    
+
     if (_textController != null) {
       _textController!.dispose();
       _textController = null;
@@ -156,12 +158,12 @@ class ChatSentController extends GetxController {
     _triggerAllRefresh();
     super.onClose();
   }
-  
+
   // Helper method to get message from controller
   String getMessage() {
     return _textController?.text.trim() ?? "";
   }
-  
+
   // Helper method to clear message
   void clearMessage() {
     if (_textController != null) {
@@ -169,7 +171,7 @@ class ChatSentController extends GetxController {
     }
     messageText.value = "";
   }
-  
+
   // Helper method to update message text
   void updateMessage(String text) {
     messageText.value = text;
@@ -177,26 +179,26 @@ class ChatSentController extends GetxController {
 
   Future<void> postChatApi({bool isFromTimer = false}) async {
     if (_isDisposed) return;
-    
+
     try {
       final enquiryId = Get.arguments['enquiry_id']?.toString() ?? '';
       final replyId = Get.arguments['user_id']?.toString() ?? '';
-      
+
       if (enquiryId.isEmpty || replyId.isEmpty) {
         return;
       }
-      
+
       var bodyParams = {
         'enquiry_id': enquiryId,
         'reply_id': replyId,
         'last_message_id': _lastMessageId,
       };
-      
+
       final token = await SharPreferences.getString(SharPreferences.token);
       if (token == null || token.isEmpty) {
         return;
       }
-      
+
       final uri = Uri.parse(API.replyChat);
       final request = http.MultipartRequest('POST', uri);
       request.headers.addAll({
@@ -204,37 +206,38 @@ class ChatSentController extends GetxController {
         'Accept': 'application/json',
       });
       request.fields.addAll(bodyParams);
-      
+
       final response = await request.send().timeout(const Duration(seconds: 5));
       final responseBody = await response.stream.bytesToString();
-      
-      if (responseBody.trim().startsWith('{') || responseBody.trim().startsWith('[')) {
+
+      if (responseBody.trim().startsWith('{') ||
+          responseBody.trim().startsWith('[')) {
         try {
           final responseData = json.decode(responseBody);
-          
+
           if (response.statusCode == 200) {
             if (responseData['data'] != null) {
               List<dynamic> newMessages = [];
-              
+
               if (responseData['data'] is List) {
                 newMessages = responseData['data'];
               } else if (responseData['data'] is Map) {
                 newMessages = [responseData['data']];
               }
-              
+
               if (newMessages.isNotEmpty) {
                 // Deduplicate optimistic messages if they have been confirmed by the server
-                final optimisticMessages = chatList.where((msg) => 
-                  msg is Map && msg['is_optimistic'] == true
-                ).toList();
+                final optimisticMessages = chatList
+                    .where((msg) => msg is Map && msg['is_optimistic'] == true)
+                    .toList();
 
                 for (var optMsg in optimisticMessages) {
                   final text = optMsg['text']?.toString() ?? '';
-                  final isConfirmed = newMessages.any((newMsg) => 
-                    newMsg is Map && 
-                    newMsg['text']?.toString().trim() == text.trim() && 
-                    newMsg['user_id']?.toString() == optMsg['user_id']?.toString()
-                  );
+                  final isConfirmed = newMessages.any((newMsg) =>
+                      newMsg is Map &&
+                      newMsg['text']?.toString().trim() == text.trim() &&
+                      newMsg['user_id']?.toString() ==
+                          optMsg['user_id']?.toString());
                   if (isConfirmed) {
                     final tempId = optMsg['temp_id']?.toString() ?? '';
                     if (tempId.isNotEmpty) {
@@ -244,20 +247,23 @@ class ChatSentController extends GetxController {
                 }
 
                 // Update last message ID
-                if (newMessages.last is Map && (newMessages.last as Map).containsKey('id')) {
+                if (newMessages.last is Map &&
+                    (newMessages.last as Map).containsKey('id')) {
                   _lastMessageId = (newMessages.last as Map)['id'].toString();
                 }
-                
+
                 if (isFromTimer) {
                   // Only add new messages that don't exist yet
-                  final existingIds = chatList.map((msg) => 
-                    msg is Map ? msg['id']?.toString() : null
-                  ).toSet();
-                  
-                  final uniqueNewMessages = newMessages.where((msg) => 
-                    msg is Map && !existingIds.contains(msg['id']?.toString())
-                  ).toList();
-                  
+                  final existingIds = chatList
+                      .map((msg) => msg is Map ? msg['id']?.toString() : null)
+                      .toSet();
+
+                  final uniqueNewMessages = newMessages
+                      .where((msg) =>
+                          msg is Map &&
+                          !existingIds.contains(msg['id']?.toString()))
+                      .toList();
+
                   if (uniqueNewMessages.isNotEmpty && !_isDisposed) {
                     chatList.addAll(uniqueNewMessages);
                     localMessages.value = List.from(chatList);
@@ -266,10 +272,11 @@ class ChatSentController extends GetxController {
                   }
                 } else {
                   // For non-timer refresh, replace all messages but preserve optimistic ones
-                  final optimisticMessages = chatList.where((msg) => 
-                    msg is Map && msg['is_optimistic'] == true
-                  ).toList();
-                  
+                  final optimisticMessages = chatList
+                      .where(
+                          (msg) => msg is Map && msg['is_optimistic'] == true)
+                      .toList();
+
                   if (optimisticMessages.isNotEmpty) {
                     // Keep optimistic messages and add new ones
                     final allMessages = [...optimisticMessages, ...newMessages];
@@ -282,7 +289,7 @@ class ChatSentController extends GetxController {
                   await _saveMessagesToCache(chatList);
                   _triggerAllRefresh();
                 }
-                
+
                 if (isFirstLoad && !_isDisposed) {
                   isFirstLoad = false;
                   scrollToBottom();
@@ -294,7 +301,6 @@ class ChatSentController extends GetxController {
           debugPrint('JSON parsing error: $e');
         }
       }
-      
     } on TimeoutException catch (e) {
       debugPrint('Timeout in postChatApi: $e');
     } catch (e) {
@@ -304,9 +310,9 @@ class ChatSentController extends GetxController {
 
   Future<void> postSendChatApi() async {
     if (_isDisposed) return;
-    
+
     final message = getMessage();
-    
+
     if (message.isEmpty) {
       ShowToast.showToast(
         'Please enter a message',
@@ -314,11 +320,11 @@ class ChatSentController extends GetxController {
       );
       return;
     }
-    
+
     if (isSending.value) {
       return;
     }
-    
+
     // Create optimistic message
     final tempId = DateTime.now().millisecondsSinceEpoch.toString();
     final optimisticMessage = {
@@ -329,20 +335,20 @@ class ChatSentController extends GetxController {
       'is_optimistic': true,
       'temp_id': tempId,
     };
-    
+
     // Add optimistic message immediately
     final currentList = List<Map<String, dynamic>>.from(localMessages);
     currentList.add(optimisticMessage);
     localMessages.value = currentList;
     chatList.add(optimisticMessage);
-    
+
     // Clear input and scroll instantly
     clearMessage();
     scrollToBottom();
-    
+
     // Set sending state
     isSending.value = true;
-    
+
     // Set a timeout to remove optimistic message if it takes too long
     _optimisticTimers[tempId] = Timer(const Duration(seconds: 30), () {
       if (!_isDisposed) {
@@ -354,24 +360,24 @@ class ChatSentController extends GetxController {
         );
       }
     });
-    
+
     try {
       final enquiryId = Get.arguments['enquiry_id']?.toString() ?? '';
       final replyId = Get.arguments['user_id']?.toString() ?? '';
-      
+
       if (enquiryId.isEmpty || replyId.isEmpty) {
         _removeOptimisticMessage(tempId);
         ShowToast.showToast('Invalid chat session', showSuccess: false);
         isSending.value = false;
         return;
       }
-      
+
       var bodyParams = {
         'enquiry_id': enquiryId,
         'reply_id': replyId,
         'text': message
       };
-      
+
       final token = await SharPreferences.getString(SharPreferences.token);
       if (token == null || token.isEmpty) {
         _removeOptimisticMessage(tempId);
@@ -379,7 +385,7 @@ class ChatSentController extends GetxController {
         isSending.value = false;
         return;
       }
-      
+
       final uri = Uri.parse(API.createReply);
       final request = http.MultipartRequest('POST', uri);
       request.headers.addAll({
@@ -387,27 +393,28 @@ class ChatSentController extends GetxController {
         'Accept': 'application/json',
       });
       request.fields.addAll(bodyParams);
-      
-      final response = await request.send().timeout(const Duration(seconds: 10));
+
+      final response =
+          await request.send().timeout(const Duration(seconds: 10));
       final responseBody = await response.stream.bytesToString();
-      
+
       // Cancel the timeout timer
       _optimisticTimers[tempId]?.cancel();
       _optimisticTimers.remove(tempId);
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Success - remove optimistic message
         _removeOptimisticMessage(tempId);
-        
+
         // Refresh chat to get the real message
         await postChatApi();
         scrollToBottom();
-        
+
         ShowToast.showToast('Message sent', showSuccess: true);
       } else {
         // Keep optimistic message for a bit longer
         ShowToast.showToast('Sent Successfully', showSuccess: true);
-        
+
         // Try to refresh after 2 seconds
         Future.delayed(const Duration(seconds: 2), () {
           if (!_isDisposed) {
@@ -415,15 +422,14 @@ class ChatSentController extends GetxController {
           }
         });
       }
-      
     } catch (e) {
       debugPrint('Error sending: $e');
       _optimisticTimers[tempId]?.cancel();
       _optimisticTimers.remove(tempId);
-      
+
       // Keep optimistic message - it will be resolved on next poll
       ShowToast.showToast('Sending... Will retry', showSuccess: false);
-      
+
       // Try to refresh after 3 seconds
       Future.delayed(const Duration(seconds: 3), () {
         if (!_isDisposed) {
@@ -436,24 +442,22 @@ class ChatSentController extends GetxController {
       }
     }
   }
-  
+
   void _removeOptimisticMessage(String tempId) {
     if (!_isDisposed) {
       // Cancel timer if exists
       _optimisticTimers[tempId]?.cancel();
       _optimisticTimers.remove(tempId);
-      
+
       // Remove from lists
       localMessages.removeWhere((msg) => msg['temp_id'] == tempId);
-      chatList.removeWhere((msg) => 
-        msg is Map && msg['temp_id'] == tempId
-      );
-      
+      chatList.removeWhere((msg) => msg is Map && msg['temp_id'] == tempId);
+
       // Save to cache without optimistic messages
       _saveMessagesToCache(chatList);
     }
   }
-  
+
   // Instant scroll to bottom
   void scrollToBottom() {
     if (!_isDisposed && scrollController.hasClients) {
@@ -468,14 +472,14 @@ class ChatSentController extends GetxController {
       });
     }
   }
-  
+
   // Method to manually refresh chat
   Future<void> refreshChat() async {
     if (!_isDisposed) {
       await postChatApi();
     }
   }
-  
+
   // Get messages instantly from cache
   List<dynamic> getDisplayMessages() {
     if (_isDisposed) return [];
@@ -488,23 +492,28 @@ class ChatSentController extends GetxController {
   void _triggerAllRefresh() {
     try {
       if (Get.isRegistered<HomeController>()) {
-        Get.find<HomeController>().getSentEnquiriesUnreadCount('1', forceRefresh: true);
+        Get.find<HomeController>()
+            .getSentEnquiriesUnreadCount('1', forceRefresh: true);
       }
     } catch (e) {
       debugPrint('Error refreshing home controller counts: $e');
     }
     try {
       if (Get.isRegistered<EnquiriesSentController>()) {
-        Get.find<EnquiriesSentController>().postSentApi("1", isAutoRefresh: true);
-        Get.find<EnquiriesSentController>().postSentApi("2", isAutoRefresh: true);
+        Get.find<EnquiriesSentController>()
+            .postSentApi("1", isAutoRefresh: true);
+        Get.find<EnquiriesSentController>()
+            .postSentApi("2", isAutoRefresh: true);
       }
     } catch (e) {
       debugPrint('Error refreshing enquiries sent: $e');
     }
     try {
       if (Get.isRegistered<EnquiriesReceivedController>()) {
-        Get.find<EnquiriesReceivedController>().postReceivedApi("1", isAutoRefresh: true);
-        Get.find<EnquiriesReceivedController>().postReceivedApi("2", isAutoRefresh: true);
+        Get.find<EnquiriesReceivedController>()
+            .postReceivedApi("1", isAutoRefresh: true);
+        Get.find<EnquiriesReceivedController>()
+            .postReceivedApi("2", isAutoRefresh: true);
       }
     } catch (e) {
       debugPrint('Error refreshing enquiries received: $e');

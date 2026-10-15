@@ -22,7 +22,8 @@ class SignDetailsScreen extends StatefulWidget {
 }
 
 class _SignDetailsScreenState extends State<SignDetailsScreen> {
-  SignDetailsController signDetailsController = Get.put(SignDetailsController());
+  SignDetailsController signDetailsController =
+      Get.put(SignDetailsController());
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +70,8 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: ConstantColor.primary.withOpacity(0.1),
+                                    color:
+                                        ConstantColor.primary.withOpacity(0.1),
                                     blurRadius: 10,
                                     offset: const Offset(0, 2),
                                   ),
@@ -216,7 +218,8 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                           _buildLabelWithAsterisk("Email ID"),
                           SizedBox(height: height * 0.008),
                           _buildTextField(
-                            controller: signDetailsController.emailController.value,
+                            controller:
+                                signDetailsController.emailController.value,
                             hint: "Enter your email address",
                             icon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
@@ -229,7 +232,8 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                           _buildLabelWithAsterisk("Area"),
                           SizedBox(height: height * 0.008),
                           _buildTextField(
-                            controller: signDetailsController.areaController.value,
+                            controller:
+                                signDetailsController.areaController.value,
                             hint: "Enter your area (e.g., Bangalore, Mumbai)",
                             icon: Icons.location_on_outlined,
                             keyboardType: TextInputType.text,
@@ -249,38 +253,48 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                           ),
                           SizedBox(height: height * 0.008),
                           _buildReferralTextField(
-                            controller: signDetailsController.referredCodeController.value,
+                            controller: signDetailsController
+                                .referredCodeController.value,
                             hint: "Enter referred code (if any)",
                             icon: Icons.card_giftcard_outlined,
                             onVerifyTap: () async {
                               FocusScope.of(context).unfocus();
                               await signDetailsController.checkReferralApi(
-                                signDetailsController.referredCodeController.value.text,
+                                signDetailsController
+                                    .referredCodeController.value.text,
                               );
                             },
                           ),
                           Obx(() {
-                            if (signDetailsController.referralMessage.value.isEmpty) {
+                            if (signDetailsController
+                                .referralMessage.value.isEmpty) {
                               return const SizedBox.shrink();
                             }
-                            final isSuccess = signDetailsController.isReferralVerified.value;
+                            final isSuccess =
+                                signDetailsController.isReferralVerified.value;
                             return Padding(
                               padding: const EdgeInsets.only(top: 6, left: 4),
                               child: Row(
                                 children: [
                                   Icon(
-                                    isSuccess ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                                    color: isSuccess ? Colors.green : Colors.red,
+                                    isSuccess
+                                        ? Icons.check_circle_rounded
+                                        : Icons.cancel_rounded,
+                                    color:
+                                        isSuccess ? Colors.green : Colors.red,
                                     size: 16,
                                   ),
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
-                                      signDetailsController.referralMessage.value,
+                                      signDetailsController
+                                          .referralMessage.value,
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w500,
-                                        color: isSuccess ? Colors.green : Colors.red,
+                                        color: isSuccess
+                                            ? Colors.green
+                                            : Colors.red,
                                       ),
                                     ),
                                   ),
@@ -310,7 +324,8 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: ConstantColor.primary.withOpacity(0.08),
+                                  color:
+                                      ConstantColor.primary.withOpacity(0.08),
                                   blurRadius: 15,
                                   offset: const Offset(0, 4),
                                 ),
@@ -359,48 +374,64 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                                       gradient: LinearGradient(
                                         colors: [
                                           Colors.white,
-                                          ConstantColor.primary.withOpacity(0.05),
+                                          ConstantColor.primary
+                                              .withOpacity(0.05),
                                         ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
-                                        color: ConstantColor.primary.withOpacity(0.4),
+                                        color: ConstantColor.primary
+                                            .withOpacity(0.4),
                                         width: 2,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: ConstantColor.primary.withOpacity(0.15),
+                                          color: ConstantColor.primary
+                                              .withOpacity(0.15),
                                           blurRadius: 12,
                                           offset: const Offset(0, 4),
                                         ),
                                       ],
                                     ),
-                                    child: signDetailsController.croppedProfileFile != null &&
-                                            signDetailsController.croppedProfileFile!.value.path.isNotEmpty
+                                    child: signDetailsController
+                                                    .croppedProfileFile !=
+                                                null &&
+                                            signDetailsController
+                                                .croppedProfileFile!
+                                                .value
+                                                .path
+                                                .isNotEmpty
                                         ? ClipRRect(
-                                            borderRadius: BorderRadius.circular(14),
+                                            borderRadius:
+                                                BorderRadius.circular(14),
                                             child: Image.file(
-                                              File(signDetailsController.croppedProfileFile!.value.path),
+                                              File(signDetailsController
+                                                  .croppedProfileFile!
+                                                  .value
+                                                  .path),
                                               fit: BoxFit.cover,
                                             ),
                                           )
                                         : Center(
                                             child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
                                               children: [
                                                 Icon(
                                                   Icons.camera_alt_outlined,
                                                   color: ConstantColor.primary,
                                                   size: 28,
                                                 ),
-                                                SizedBox(height: height * 0.005),
+                                                SizedBox(
+                                                    height: height * 0.005),
                                                 Text(
                                                   "Add Photo",
                                                   style: TextStyle(
                                                     fontSize: 11,
-                                                    color: ConstantColor.primary,
+                                                    color:
+                                                        ConstantColor.primary,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -430,24 +461,38 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                             },
                             child: AppButton(
                               onTap: () async {
-                                if (signDetailsController.emailController.value.text.isEmpty) {
-                                  ShowToast.showToast("Please Enter Email ID", showSuccess: false);
+                                if (signDetailsController
+                                    .emailController.value.text.isEmpty) {
+                                  ShowToast.showToast("Please Enter Email ID",
+                                      showSuccess: false);
                                 } else if (!RegExp(
                                         r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                    .hasMatch(signDetailsController.emailController.value.text.trim())) {
-                                  ShowToast.showToast("Please Enter Valid Email ID", showSuccess: false);
-                                } else if (signDetailsController.areaController.value.text.isEmpty) {
-                                  ShowToast.showToast("Please Enter Area", showSuccess: false);
+                                    .hasMatch(signDetailsController
+                                        .emailController.value.text
+                                        .trim())) {
+                                  ShowToast.showToast(
+                                      "Please Enter Valid Email ID",
+                                      showSuccess: false);
+                                } else if (signDetailsController
+                                    .areaController.value.text.isEmpty) {
+                                  ShowToast.showToast("Please Enter Area",
+                                      showSuccess: false);
                                 } else {
                                   String referralCodeToSend = "";
-                                  String enteredCode = signDetailsController.referredCodeController.value.text.trim();
+                                  String enteredCode = signDetailsController
+                                      .referredCodeController.value.text
+                                      .trim();
 
                                   if (enteredCode.isNotEmpty) {
-                                    if (signDetailsController.isReferralVerified.value &&
-                                        enteredCode == signDetailsController.verifiedReferralCode.value) {
+                                    if (signDetailsController
+                                            .isReferralVerified.value &&
+                                        enteredCode ==
+                                            signDetailsController
+                                                .verifiedReferralCode.value) {
                                       referralCodeToSend = enteredCode;
                                     } else {
-                                      bool isValid = await signDetailsController.checkReferralApi(enteredCode);
+                                      bool isValid = await signDetailsController
+                                          .checkReferralApi(enteredCode);
                                       if (isValid) {
                                         referralCodeToSend = enteredCode;
                                       } else {
@@ -460,21 +505,35 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                                   Map<String, String> bodyParams = {
                                     'person_name': widget.name.trim(),
                                     'person_mobile': widget.phoneNumber.trim(),
-                                    'person_email': signDetailsController.emailController.value.text.trim(),
-                                    'person_area': signDetailsController.areaController.value.text.trim(),
+                                    'person_email': signDetailsController
+                                        .emailController.value.text
+                                        .trim(),
+                                    'person_area': signDetailsController
+                                        .areaController.value.text
+                                        .trim(),
                                     'referred_by_code': referralCodeToSend,
                                     'user_type': '1',
                                   };
                                   await signDetailsController.postSignUpApi(
                                     bodyParams,
-                                    signDetailsController.croppedProfileFile != null &&
-                                            signDetailsController.croppedProfileFile!.value.path.isNotEmpty
-                                        ? signDetailsController.croppedProfileFile!.value.path.trim()
-                                        : signDetailsController.filePath.value.trim(),
+                                    signDetailsController
+                                                    .croppedProfileFile !=
+                                                null &&
+                                            signDetailsController
+                                                .croppedProfileFile!
+                                                .value
+                                                .path
+                                                .isNotEmpty
+                                        ? signDetailsController
+                                            .croppedProfileFile!.value.path
+                                            .trim()
+                                        : signDetailsController.filePath.value
+                                            .trim(),
                                   );
                                 }
                               },
-                              isLoading: signDetailsController.isButtonLoading.value,
+                              isLoading:
+                                  signDetailsController.isButtonLoading.value,
                               title: "Continue",
                             ),
                           ),
@@ -524,10 +583,13 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
               textInputAction: TextInputAction.done,
               textCapitalization: TextCapitalization.characters,
               onChanged: (val) {
-                if (signDetailsController.verifiedReferralCode.value.isNotEmpty &&
-                    val.trim() != signDetailsController.verifiedReferralCode.value) {
+                if (signDetailsController
+                        .verifiedReferralCode.value.isNotEmpty &&
+                    val.trim() !=
+                        signDetailsController.verifiedReferralCode.value) {
                   signDetailsController.resetReferralStatus();
-                } else if (signDetailsController.referralMessage.value.isNotEmpty &&
+                } else if (signDetailsController
+                        .referralMessage.value.isNotEmpty &&
                     val.trim().isEmpty) {
                   signDetailsController.resetReferralStatus();
                 }
@@ -535,10 +597,12 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
               style: TextStyle(fontSize: 16, color: ConstantColor.blackColor),
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: TextStyle(fontSize: 14, color: ConstantColor.grayColor),
+                hintStyle:
+                    TextStyle(fontSize: 14, color: ConstantColor.grayColor),
                 prefixIcon: Icon(icon, color: ConstantColor.primary, size: 22),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               ),
             ),
           ),
@@ -558,7 +622,8 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
                       onPressed: onVerifyTap,
                       style: TextButton.styleFrom(
                         backgroundColor: ConstantColor.primary.withOpacity(0.1),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -613,7 +678,8 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
           hintStyle: TextStyle(fontSize: 14, color: ConstantColor.grayColor),
           prefixIcon: Icon(icon, color: ConstantColor.primary, size: 22),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );
@@ -645,5 +711,4 @@ class _SignDetailsScreenState extends State<SignDetailsScreen> {
       ),
     );
   }
-
 }

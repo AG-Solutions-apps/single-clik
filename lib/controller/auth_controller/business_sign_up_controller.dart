@@ -25,7 +25,7 @@ class BusinessSignUpController extends GetxController {
   Rx<TextEditingController> txtReferredCode = TextEditingController().obs;
   Rx<TextEditingController> txtOtherCategory = TextEditingController().obs;
   Rx<TextEditingController> txtOtherSubCategory = TextEditingController().obs;
-  
+
   RxList<String> profileTypeList = <String>[
     'Business',
     'Service',
@@ -34,7 +34,8 @@ class BusinessSignUpController extends GetxController {
   RxString selectedProfileType = "".obs;
   RxList<Map<String, dynamic>> categoryDataList = <Map<String, dynamic>>[].obs;
   RxMap<String, dynamic> selectedCategory = <String, dynamic>{}.obs;
-  RxList<Map<String, dynamic>> subCategoryDataList = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> subCategoryDataList =
+      <Map<String, dynamic>>[].obs;
   RxMap<String, dynamic> selectedSubCategory = <String, dynamic>{}.obs;
   RxString filePath = "".obs;
 
@@ -74,15 +75,18 @@ class BusinessSignUpController extends GetxController {
 
       // Method 1: MultipartRequest POST with all parameter aliases
       try {
-        final request = http.MultipartRequest('POST', Uri.parse(API.checkReferral));
+        final request =
+            http.MultipartRequest('POST', Uri.parse(API.checkReferral));
         request.headers.addAll(headers);
         request.fields['referred_by_code'] = cleanCode;
         request.fields['referral_code'] = cleanCode;
         request.fields['code'] = cleanCode;
 
-        var streamedRes = await request.send().timeout(const Duration(seconds: 10));
+        var streamedRes =
+            await request.send().timeout(const Duration(seconds: 10));
         var resDone = await http.Response.fromStream(streamedRes);
-        debugPrint('Method 1 (Multipart POST) status: ${resDone.statusCode}, body: ${resDone.body}');
+        debugPrint(
+            'Method 1 (Multipart POST) status: ${resDone.statusCode}, body: ${resDone.body}');
         if (resDone.statusCode == 200 && _isResponseSuccess(resDone.body)) {
           response = resDone;
         } else if (response == null) {
@@ -93,7 +97,9 @@ class BusinessSignUpController extends GetxController {
       }
 
       // Method 2: Standard http.post if Method 1 didn't succeed
-      if (response == null || response.statusCode != 200 || !_isResponseSuccess(response.body)) {
+      if (response == null ||
+          response.statusCode != 200 ||
+          !_isResponseSuccess(response.body)) {
         try {
           final postRes = await http.post(
             Uri.parse(API.checkReferral),
@@ -104,7 +110,8 @@ class BusinessSignUpController extends GetxController {
               'code': cleanCode,
             },
           ).timeout(const Duration(seconds: 10));
-          debugPrint('Method 2 (Standard POST) status: ${postRes.statusCode}, body: ${postRes.body}');
+          debugPrint(
+              'Method 2 (Standard POST) status: ${postRes.statusCode}, body: ${postRes.body}');
           if (postRes.statusCode == 200 && _isResponseSuccess(postRes.body)) {
             response = postRes;
           }
@@ -114,15 +121,20 @@ class BusinessSignUpController extends GetxController {
       }
 
       // Method 3: http.get (query parameters) if Method 1 & 2 didn't pass
-      if (response == null || response.statusCode != 200 || !_isResponseSuccess(response.body)) {
+      if (response == null ||
+          response.statusCode != 200 ||
+          !_isResponseSuccess(response.body)) {
         try {
           final getUri = Uri.parse(API.checkReferral).replace(queryParameters: {
             'referred_by_code': cleanCode,
             'referral_code': cleanCode,
             'code': cleanCode,
           });
-          final getRes = await http.get(getUri, headers: headers).timeout(const Duration(seconds: 10));
-          debugPrint('Method 3 (GET) status: ${getRes.statusCode}, body: ${getRes.body}');
+          final getRes = await http
+              .get(getUri, headers: headers)
+              .timeout(const Duration(seconds: 10));
+          debugPrint(
+              'Method 3 (GET) status: ${getRes.statusCode}, body: ${getRes.body}');
           if (getRes.statusCode == 200 && _isResponseSuccess(getRes.body)) {
             response = getRes;
           }
@@ -149,7 +161,9 @@ class BusinessSignUpController extends GetxController {
           final rawMsg = responseData['msg']?.toString() ??
               responseData['message']?.toString() ??
               responseData['data']?.toString();
-          if (rawMsg != null && rawMsg.trim().isNotEmpty && rawMsg.toLowerCase() != 'yes') {
+          if (rawMsg != null &&
+              rawMsg.trim().isNotEmpty &&
+              rawMsg.toLowerCase() != 'yes') {
             msgStr = rawMsg;
           }
           referralMessage.value = msgStr;
@@ -163,7 +177,9 @@ class BusinessSignUpController extends GetxController {
           final rawMsg = responseData['msg']?.toString() ??
               responseData['message']?.toString() ??
               responseData['data']?.toString();
-          if (rawMsg != null && rawMsg.trim().isNotEmpty && rawMsg.toLowerCase() != 'no') {
+          if (rawMsg != null &&
+              rawMsg.trim().isNotEmpty &&
+              rawMsg.toLowerCase() != 'no') {
             msgStr = rawMsg;
           }
           referralMessage.value = msgStr;
@@ -190,10 +206,16 @@ class BusinessSignUpController extends GetxController {
   bool _isResponseSuccess(String bodyStr) {
     final cleanBody = bodyStr.trim().toLowerCase();
 
-    if (cleanBody == 'yes' || cleanBody == '"yes"' || cleanBody == 'true' || cleanBody == '"true"') {
+    if (cleanBody == 'yes' ||
+        cleanBody == '"yes"' ||
+        cleanBody == 'true' ||
+        cleanBody == '"true"') {
       return true;
     }
-    if (cleanBody == 'no' || cleanBody == '"no"' || cleanBody == 'false' || cleanBody == '"false"') {
+    if (cleanBody == 'no' ||
+        cleanBody == '"no"' ||
+        cleanBody == 'false' ||
+        cleanBody == '"false"') {
       return false;
     }
 
@@ -208,20 +230,42 @@ class BusinessSignUpController extends GetxController {
         final data = decoded['data']?.toString().toLowerCase();
 
         // Check for 'yes' in any field
-        if (code == 'yes' || status == 'yes' || success == 'yes' || msg == 'yes' || message == 'yes' || data == 'yes') {
+        if (code == 'yes' ||
+            status == 'yes' ||
+            success == 'yes' ||
+            msg == 'yes' ||
+            message == 'yes' ||
+            data == 'yes') {
           return true;
         }
 
         // Check for 'no' in any field
-        if (code == 'no' || status == 'no' || success == 'no' || msg == 'no' || message == 'no' || data == 'no') {
+        if (code == 'no' ||
+            status == 'no' ||
+            success == 'no' ||
+            msg == 'no' ||
+            message == 'no' ||
+            data == 'no') {
           return false;
         }
 
-        if (code == '200' || status == 'true' || status == '200' || success == 'true' || decoded['status'] == true || decoded['success'] == true || decoded['code'] == 200) {
+        if (code == '200' ||
+            status == 'true' ||
+            status == '200' ||
+            success == 'true' ||
+            decoded['status'] == true ||
+            decoded['success'] == true ||
+            decoded['code'] == 200) {
           return true;
         }
 
-        if (code == '400' || status == 'false' || status == '400' || success == 'false' || decoded['status'] == false || decoded['success'] == false || decoded['code'] == 400) {
+        if (code == '400' ||
+            status == 'false' ||
+            status == '400' ||
+            success == 'false' ||
+            decoded['status'] == false ||
+            decoded['success'] == false ||
+            decoded['code'] == 400) {
           return false;
         }
       } else if (decoded is String) {
@@ -230,7 +274,9 @@ class BusinessSignUpController extends GetxController {
         if (str == 'no' || str == 'false') return false;
       }
     } catch (_) {
-      if (cleanBody.contains('"yes"') || cleanBody.contains(':yes') || cleanBody.contains(':"yes"')) {
+      if (cleanBody.contains('"yes"') ||
+          cleanBody.contains(':yes') ||
+          cleanBody.contains(':"yes"')) {
         return true;
       }
     }
@@ -327,7 +373,8 @@ class BusinessSignUpController extends GetxController {
     required Map<String, String> parameters,
   }) async {
     try {
-      final request = http.MultipartRequest('POST', Uri.parse(API.subcategories));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.subcategories));
       request.headers['Accept'] = 'application/json';
       request.fields.addAll(parameters);
       var res = await request.send();
@@ -358,7 +405,8 @@ class BusinessSignUpController extends GetxController {
       if (data['msg'] != null && data['msg'].toString().trim().isNotEmpty) {
         return data['msg'].toString().trim();
       }
-      if (data['message'] != null && data['message'].toString().trim().isNotEmpty) {
+      if (data['message'] != null &&
+          data['message'].toString().trim().isNotEmpty) {
         return data['message'].toString().trim();
       }
       if (data['error'] != null && data['error'].toString().trim().isNotEmpty) {
@@ -375,7 +423,8 @@ class BusinessSignUpController extends GetxController {
               return firstVal.toString().trim();
             }
           }
-        } else if (data['errors'] is List && (data['errors'] as List).isNotEmpty) {
+        } else if (data['errors'] is List &&
+            (data['errors'] as List).isNotEmpty) {
           return (data['errors'] as List).first.toString().trim();
         } else {
           return data['errors'].toString().trim();
@@ -387,15 +436,19 @@ class BusinessSignUpController extends GetxController {
     return fallback;
   }
 
-  Future<Map<String, dynamic>> postBusinessSignUpApi(Map<String, String> bodyParams, String photo) async {
+  Future<Map<String, dynamic>> postBusinessSignUpApi(
+      Map<String, String> bodyParams, String photo) async {
     isAccountCreated.value = false;
     try {
       isButtonLoading.value = true;
-      final request = http.MultipartRequest('POST', Uri.parse(API.businessSignUp));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.businessSignUp));
       request.headers['Accept'] = 'application/json';
       request.fields.addAll(bodyParams);
-      
-      if (photo.isNotEmpty && !photo.startsWith("http") && File(photo).existsSync()) {
+
+      if (photo.isNotEmpty &&
+          !photo.startsWith("http") &&
+          File(photo).existsSync()) {
         request.files.add(
           await http.MultipartFile.fromPath('photo', photo),
         );
@@ -422,7 +475,10 @@ class BusinessSignUpController extends GetxController {
 
           // Check if explicit failure from backend (e.g. Email already exists)
           bool isFailed = (code != null && code != 200 && code != '200') ||
-              (status == false || status == 'false' || status == 0 || status == '0') ||
+              (status == false ||
+                  status == 'false' ||
+                  status == 0 ||
+                  status == '0') ||
               (success == false || success == 'false');
 
           if (isFailed) {
@@ -430,9 +486,14 @@ class BusinessSignUpController extends GetxController {
             throw _extractErrorMessage(responseData);
           }
 
-          if (code == 200 || code == '200' || status == true || status == 1 || success == true) {
+          if (code == 200 ||
+              code == '200' ||
+              status == true ||
+              status == 1 ||
+              success == true) {
             if (responseData['data'] != null && responseData['data'] is Map) {
-              createdPassword.value = responseData['data']['cpassword']?.toString() ?? '';
+              createdPassword.value =
+                  responseData['data']['cpassword']?.toString() ?? '';
               createdUserId.value = responseData['data']['id'] ?? 0;
             }
             isAccountCreated.value = true;
@@ -441,7 +502,8 @@ class BusinessSignUpController extends GetxController {
 
           // If response contains data with user info, consider it success
           if (responseData['data'] != null && responseData['data'] is Map) {
-            createdPassword.value = responseData['data']['cpassword']?.toString() ?? '';
+            createdPassword.value =
+                responseData['data']['cpassword']?.toString() ?? '';
             createdUserId.value = responseData['data']['id'] ?? 0;
             isAccountCreated.value = true;
             return Map<String, dynamic>.from(responseData);
@@ -475,18 +537,22 @@ class BusinessSignUpController extends GetxController {
     }
   }
 
-  Future<Map<String, dynamic>> postUpdateProfileApi(Map<String, String> body, String photo) async {
+  Future<Map<String, dynamic>> postUpdateProfileApi(
+      Map<String, String> body, String photo) async {
     try {
       isButtonLoading.value = true;
-      final request = http.MultipartRequest('POST', Uri.parse(API.updateProfile));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.updateProfile));
       String? token = await SharPreferences.getString(SharPreferences.token);
       if (token != null && token.trim().isNotEmpty) {
         request.headers['Authorization'] = 'Bearer ${token.trim()}';
       }
       request.headers['Accept'] = 'application/json';
       request.fields.addAll(body);
-      
-      if (photo.isNotEmpty && !photo.startsWith("http") && File(photo).existsSync()) {
+
+      if (photo.isNotEmpty &&
+          !photo.startsWith("http") &&
+          File(photo).existsSync()) {
         request.files.add(
           await http.MultipartFile.fromPath('photo', photo),
         );
@@ -494,7 +560,7 @@ class BusinessSignUpController extends GetxController {
 
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
-      
+
       debugPrint('Update Profile Status Code: ${res.statusCode}');
       debugPrint('Update Profile Response: ${responseDone.body}');
 
@@ -512,7 +578,10 @@ class BusinessSignUpController extends GetxController {
           final success = responseData['success'];
 
           bool isFailed = (code != null && code != 200 && code != '200') ||
-              (status == false || status == 'false' || status == 0 || status == '0') ||
+              (status == false ||
+                  status == 'false' ||
+                  status == 0 ||
+                  status == '0') ||
               (success == false || success == 'false');
 
           if (isFailed) {
@@ -541,7 +610,7 @@ class BusinessSignUpController extends GetxController {
       isButtonLoading.value = false;
     }
   }
-  
+
   void clearFields() {
     txtFullName.value.clear();
     txtCompanyName.value.clear();
@@ -585,8 +654,8 @@ class BusinessSignUpController extends GetxController {
   /// Priority: local flag first, then API check.
   Future<Map<String, dynamic>> checkProfileBusinessProfileApi() async {
     // 1️⃣  Local flag check (instant, no network needed)
-    final localFlag =
-        await SharPreferences.getBoolean(SharPreferences.businessRequestSubmitted);
+    final localFlag = await SharPreferences.getBoolean(
+        SharPreferences.businessRequestSubmitted);
     if (localFlag == true) {
       debugPrint('Local flag says request already submitted — blocking.');
       return {

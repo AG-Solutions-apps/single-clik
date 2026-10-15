@@ -19,7 +19,6 @@ class ServicesScreen extends StatefulWidget {
 }
 
 class ServicesScreenState extends State<ServicesScreen> {
-
   ServicesController servicesController = Get.put(ServicesController());
 
   @override
@@ -63,63 +62,63 @@ class ServicesScreenState extends State<ServicesScreen> {
       body: Obx(
         () => servicesController.isLoading.value
             ? const Center(
-          child: CircularProgressIndicator(),
-        )
+                child: CircularProgressIndicator(),
+              )
             : Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: ListView.builder(
-            itemCount: servicesController.servicesList.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) => GestureDetector(
-              onTap: () {
-                Get.to(() => UserListScreen(
-                  categoryId: (servicesController.servicesList[index]
-                  ['category'] ??
-                      "")
-                      .toString(),
-                  categoryName: (servicesController.servicesList[index]
-                  ['category'] ??
-                      "")
-                      .toString(),
-                ));
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: ConstantColor.whiteColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                      ConstantColor.blackColor.withAlpha(26),
-                      offset: Offset(0, 5),
-                      spreadRadius: 0,
-                      blurRadius: 10,
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 10),
-                margin: const EdgeInsets.symmetric(
-                    vertical: 5, horizontal: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      servicesController.servicesList[index]['subcategory'] ??
-                          "",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: ConstantColor.primary,
+                padding: const EdgeInsets.only(top: 10),
+                child: ListView.builder(
+                  itemCount: servicesController.servicesList.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) => GestureDetector(
+                    onTap: () {
+                      Get.to(() => UserListScreen(
+                            categoryId: (servicesController.servicesList[index]
+                                        ['category'] ??
+                                    "")
+                                .toString(),
+                            categoryName: (servicesController
+                                        .servicesList[index]['category'] ??
+                                    "")
+                                .toString(),
+                          ));
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: ConstantColor.whiteColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: ConstantColor.blackColor.withAlpha(26),
+                            offset: Offset(0, 5),
+                            spreadRadius: 0,
+                            blurRadius: 10,
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      textAlign: TextAlign.center,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            servicesController.servicesList[index]
+                                    ['subcategory'] ??
+                                "",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: ConstantColor.primary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
       ),
     );
   }

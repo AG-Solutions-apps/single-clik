@@ -39,7 +39,6 @@ class UpdateProfileController extends GetxController {
   final filePath = "".obs;
   Rx<CroppedFile>? croppedProfileFile = CroppedFile("").obs;
 
-
   Future<void> cropImage(XFile? pickedFile) async {
     if (pickedFile != null) {
       final croppedFile = await ImageCropper().cropImage(
@@ -100,7 +99,8 @@ class UpdateProfileController extends GetxController {
     try {
       final token = await SharPreferences.getString(SharPreferences.token);
       if (token == null || token.trim().isEmpty) {
-        ShowToast.showToast("Authentication error. Please login again.", showSuccess: false);
+        ShowToast.showToast("Authentication error. Please login again.",
+            showSuccess: false);
         isButtonLoading.value = false;
         return;
       }
@@ -112,12 +112,14 @@ class UpdateProfileController extends GetxController {
       });
       request.fields.addAll(body);
       debugPrint(photo);
-      (photo.isEmpty || photo.startsWith("http")) ? null : request.files.add(
-        await http.MultipartFile.fromPath(
-          'photo',
-          photo,
-        ),
-      );
+      (photo.isEmpty || photo.startsWith("http"))
+          ? null
+          : request.files.add(
+              await http.MultipartFile.fromPath(
+                'photo',
+                photo,
+              ),
+            );
 
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
@@ -211,8 +213,7 @@ class UpdateProfileController extends GetxController {
         isCategoryLoading.value = false;
         // ShowToast.showToast(responseData['msg'] ?? 'Something went wrong.',showSuccess: false,);
       }
-    }
-    catch (e) {
+    } catch (e) {
       isCategoryLoading.value = false;
       // ShowToast.showToast('Something went wrong.',showSuccess: false,);
       debugPrint(e.toString());

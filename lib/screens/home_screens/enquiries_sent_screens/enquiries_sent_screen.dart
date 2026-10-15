@@ -18,9 +18,10 @@ class EnquiriesSentScreen extends StatefulWidget {
 }
 
 class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
-  EnquiriesSentController enquiriesSentController = Get.put(EnquiriesSentController());
+  EnquiriesSentController enquiriesSentController =
+      Get.put(EnquiriesSentController());
   HomeController homeController = Get.put(HomeController());
-  
+
   Timer? _autoRefreshTimer;
   String _currentStatus = "1";
   bool _isRefreshing = false;
@@ -28,14 +29,14 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Start auto-refresh timer
     _startAutoRefresh();
-    
+
     // Listen to tab changes
     enquiriesSentController.tabController.addListener(_handleTabChange);
   }
-  
+
   void _handleTabChange() {
     if (!enquiriesSentController.tabController.indexIsChanging) {
       if (enquiriesSentController.tabController.index == 0) {
@@ -45,19 +46,21 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
       }
     }
   }
-  
+
   void _startAutoRefresh() {
     // Auto-refresh every 3 seconds
     _autoRefreshTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (mounted && !_isRefreshing && !enquiriesSentController.isAutoRefreshing.value) {
+      if (mounted &&
+          !_isRefreshing &&
+          !enquiriesSentController.isAutoRefreshing.value) {
         _autoRefreshData();
       }
     });
   }
-  
+
   Future<void> _autoRefreshData() async {
     if (_isRefreshing) return;
-    
+
     _isRefreshing = true;
     try {
       // Silently refresh both tabs data
@@ -65,10 +68,9 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
         enquiriesSentController.postSentApi("1", isAutoRefresh: true),
         enquiriesSentController.postSentApi("2", isAutoRefresh: true),
       ]);
-      
+
       // Update home controller unread count
       await homeController.getSentEnquiriesUnreadCount("1");
-      
     } catch (e) {
       debugPrint('Auto-refresh error: $e');
     } finally {
@@ -88,9 +90,9 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffF8FAFC), // Matches the new UI background
       body: Obx(
-        () => (enquiriesSentController.isLoading.value && 
-               enquiriesSentController.openSentList.isEmpty && 
-               enquiriesSentController.closeSentList.isEmpty)
+        () => (enquiriesSentController.isLoading.value &&
+                enquiriesSentController.openSentList.isEmpty &&
+                enquiriesSentController.closeSentList.isEmpty)
             ? const Center(
                 child: CircularProgressIndicator(),
               )
@@ -108,7 +110,7 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
       ),
     );
   }
-  
+
   Widget _buildOpenTab() {
     return RefreshIndicator(
       onRefresh: () async {
@@ -125,7 +127,7 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 final enquiry = enquiriesSentController.openSentList[index];
-                
+
                 return _buildEnquiryCard(
                   itemData: enquiry,
                   isOpen: true,
@@ -136,9 +138,8 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
                       description: 'Do you want to close this enquiry?',
                       onPressed: () async {
                         Get.back();
-                        await enquiriesSentController.postCloseSentApi(
-                          enquiry['id'].toString()
-                        );
+                        await enquiriesSentController
+                            .postCloseSentApi(enquiry['id'].toString());
                       },
                     );
                   },
@@ -154,7 +155,8 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
                       },
                     )?.then((value) async {
                       // Refresh data when coming back
-                      await enquiriesSentController.postSentApi("1", isAutoRefresh: false);
+                      await enquiriesSentController.postSentApi("1",
+                          isAutoRefresh: false);
                       await homeController.getSentEnquiriesUnreadCount("1");
                     });
                   },
@@ -163,7 +165,7 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
             ),
     );
   }
-  
+
   Widget _buildClosedTab() {
     return RefreshIndicator(
       onRefresh: () async {
@@ -179,7 +181,7 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 final enquiry = enquiriesSentController.closeSentList[index];
-                
+
                 return _buildEnquiryCard(
                   itemData: enquiry,
                   isOpen: false,
@@ -194,7 +196,8 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
                         'user_id': enquiry['user_id']?.toString() ?? '',
                       },
                     )?.then((value) async {
-                      await enquiriesSentController.postSentApi("2", isAutoRefresh: false);
+                      await enquiriesSentController.postSentApi("2",
+                          isAutoRefresh: false);
                     });
                   },
                 );
@@ -230,11 +233,13 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
     VoidCallback? onClose, // Optional close button for open enquiries
   }) {
     // Formatting variables
-    String category = itemData['category'] == null || itemData['category'].toString().trim().isEmpty
+    String category = itemData['category'] == null ||
+            itemData['category'].toString().trim().isEmpty
         ? 'Category ${ConstantString.naLabel}'
         : itemData['category'].toString();
 
-    String subCategory = itemData['subcategory'] == null || itemData['subcategory'].toString().trim().isEmpty
+    String subCategory = itemData['subcategory'] == null ||
+            itemData['subcategory'].toString().trim().isEmpty
         ? 'Sub Category ${ConstantString.naLabel}'
         : itemData['subcategory'].toString();
 
@@ -242,13 +247,14 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
 
     String formattedDate = "";
     try {
-      formattedDate = DateFormat('dd MMM yyyy').format(
-          DateTime.parse(itemData['created_at'].toString()));
+      formattedDate = DateFormat('dd MMM yyyy')
+          .format(DateTime.parse(itemData['created_at'].toString()));
     } catch (e) {
       formattedDate = DateFormat('dd MMM yyyy').format(DateTime.now());
     }
 
-    int unreadCount = int.tryParse(itemData['unread_reply_count'].toString()) ?? 0;
+    int unreadCount =
+        int.tryParse(itemData['unread_reply_count'].toString()) ?? 0;
     bool hasUnread = unreadCount > 0;
 
     return GestureDetector(
@@ -259,7 +265,8 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: hasUnread
-              ? Border.all(color: ConstantColor.primary.withOpacity(0.5), width: 1.5)
+              ? Border.all(
+                  color: ConstantColor.primary.withOpacity(0.5), width: 1.5)
               : null,
           boxShadow: [
             BoxShadow(
@@ -306,15 +313,17 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
                             ),
                           ),
                           child: ClipOval(
-                            child: itemData['photo'] != null && itemData['photo'].toString().isNotEmpty
+                            child: itemData['photo'] != null &&
+                                    itemData['photo'].toString().isNotEmpty
                                 ? AppImageAsset(
-                                    image: "${ConstantString.userImgUrlPath}${itemData['photo']}",
+                                    image:
+                                        "${ConstantString.userImgUrlPath}${itemData['photo']}",
                                     isFile: false,
                                     fit: BoxFit.cover,
                                   )
                                 : const Center(
                                     child: Icon(
-                                      Icons.assignment_outlined, 
+                                      Icons.assignment_outlined,
                                       color: Color(0xffA8C0F0),
                                       size: 24,
                                     ),
@@ -390,7 +399,7 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
                                       ),
                                     ),
                                   ),
-                                  
+
                                 /// Open/Closed Badge
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -414,7 +423,7 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
                                 ),
                               ],
                             ),
-                            
+
                             /// Unread Badge Indicator
                             if (hasUnread) ...[
                               const SizedBox(height: 6),
@@ -517,7 +526,6 @@ class EnquiriesSentScreenState extends State<EnquiriesSentScreen> {
 class _BottomWavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-
     /// BACK WAVE
     final path1 = Path();
     path1.moveTo(0, size.height * 0.55);
@@ -540,10 +548,7 @@ class _BottomWavePainter extends CustomPainter {
     path1.lineTo(0, size.height);
     path1.close();
 
-    canvas.drawPath(
-      path1,
-      Paint()..color = const Color(0xFFF4F7FD)
-    );
+    canvas.drawPath(path1, Paint()..color = const Color(0xFFF4F7FD));
 
     /// MIDDLE WAVE
     final path2 = Path();
@@ -594,10 +599,7 @@ class _BottomWavePainter extends CustomPainter {
     path3.lineTo(size.width, size.height);
     path3.close();
 
-    canvas.drawPath(
-      path3,
-      Paint()..color = const Color(0xFFDCE7F7)
-    );
+    canvas.drawPath(path3, Paint()..color = const Color(0xFFDCE7F7));
   }
 
   @override

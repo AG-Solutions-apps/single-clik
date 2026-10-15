@@ -16,7 +16,8 @@ class EnquiriesSentGroupController extends GetxController {
   bool _isDisposed = false;
   bool _isTimerStarted = false;
 
-  Future postGroupSentApi(String? enquiryId, {bool isAutoRefresh = false}) async {
+  Future postGroupSentApi(String? enquiryId,
+      {bool isAutoRefresh = false}) async {
     if (_isDisposed) return;
     if (enquiryId == null || enquiryId.isEmpty) return;
 
@@ -36,11 +37,13 @@ class EnquiriesSentGroupController extends GetxController {
       } else {
         isAutoRefreshing.value = true;
       }
-      
+
       final token = await SharPreferences.getString(SharPreferences.token);
       if (token == null || token.trim().isEmpty) {
-        if (!isAutoRefresh) isLoading.value = false;
-        else isAutoRefreshing.value = false;
+        if (!isAutoRefresh)
+          isLoading.value = false;
+        else
+          isAutoRefreshing.value = false;
         return;
       }
       final request = http.MultipartRequest('POST', Uri.parse(API.groupSent));
@@ -53,7 +56,7 @@ class EnquiriesSentGroupController extends GetxController {
 
       var res = await request.send().timeout(const Duration(seconds: 10));
       var responseDone = await http.Response.fromStream(res);
-      
+
       if (_isDisposed) return;
 
       if (res.statusCode == 200) {
@@ -63,8 +66,7 @@ class EnquiriesSentGroupController extends GetxController {
           debugPrint('SenderGroupList updated: ${sentGroupList.length} items');
         }
       }
-    }
-    catch (e) {
+    } catch (e) {
       debugPrint('Error in postGroupSentApi: $e');
     } finally {
       if (!_isDisposed) {

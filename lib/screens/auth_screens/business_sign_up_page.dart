@@ -59,43 +59,50 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
   @override
   void initState() {
     super.initState();
-    
+
     multiSelectController = MultiSelectController<Map<String, dynamic>>();
-    
+
     if (Get.isRegistered<BusinessSignUpController>()) {
       businessSignUpController = Get.find<BusinessSignUpController>();
     } else {
       businessSignUpController = Get.put(BusinessSignUpController());
     }
-    
+
     if (Get.isRegistered<HomeController>()) {
       homeController = Get.find<HomeController>();
     } else {
       homeController = Get.put(HomeController());
     }
-    
+
     if (widget.newAccount != true) {
       _preFillUserData();
     }
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadCategories();
     });
   }
-  
+
   void _preFillUserData() {
     final userData = homeController.userData;
     if (userData.isNotEmpty) {
-      businessSignUpController.txtCompanyName.value.text = userData['company_name']?.toString() ?? '';
-      businessSignUpController.selectedProfileType.value = _getProfileTypeValue(userData['profile_type']?.toString() ?? '');
-      businessSignUpController.txtWhatsappNo.value.text = userData['whatsapp']?.toString() ?? '';
-      businessSignUpController.txtWebsite.value.text = userData['website']?.toString() ?? '';
-      businessSignUpController.txtAbout.value.text = userData['about_us']?.toString() ?? '';
-      businessSignUpController.txtArea.value.text = userData['area']?.toString() ?? '';
-      businessSignUpController.filePath.value = userData['photo']?.toString() ?? '';
+      businessSignUpController.txtCompanyName.value.text =
+          userData['company_name']?.toString() ?? '';
+      businessSignUpController.selectedProfileType.value =
+          _getProfileTypeValue(userData['profile_type']?.toString() ?? '');
+      businessSignUpController.txtWhatsappNo.value.text =
+          userData['whatsapp']?.toString() ?? '';
+      businessSignUpController.txtWebsite.value.text =
+          userData['website']?.toString() ?? '';
+      businessSignUpController.txtAbout.value.text =
+          userData['about_us']?.toString() ?? '';
+      businessSignUpController.txtArea.value.text =
+          userData['area']?.toString() ?? '';
+      businessSignUpController.filePath.value =
+          userData['photo']?.toString() ?? '';
     }
   }
-  
+
   String _getProfileTypeValue(String profileType) {
     switch (profileType) {
       case '0':
@@ -127,8 +134,9 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
     try {
       final categories = await businessSignUpController.getCategoryDataApi();
       businessSignUpController.categoryDataList.value = categories;
-      
-      if (widget.newAccount != true && homeController.userData['category_id'] != null) {
+
+      if (widget.newAccount != true &&
+          homeController.userData['category_id'] != null) {
         final categoryId = homeController.userData['category_id'].toString();
         final selectedCat = categories.firstWhere(
           (cat) => cat['id'].toString() == categoryId,
@@ -137,8 +145,10 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
         if (selectedCat.isNotEmpty) {
           businessSignUpController.selectedCategory.value = selectedCat;
           await _loadSubCategories(selectedCat['id'].toString());
-          
-          final subCategoryIds = (homeController.userData['sub_category_id']?.toString() ?? '').split(',');
+
+          final subCategoryIds =
+              (homeController.userData['sub_category_id']?.toString() ?? '')
+                  .split(',');
           if (subCategoryIds.isNotEmpty && subCategoryIds.first.isNotEmpty) {
             await Future.delayed(const Duration(milliseconds: 500));
             final List<DropdownItem<Map<String, dynamic>>> selectedItems = [];
@@ -158,16 +168,16 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
       debugPrint('Error loading categories: $error');
     }
   }
-  
+
   Future<void> _loadSubCategories(String categoryId) async {
     try {
       EasyLoading.show(status: ConstantString.pleaseWaitLabel);
-      final subCategories = await businessSignUpController
-          .getSubCategoryDataCategoryIdWiseApi(
-            parameters: {'category_id': categoryId},
-          );
+      final subCategories =
+          await businessSignUpController.getSubCategoryDataCategoryIdWiseApi(
+        parameters: {'category_id': categoryId},
+      );
       businessSignUpController.subCategoryDataList.value = subCategories;
-      
+
       final List<DropdownItem<Map<String, dynamic>>> items = [];
       for (var element in subCategories) {
         items.add(DropdownItem<Map<String, dynamic>>(
@@ -470,7 +480,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'Please enter your email id';
-            } else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+            } else if (!RegExp(
+                    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                 .hasMatch(value.trim())) {
               return 'Please enter a valid email id';
             }
@@ -535,7 +546,7 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
         child: const Center(child: CircularProgressIndicator()),
       );
     }
-    
+
     if (businessSignUpController.categoryDataList.isNotEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,7 +565,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
           ),
           Container(
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: ConstantColor.grayColor)),
+              border:
+                  Border(bottom: BorderSide(color: ConstantColor.grayColor)),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<Map<String, dynamic>>(
@@ -566,8 +578,10 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                         businessSignUpController.selectedCategory['id'] == null
                     ? null
                     : businessSignUpController.categoryDataList.firstWhere(
-                        (element) => element['id'].toString() == 
-                            businessSignUpController.selectedCategory['id'].toString(),
+                        (element) =>
+                            element['id'].toString() ==
+                            businessSignUpController.selectedCategory['id']
+                                .toString(),
                         orElse: () => <String, dynamic>{},
                       ),
                 items: businessSignUpController.categoryDataList
@@ -644,7 +658,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                 spacing: 10,
               ),
               dropdownItemDecoration: DropdownItemDecoration(
-                selectedIcon: Icon(Icons.check_box_rounded, color: ConstantColor.whiteColor),
+                selectedIcon: Icon(Icons.check_box_rounded,
+                    color: ConstantColor.whiteColor),
                 selectedTextColor: ConstantColor.whiteColor,
                 backgroundColor: ConstantColor.primary.withAlpha(77),
                 selectedBackgroundColor: ConstantColor.primary.withAlpha(230),
@@ -653,7 +668,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                 hintText: "Select one or more",
                 hintStyle: _textFieldHintTextStyle,
                 border: UnderlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: ConstantColor.grayColor),
+                  borderSide:
+                      BorderSide(width: 1, color: ConstantColor.grayColor),
                 ),
               ),
             ),
@@ -730,7 +746,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
         Text.rich(
           TextSpan(
             children: [
-              TextSpan(text: "Whatsapp Number", style: _textFieldLabelTextStyle),
+              TextSpan(
+                  text: "Whatsapp Number", style: _textFieldLabelTextStyle),
               TextSpan(
                 text: "*",
                 style: _textFieldLabelTextStyle.copyWith(color: Colors.red),
@@ -785,7 +802,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
           textCapitalization: TextCapitalization.none,
           style: _textFieldTextStyle,
           textInputAction: TextInputAction.next,
-          decoration: _inputDecoration(hintText: "Enter your Website (optional)"),
+          decoration:
+              _inputDecoration(hintText: "Enter your Website (optional)"),
         ),
       ],
     );
@@ -877,15 +895,19 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                 style: _textFieldTextStyle,
                 textInputAction: TextInputAction.next,
                 onChanged: (val) {
-                  if (businessSignUpController.verifiedReferralCode.value.isNotEmpty &&
-                      val.trim() != businessSignUpController.verifiedReferralCode.value) {
+                  if (businessSignUpController
+                          .verifiedReferralCode.value.isNotEmpty &&
+                      val.trim() !=
+                          businessSignUpController.verifiedReferralCode.value) {
                     businessSignUpController.resetReferralStatus();
-                  } else if (businessSignUpController.referralMessage.value.isNotEmpty &&
+                  } else if (businessSignUpController
+                          .referralMessage.value.isNotEmpty &&
                       val.trim().isEmpty) {
                     businessSignUpController.resetReferralStatus();
                   }
                 },
-                decoration: _inputDecoration(hintText: "Enter referral code (optional)"),
+                decoration: _inputDecoration(
+                    hintText: "Enter referral code (optional)"),
               ),
             ),
             const SizedBox(width: 8),
@@ -908,7 +930,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: ConstantColor.primary.withOpacity(0.1),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -978,7 +1001,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
               child: GestureDetector(
                 onTap: () async {
                   final ImagePicker picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                  final XFile? image =
+                      await picker.pickImage(source: ImageSource.gallery);
                   if (image != null) {
                     await businessSignUpController.cropImage(image);
                   }
@@ -990,17 +1014,22 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                     color: const Color(0xffFFF0E9),
                     borderRadius: BorderRadius.circular(7),
                   ),
-                  child: businessSignUpController.croppedProfileFile.value?.path != null &&
-                          businessSignUpController.croppedProfileFile.value!.path.isNotEmpty
-                      ? Image.file(
-                          File(businessSignUpController.croppedProfileFile.value!.path),
-                          height: 160,
-                          width: 160,
-                          fit: BoxFit.cover,
-                        )
-                      : const Center(
-                          child: Icon(Icons.camera_alt, size: 30, color: Colors.grey),
-                        ),
+                  child:
+                      businessSignUpController.croppedProfileFile.value?.path !=
+                                  null &&
+                              businessSignUpController
+                                  .croppedProfileFile.value!.path.isNotEmpty
+                          ? Image.file(
+                              File(businessSignUpController
+                                  .croppedProfileFile.value!.path),
+                              height: 160,
+                              width: 160,
+                              fit: BoxFit.cover,
+                            )
+                          : const Center(
+                              child: Icon(Icons.camera_alt,
+                                  size: 30, color: Colors.grey),
+                            ),
                 ),
               ),
             ),
@@ -1039,8 +1068,10 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                             height: Get.width / 3,
                             width: Get.width / 3,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => const Center(
-                              child: Icon(Icons.person, size: 50, color: Colors.grey),
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Center(
+                              child: Icon(Icons.person,
+                                  size: 50, color: Colors.grey),
                             ),
                           ))
                     : const Center(
@@ -1054,7 +1085,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
             child: GestureDetector(
               onTap: () async {
                 final ImagePicker picker = ImagePicker();
-                final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                final XFile? image =
+                    await picker.pickImage(source: ImageSource.gallery);
                 if (image != null) {
                   businessSignUpController.filePath.value = image.path;
                 }
@@ -1127,8 +1159,9 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
             GestureDetector(
               onTap: () {
                 final controller = _getWebViewController();
-                controller.loadRequest(Uri.parse(ConstantString.businessTermsUrl));
-                
+                controller
+                    .loadRequest(Uri.parse(ConstantString.businessTermsUrl));
+
                 showDialog(
                   context: context,
                   builder: (context) {
@@ -1202,64 +1235,70 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
     if (!formKey.currentState!.validate()) {
       return;
     }
-    
+
     if (!checkTermsCondition.value) {
-      ShowToast.showToast("Please accept our terms & conditions", showSuccess: false);
+      ShowToast.showToast("Please accept our terms & conditions",
+          showSuccess: false);
       return;
     }
-    
+
     if (businessSignUpController.selectedProfileType.value.isEmpty) {
       ShowToast.showToast("Please select profile type", showSuccess: false);
       return;
     }
-    
+
     if (businessSignUpController.categoryDataList.isEmpty &&
         businessSignUpController.txtOtherCategory.value.text.trim().isEmpty) {
       ShowToast.showToast("Please enter category", showSuccess: false);
       return;
     }
-    
+
     if (businessSignUpController.categoryDataList.isNotEmpty &&
         businessSignUpController.selectedCategory.isEmpty) {
       ShowToast.showToast("Please select category", showSuccess: false);
       return;
     }
-    
+
     if (businessSignUpController.subCategoryDataList.isEmpty &&
-        businessSignUpController.txtOtherSubCategory.value.text.trim().isEmpty &&
+        businessSignUpController.txtOtherSubCategory.value.text
+            .trim()
+            .isEmpty &&
         businessSignUpController.selectedCategory.isNotEmpty) {
       ShowToast.showToast("Please enter sub category", showSuccess: false);
       return;
     }
-    
+
     if (businessSignUpController.subCategoryDataList.isNotEmpty &&
         multiSelectController.selectedItems.isEmpty) {
       ShowToast.showToast("Please select sub category", showSuccess: false);
       return;
     }
-    
+
     if (businessSignUpController.txtWhatsappNo.value.text.trim().isEmpty ||
         businessSignUpController.txtWhatsappNo.value.text.trim().length != 10) {
-      ShowToast.showToast("Please enter valid whatsapp number", showSuccess: false);
+      ShowToast.showToast("Please enter valid whatsapp number",
+          showSuccess: false);
       return;
     }
-    
+
     if (businessSignUpController.txtAbout.value.text.trim().isEmpty) {
-      ShowToast.showToast("Please enter about your business", showSuccess: false);
+      ShowToast.showToast("Please enter about your business",
+          showSuccess: false);
       return;
     }
-    
+
     if (businessSignUpController.txtArea.value.text.trim().isEmpty) {
       ShowToast.showToast("Please enter your area", showSuccess: false);
       return;
     }
-    
+
     FocusScope.of(context).unfocus();
-    
+
     // For existing users converting to business: block if already submitted
     if (widget.newAccount != true) {
       EasyLoading.show(status: ConstantString.pleaseWaitLabel);
-      final checkResult = await businessSignUpController.checkProfileBusinessProfileApi();
+      final checkResult =
+          await businessSignUpController.checkProfileBusinessProfileApi();
       EasyLoading.dismiss();
       if (checkResult['status'] == true) {
         if (mounted) {
@@ -1268,21 +1307,25 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
         return;
       }
     }
-    
+
     try {
       final bool isUpdateProfile = widget.newAccount != true;
-      
+
       String referralCodeToSend = "";
       if (isUpdateProfile) {
-        referralCodeToSend = homeController.userData['referred_by_code']?.toString() ?? '';
+        referralCodeToSend =
+            homeController.userData['referred_by_code']?.toString() ?? '';
       } else {
-        String enteredCode = businessSignUpController.txtReferredCode.value.text.trim();
+        String enteredCode =
+            businessSignUpController.txtReferredCode.value.text.trim();
         if (enteredCode.isNotEmpty) {
           if (businessSignUpController.isReferralVerified.value &&
-              enteredCode == businessSignUpController.verifiedReferralCode.value) {
+              enteredCode ==
+                  businessSignUpController.verifiedReferralCode.value) {
             referralCodeToSend = enteredCode;
           } else {
-            bool isValid = await businessSignUpController.checkReferralApi(enteredCode);
+            bool isValid =
+                await businessSignUpController.checkReferralApi(enteredCode);
             if (isValid) {
               referralCodeToSend = enteredCode;
             } else {
@@ -1298,17 +1341,20 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
         'name': isUpdateProfile
             ? (homeController.userData['name']?.toString() ?? '')
             : businessSignUpController.txtFullName.value.text.trim(),
-        'company_name': businessSignUpController.txtCompanyName.value.text.trim(),
+        'company_name':
+            businessSignUpController.txtCompanyName.value.text.trim(),
         'mobile': isUpdateProfile
             ? (homeController.userData['mobile']?.toString() ?? '')
             : businessSignUpController.txtMobileNo.value.text.trim(),
         'email': isUpdateProfile
             ? (homeController.userData['email']?.toString() ?? '')
             : businessSignUpController.txtEmailId.value.text.trim(),
-        'profile_type': _getProfileTypeValueForApi(businessSignUpController.selectedProfileType.value),
+        'profile_type': _getProfileTypeValueForApi(
+            businessSignUpController.selectedProfileType.value),
         'category': businessSignUpController.categoryDataList.isEmpty
             ? ''
-            : (businessSignUpController.selectedCategory['id']?.toString() ?? ''),
+            : (businessSignUpController.selectedCategory['id']?.toString() ??
+                ''),
         'other_category': businessSignUpController.categoryDataList.isNotEmpty
             ? ''
             : businessSignUpController.txtOtherCategory.value.text.trim(),
@@ -1318,7 +1364,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
             : multiSelectController.selectedItems
                 .map((e) => e.value['id']?.toString() ?? '0')
                 .join(','),
-        'other_sub_category': businessSignUpController.categoryDataList.isNotEmpty &&
+        'other_sub_category': businessSignUpController
+                    .categoryDataList.isNotEmpty &&
                 businessSignUpController.subCategoryDataList.isNotEmpty
             ? ''
             : businessSignUpController.txtOtherSubCategory.value.text.trim(),
@@ -1330,67 +1377,82 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
             : businessSignUpController.txtArea.value.text.trim(),
         'referred_by_code': referralCodeToSend,
       };
-      
+
       debugPrint('Request Body: $bodyParams');
-      
+
       String photoPath = "";
       if (isUpdateProfile) {
         photoPath = businessSignUpController.filePath.value;
       } else {
-        photoPath = businessSignUpController.croppedProfileFile.value?.path ?? "";
+        photoPath =
+            businessSignUpController.croppedProfileFile.value?.path ?? "";
       }
-      
+
       EasyLoading.show(status: ConstantString.pleaseWaitLabel);
-      
+
       if (isUpdateProfile) {
-        final response = await businessSignUpController.postUpdateProfileApi(bodyParams, photoPath);
+        final response = await businessSignUpController.postUpdateProfileApi(
+            bodyParams, photoPath);
         await EasyLoading.dismiss();
-        
+
         if (response['code'] == 200) {
           // ✅ Mark locally so user cannot re-submit
           await BusinessSignUpController.markBusinessRequestSubmitted();
           await homeController.postFetchProfileApi(forceRefresh: true);
-          ShowToast.showToast(response['msg'] ?? "Request submitted successfully! Please wait for admin approval.", showSuccess: true);
-          
+          ShowToast.showToast(
+              response['msg'] ??
+                  "Request submitted successfully! Please wait for admin approval.",
+              showSuccess: true);
+
           if (mounted) {
             Get.offAll(() => const HomeTabBarScreen());
           }
         } else {
-          ShowToast.showToast(response['msg'] ?? ConstantString.somethingWantWrongMsg, showSuccess: false);
+          ShowToast.showToast(
+              response['msg'] ?? ConstantString.somethingWantWrongMsg,
+              showSuccess: false);
         }
       } else {
-        final response = await businessSignUpController.postBusinessSignUpApi(bodyParams, photoPath);
+        final response = await businessSignUpController.postBusinessSignUpApi(
+            bodyParams, photoPath);
         await EasyLoading.dismiss();
-        
+
         // Account created successfully
-        if (response['code'] == 200 && businessSignUpController.isAccountCreated.value) {
+        if (response['code'] == 200 &&
+            businessSignUpController.isAccountCreated.value) {
           // ✅ Mark locally so user cannot re-submit
           await BusinessSignUpController.markBusinessRequestSubmitted();
-          ShowToast.showToast(response['msg'] ?? "Account created successfully! Please login.", showSuccess: true);
-          
+          ShowToast.showToast(
+              response['msg'] ?? "Account created successfully! Please login.",
+              showSuccess: true);
+
           // Get mobile number
           String mobileNumber = bodyParams['mobile'] ?? '';
-          
+
           // Navigate to Mobile Number Screen
           if (mounted) {
             Get.offAll(() => const MobileNumberScreen());
-            
+
             // After navigation, pre-fill the mobile number
             Future.delayed(const Duration(milliseconds: 500), () {
               if (Get.isRegistered<MobileNumberController>()) {
-                final mobileNumberController = Get.find<MobileNumberController>();
-                mobileNumberController.mobileNumberController.value.text = mobileNumber;
+                final mobileNumberController =
+                    Get.find<MobileNumberController>();
+                mobileNumberController.mobileNumberController.value.text =
+                    mobileNumber;
               }
             });
           }
         } else {
-          ShowToast.showToast(response['msg'] ?? ConstantString.somethingWantWrongMsg, showSuccess: false);
+          ShowToast.showToast(
+              response['msg'] ?? ConstantString.somethingWantWrongMsg,
+              showSuccess: false);
         }
       }
     } catch (error) {
       await EasyLoading.dismiss();
       debugPrint('Submit Error: $error');
-      
+
       String errorMsg = error.toString();
       if (errorMsg.startsWith("Exception: ")) {
         errorMsg = errorMsg.replaceFirst("Exception: ", "");
@@ -1398,7 +1460,7 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
       ShowToast.showToast(errorMsg, showSuccess: false);
     }
   }
-  
+
   String _getProfileTypeValueForApi(String profileType) {
     switch (profileType.toLowerCase()) {
       case 'business':
@@ -1419,7 +1481,7 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
   );
 
   final TextStyle _textFieldHintTextStyle = const TextStyle(fontSize: 14);
-  
+
   final TextStyle _textFieldTextStyle = TextStyle(
     fontSize: 21,
     color: ConstantColor.blackColor,
@@ -1438,9 +1500,10 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
   );
 
   // ── Already-Submitted protection dialog ─────────────────────────
-  ProfileController get _profileController => Get.isRegistered<ProfileController>()
-      ? Get.find<ProfileController>()
-      : Get.put(ProfileController());
+  ProfileController get _profileController =>
+      Get.isRegistered<ProfileController>()
+          ? Get.find<ProfileController>()
+          : Get.put(ProfileController());
 
   void _showAlreadySubmittedDialog(BuildContext context) {
     showDialog(
@@ -1453,8 +1516,7 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
           insetPadding: EdgeInsets.symmetric(horizontal: Get.width / 15),
           backgroundColor: Colors.white,
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1484,8 +1546,8 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                 Text(
                   "Your business account request is already submitted. Please wait for admin approval, or contact our support team for immediate assistance.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 14, color: Colors.grey, height: 1.4),
+                  style:
+                      TextStyle(fontSize: 14, color: Colors.grey, height: 1.4),
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -1494,8 +1556,7 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                       child: OutlinedButton(
                         onPressed: () => Get.back(),
                         style: OutlinedButton.styleFrom(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           side: BorderSide(color: Colors.grey[300]!),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8)),
@@ -1521,8 +1582,7 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                               if (await canLaunchUrl(url)) {
                                 await launchUrl(url);
                               } else {
-                                ShowToast.showToast(
-                                    "Could not launch dialer",
+                                ShowToast.showToast("Could not launch dialer",
                                     showSuccess: false);
                               }
                             }
@@ -1534,8 +1594,7 @@ class _BusinessSignUpPageState extends State<BusinessSignUpPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ConstantColor.primary,
                           foregroundColor: Colors.white,
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),

@@ -43,7 +43,8 @@ class EnquiriesReceivedScreenState extends State<EnquiriesReceivedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF8FAFC), // Lighter background to match UI
+      backgroundColor:
+          const Color(0xffF8FAFC), // Lighter background to match UI
       body: Obx(
         () => enquiriesReceivedController.isLoading.value
             ? const Center(
@@ -96,18 +97,24 @@ class EnquiriesReceivedScreenState extends State<EnquiriesReceivedScreen> {
                         /// ── OPEN TAB ──
                         RefreshIndicator(
                           onRefresh: () async {
-                            await enquiriesReceivedController.postReceivedApi("1");
-                            await homeController.getSentEnquiriesUnreadCount("1");
+                            await enquiriesReceivedController
+                                .postReceivedApi("1");
+                            await homeController
+                                .getSentEnquiriesUnreadCount("1");
                           },
                           backgroundColor: ConstantColor.whiteColor,
                           color: ConstantColor.primary,
-                          child: enquiriesReceivedController.openReceivedList.isEmpty
+                          child: enquiriesReceivedController
+                                  .openReceivedList.isEmpty
                               ? _buildEmptyState()
                               : ListView.builder(
-                                  padding: const EdgeInsets.only(top: 8, bottom: 20),
-                                  itemCount: enquiriesReceivedController.openReceivedList.length,
+                                  padding:
+                                      const EdgeInsets.only(top: 8, bottom: 20),
+                                  itemCount: enquiriesReceivedController
+                                      .openReceivedList.length,
                                   itemBuilder: (context, index) {
-                                    final itemData = enquiriesReceivedController.openReceivedList[index];
+                                    final itemData = enquiriesReceivedController
+                                        .openReceivedList[index];
                                     return _buildEnquiryCard(
                                       itemData: itemData,
                                       isOpen: true,
@@ -117,8 +124,10 @@ class EnquiriesReceivedScreenState extends State<EnquiriesReceivedScreen> {
                                               userData: itemData, isChat: true),
                                           arguments: itemData,
                                         )?.then((value) async {
-                                          await enquiriesReceivedController.postReceivedApi("1");
-                                          await homeController.getSentEnquiriesUnreadCount("1");
+                                          await enquiriesReceivedController
+                                              .postReceivedApi("1");
+                                          await homeController
+                                              .getSentEnquiriesUnreadCount("1");
                                         });
                                       },
                                     );
@@ -129,29 +138,38 @@ class EnquiriesReceivedScreenState extends State<EnquiriesReceivedScreen> {
                         /// ── CLOSED TAB ──
                         RefreshIndicator(
                           onRefresh: () async {
-                            await enquiriesReceivedController.postReceivedApi("2");
-                            await homeController.getSentEnquiriesUnreadCount("1");
+                            await enquiriesReceivedController
+                                .postReceivedApi("2");
+                            await homeController
+                                .getSentEnquiriesUnreadCount("1");
                           },
                           backgroundColor: ConstantColor.whiteColor,
                           color: ConstantColor.primary,
-                          child: enquiriesReceivedController.closeReceivedList.isEmpty
+                          child: enquiriesReceivedController
+                                  .closeReceivedList.isEmpty
                               ? _buildEmptyState()
                               : ListView.builder(
-                                  padding: const EdgeInsets.only(top: 8, bottom: 20),
-                                  itemCount: enquiriesReceivedController.closeReceivedList.length,
+                                  padding:
+                                      const EdgeInsets.only(top: 8, bottom: 20),
+                                  itemCount: enquiriesReceivedController
+                                      .closeReceivedList.length,
                                   itemBuilder: (context, index) {
-                                    final itemData = enquiriesReceivedController.closeReceivedList[index];
+                                    final itemData = enquiriesReceivedController
+                                        .closeReceivedList[index];
                                     return _buildEnquiryCard(
                                       itemData: itemData,
                                       isOpen: false,
                                       onTap: () async {
                                         await Get.to(
                                           () => ChatReceivedScreen(
-                                              userData: itemData, isChat: false),
+                                              userData: itemData,
+                                              isChat: false),
                                           arguments: itemData,
                                         )?.then((value) async {
-                                          await enquiriesReceivedController.postReceivedApi("2");
-                                          await homeController.getSentEnquiriesUnreadCount("1");
+                                          await enquiriesReceivedController
+                                              .postReceivedApi("2");
+                                          await homeController
+                                              .getSentEnquiriesUnreadCount("1");
                                         });
                                       },
                                     );
@@ -193,15 +211,18 @@ class EnquiriesReceivedScreenState extends State<EnquiriesReceivedScreen> {
     required VoidCallback onTap,
   }) {
     // Formatting variables
-    String name = itemData['name'] == null || itemData['name'].toString().trim().isEmpty
-        ? 'Name ${ConstantString.naLabel}'
-        : itemData['name'].toString();
+    String name =
+        itemData['name'] == null || itemData['name'].toString().trim().isEmpty
+            ? 'Name ${ConstantString.naLabel}'
+            : itemData['name'].toString();
 
-    String category = itemData['category'] == null || itemData['category'].toString().trim().isEmpty
+    String category = itemData['category'] == null ||
+            itemData['category'].toString().trim().isEmpty
         ? 'Category ${ConstantString.naLabel}'
         : itemData['category'].toString();
 
-    String subCategory = itemData['subcategory'] == null || itemData['subcategory'].toString().trim().isEmpty
+    String subCategory = itemData['subcategory'] == null ||
+            itemData['subcategory'].toString().trim().isEmpty
         ? 'Sub Category ${ConstantString.naLabel}'
         : itemData['subcategory'].toString();
 
@@ -209,13 +230,14 @@ class EnquiriesReceivedScreenState extends State<EnquiriesReceivedScreen> {
 
     String formattedDate = "";
     try {
-      formattedDate = DateFormat('dd MMM yyyy').format(
-          DateTime.parse(itemData['created_at'].toString()));
+      formattedDate = DateFormat('dd MMM yyyy')
+          .format(DateTime.parse(itemData['created_at'].toString()));
     } catch (e) {
       formattedDate = DateFormat('dd MMM yyyy').format(DateTime.now());
     }
 
-    int unreadCount = int.tryParse(itemData['unread_reply_count'].toString()) ?? 0;
+    int unreadCount =
+        int.tryParse(itemData['unread_reply_count'].toString()) ?? 0;
 
     return GestureDetector(
       onTap: onTap,
@@ -398,14 +420,14 @@ class EnquiriesReceivedScreenState extends State<EnquiriesReceivedScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                           gradient: LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      const Color(0xff4F86FF), // Light Blue
-      const Color(0xff0B3C9B), // Primary Blue
-    ],
-  ),//
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                const Color(0xff4F86FF), // Light Blue
+                                const Color(0xff0B3C9B), // Primary Blue
+                              ],
+                            ), //
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Row(
@@ -445,7 +467,6 @@ class EnquiriesReceivedScreenState extends State<EnquiriesReceivedScreen> {
 class _BottomWavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-
     /// BACK WAVE
     final path1 = Path();
     path1.moveTo(0, size.height * 0.55);
@@ -468,10 +489,7 @@ class _BottomWavePainter extends CustomPainter {
     path1.lineTo(0, size.height);
     path1.close();
 
-    canvas.drawPath(
-      path1,
-     Paint()..color = const Color(0xFFF4F7FD)
-    );
+    canvas.drawPath(path1, Paint()..color = const Color(0xFFF4F7FD));
 
     /// MIDDLE WAVE
     final path2 = Path();
@@ -522,10 +540,7 @@ class _BottomWavePainter extends CustomPainter {
     path3.lineTo(size.width, size.height);
     path3.close();
 
-    canvas.drawPath(
-      path3,
-     Paint()..color = const Color(0xFFDCE7F7)
-    );
+    canvas.drawPath(path3, Paint()..color = const Color(0xFFDCE7F7));
   }
 
   @override

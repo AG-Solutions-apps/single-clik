@@ -42,6 +42,5 @@ class SharPreferences {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.clear();
   }
-
 }
 //local storage

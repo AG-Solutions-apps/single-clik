@@ -73,19 +73,50 @@ class ProfileController extends GetxController {
     try {
       HomeController homeController = Get.find<HomeController>();
       Map<String, String> bodyParams = {
-        'name': (profileMap['name'] ?? homeController.userData['name'] ?? '').toString().trim(),
-        'company_name': (profileMap['company_name'] ?? homeController.userData['company_name'] ?? '').toString().trim(),
-        'email': (profileMap['email'] ?? homeController.userData['email'] ?? '').toString().trim(),
-        'area': (areaController.value.text.isNotEmpty 
-            ? areaController.value.text 
-            : (profileMap['area'] ?? homeController.userData['area'] ?? '')).toString().trim(),
-        'referred_by_code': (profileMap['referred_by_code'] ?? homeController.userData['referred_by_code'] ?? '').toString().trim(),
-        'profile_type': (profileMap['profile_type'] ?? homeController.userData['profile_type'] ?? '0').toString(),
-        'category': (profileMap['category'] ?? homeController.userData['category'] ?? '0').toString(),
-        'sub_category': (profileMap['sub_category'] ?? homeController.userData['sub_category'] ?? '0').toString(),
-        'whatsapp': (profileMap['whatsapp'] ?? homeController.userData['whatsapp'] ?? '').toString(),
-        'website': (profileMap['website'] ?? homeController.userData['website'] ?? '').toString(),
-        'about_us': (profileMap['about_us'] ?? homeController.userData['about_us'] ?? '').toString(),
+        'name': (profileMap['name'] ?? homeController.userData['name'] ?? '')
+            .toString()
+            .trim(),
+        'company_name': (profileMap['company_name'] ??
+                homeController.userData['company_name'] ??
+                '')
+            .toString()
+            .trim(),
+        'email': (profileMap['email'] ?? homeController.userData['email'] ?? '')
+            .toString()
+            .trim(),
+        'area': (areaController.value.text.isNotEmpty
+                ? areaController.value.text
+                : (profileMap['area'] ?? homeController.userData['area'] ?? ''))
+            .toString()
+            .trim(),
+        'referred_by_code': (profileMap['referred_by_code'] ??
+                homeController.userData['referred_by_code'] ??
+                '')
+            .toString()
+            .trim(),
+        'profile_type': (profileMap['profile_type'] ??
+                homeController.userData['profile_type'] ??
+                '0')
+            .toString(),
+        'category': (profileMap['category'] ??
+                homeController.userData['category'] ??
+                '0')
+            .toString(),
+        'sub_category': (profileMap['sub_category'] ??
+                homeController.userData['sub_category'] ??
+                '0')
+            .toString(),
+        'whatsapp': (profileMap['whatsapp'] ??
+                homeController.userData['whatsapp'] ??
+                '')
+            .toString(),
+        'website':
+            (profileMap['website'] ?? homeController.userData['website'] ?? '')
+                .toString(),
+        'about_us': (profileMap['about_us'] ??
+                homeController.userData['about_us'] ??
+                '')
+            .toString(),
       };
 
       final value = await postUpdateProfileApi(
@@ -105,7 +136,8 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error uploading profile photo: $e');
-      ShowToast.showToast('Failed to upload profile photo.', showSuccess: false);
+      ShowToast.showToast('Failed to upload profile photo.',
+          showSuccess: false);
     } finally {
       isButtonLoading.value = false;
     }
@@ -144,14 +176,16 @@ class ProfileController extends GetxController {
           if (dataField.isNotEmpty) {
             var firstItem = dataField[0];
             if (firstItem is Map) {
-              if (firstItem.containsKey('product_name') || firstItem.containsKey('product_status')) {
+              if (firstItem.containsKey('product_name') ||
+                  firstItem.containsKey('product_status')) {
                 parsedProducts = dataField;
               } else {
                 parsedProfile = Map<String, dynamic>.from(firstItem);
                 if (firstItem.containsKey('products')) {
                   parsedProducts = List.from(firstItem['products'] ?? []);
                 } else if (firstItem.containsKey('product_services')) {
-                  parsedProducts = List.from(firstItem['product_services'] ?? []);
+                  parsedProducts =
+                      List.from(firstItem['product_services'] ?? []);
                 }
               }
             }
@@ -177,11 +211,16 @@ class ProfileController extends GetxController {
           parsedProducts = productsList;
         }
 
-        if (responseData.containsKey('total_points')) parsedProfile['total_points'] = responseData['total_points'];
-        if (responseData.containsKey('claim_points')) parsedProfile['claim_points'] = responseData['claim_points'];
-        if (responseData.containsKey('history_points')) parsedProfile['history_points'] = responseData['history_points'];
-        if (responseData.containsKey('claim_history')) parsedProfile['claim_history'] = responseData['claim_history'];
-        if (responseData.containsKey('image_url')) parsedProfile['image_url'] = responseData['image_url'];
+        if (responseData.containsKey('total_points'))
+          parsedProfile['total_points'] = responseData['total_points'];
+        if (responseData.containsKey('claim_points'))
+          parsedProfile['claim_points'] = responseData['claim_points'];
+        if (responseData.containsKey('history_points'))
+          parsedProfile['history_points'] = responseData['history_points'];
+        if (responseData.containsKey('claim_history'))
+          parsedProfile['claim_history'] = responseData['claim_history'];
+        if (responseData.containsKey('image_url'))
+          parsedProfile['image_url'] = responseData['image_url'];
 
         profileMap.value = parsedProfile;
         filePath.value =
@@ -193,15 +232,14 @@ class ProfileController extends GetxController {
           areaController.value.text = (profileMap['area'] ?? '').toString();
           nameController.value.text = (profileMap['name'] ?? '').toString();
         }
-        
+
         homeController.userData.value = parsedProfile;
         debugPrint('parsedProfile $parsedProfile');
         isLoading.value = false;
       } else {
         isLoading.value = false;
       }
-    }
-    catch (e) {
+    } catch (e) {
       isLoading.value = false;
       // ShowToast.showToast('Something went wrong.',showSuccess: false,);
       debugPrint(e.toString());
@@ -210,11 +248,13 @@ class ProfileController extends GetxController {
 
   Future<List<dynamic>> postFetchProductServicesApi({String? userId}) async {
     try {
-      final token = await SharPreferences.getString(SharPreferences.token) ?? '';
+      final token =
+          await SharPreferences.getString(SharPreferences.token) ?? '';
       if (token.trim().isEmpty) {
         return [];
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.fetchProductServices));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -250,22 +290,24 @@ class ProfileController extends GetxController {
         throw 'Authentication error. Please login again.';
       }
       HomeController homeController = Get.find<HomeController>();
-      final isBusiness = (homeController.userData['user_type'].toString() == '2');
+      final isBusiness =
+          (homeController.userData['user_type'].toString() == '2');
       final apiUrl = isBusiness ? API.updateProfile : API.updateUserProfile;
 
-      final request =
-          http.MultipartRequest('POST', Uri.parse(apiUrl));
+      final request = http.MultipartRequest('POST', Uri.parse(apiUrl));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
       });
       request.fields.addAll(body);
-      (photo.isEmpty || photo.startsWith("http")) ? null : request.files.add(
-        await http.MultipartFile.fromPath(
-          'photo',
-          photo,
-        ),
-      );
+      (photo.isEmpty || photo.startsWith("http"))
+          ? null
+          : request.files.add(
+              await http.MultipartFile.fromPath(
+                'photo',
+                photo,
+              ),
+            );
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
       debugPrint('ResponseDone:,$body $responseDone');
@@ -350,7 +392,8 @@ class ProfileController extends GetxController {
     }
   }
 
-  Future<dynamic> postCreateProductApi(String productName, String imagePath) async {
+  Future<dynamic> postCreateProductApi(
+      String productName, String imagePath) async {
     isButtonLoading.value = true;
     try {
       final token = await SharPreferences.getString(SharPreferences.token);
@@ -358,7 +401,8 @@ class ProfileController extends GetxController {
         isButtonLoading.value = false;
         throw 'Authentication error. Please login again.';
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.createProductServices));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.createProductServices));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -383,7 +427,7 @@ class ProfileController extends GetxController {
       var responseDone = await http.Response.fromStream(res);
       debugPrint('Create Product Response Code: ${res.statusCode}');
       debugPrint('Create Product Response: ${responseDone.body}');
-      
+
       if (res.statusCode == 200 || res.statusCode == 201) {
         if (responseDone.body.trim().isEmpty) {
           return {'code': 200, 'msg': 'Product created successfully'};
@@ -395,7 +439,9 @@ class ProfileController extends GetxController {
             if (code == 200 || code == 201 || code == "200" || code == "201") {
               return responseData;
             } else {
-              String errorMsg = responseData['msg'] ?? responseData['message'] ?? 'Failed with code $code';
+              String errorMsg = responseData['msg'] ??
+                  responseData['message'] ??
+                  'Failed with code $code';
               if (errorMsg.length > 150) {
                 errorMsg = '${errorMsg.substring(0, 150)}...';
               }
@@ -411,9 +457,12 @@ class ProfileController extends GetxController {
         String errorMsg = '';
         try {
           final responseData = json.decode(responseDone.body);
-          errorMsg = responseData['msg'] ?? responseData['message'] ?? 'Status ${res.statusCode}';
+          errorMsg = responseData['msg'] ??
+              responseData['message'] ??
+              'Status ${res.statusCode}';
         } catch (_) {
-          errorMsg = 'Server error (${res.statusCode}): ${responseDone.body.isNotEmpty ? responseDone.body : "Empty Response"}';
+          errorMsg =
+              'Server error (${res.statusCode}): ${responseDone.body.isNotEmpty ? responseDone.body : "Empty Response"}';
         }
         if (errorMsg.length > 150) {
           errorMsg = '${errorMsg.substring(0, 150)}...';
@@ -436,7 +485,8 @@ class ProfileController extends GetxController {
         isButtonLoading.value = false;
         throw 'Authentication error. Please login again.';
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.deleteProductServices));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.deleteProductServices));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -448,7 +498,7 @@ class ProfileController extends GetxController {
       var responseDone = await http.Response.fromStream(res);
       debugPrint('Delete Product Response Code: ${res.statusCode}');
       debugPrint('Delete Product Response: ${responseDone.body}');
-      
+
       if (res.statusCode == 200 || res.statusCode == 201) {
         if (responseDone.body.trim().isEmpty) {
           return {'code': 200, 'msg': 'Product deleted successfully'};
@@ -460,7 +510,9 @@ class ProfileController extends GetxController {
             if (code == 200 || code == 201 || code == "200" || code == "201") {
               return responseData;
             } else {
-              String errorMsg = responseData['msg'] ?? responseData['message'] ?? 'Failed with code $code';
+              String errorMsg = responseData['msg'] ??
+                  responseData['message'] ??
+                  'Failed with code $code';
               if (errorMsg.length > 150) {
                 errorMsg = '${errorMsg.substring(0, 150)}...';
               }
@@ -476,9 +528,12 @@ class ProfileController extends GetxController {
         String errorMsg = '';
         try {
           final responseData = json.decode(responseDone.body);
-          errorMsg = responseData['msg'] ?? responseData['message'] ?? 'Status ${res.statusCode}';
+          errorMsg = responseData['msg'] ??
+              responseData['message'] ??
+              'Status ${res.statusCode}';
         } catch (_) {
-          errorMsg = 'Server error (${res.statusCode}): ${responseDone.body.isNotEmpty ? responseDone.body : "Empty Response"}';
+          errorMsg =
+              'Server error (${res.statusCode}): ${responseDone.body.isNotEmpty ? responseDone.body : "Empty Response"}';
         }
         if (errorMsg.length > 150) {
           errorMsg = '${errorMsg.substring(0, 150)}...';

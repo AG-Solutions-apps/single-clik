@@ -35,7 +35,8 @@ class OTPController extends GetxController {
   void onReady() {
     super.onReady();
     debugPrint('=== OTPController Ready ===');
-    debugPrint('Initial verify ID: ${verify.value.isEmpty ? "Empty" : verify.value}');
+    debugPrint(
+        'Initial verify ID: ${verify.value.isEmpty ? "Empty" : verify.value}');
     debugPrint('Initial resend token: ${resendToken.value}');
     debugPrint('Initial OTP: ${otp.value.isEmpty ? "Empty" : "***"}');
   }
@@ -79,14 +80,15 @@ class OTPController extends GetxController {
 
   void setVerificationData(String verificationId, int token) {
     debugPrint('=== Setting Verification Data ===');
-    debugPrint('Old verificationId: ${verify.value.isEmpty ? "Empty" : verify.value}');
+    debugPrint(
+        'Old verificationId: ${verify.value.isEmpty ? "Empty" : verify.value}');
     debugPrint('New verificationId: $verificationId');
     debugPrint('Old resendToken: ${resendToken.value}');
     debugPrint('New resendToken: $token');
-    
+
     verify.value = verificationId;
     resendToken.value = token;
-    
+
     debugPrint('Verification data updated successfully');
     debugPrint('Current verificationId: ${verify.value}');
     debugPrint('Current resendToken: ${resendToken.value}');
@@ -102,11 +104,11 @@ class OTPController extends GetxController {
   Future<dynamic> postCheckMobileApi(Map<String, String> bodyParams) async {
     debugPrint('=== postCheckMobileApi Called ===');
     debugPrint('Request body: $bodyParams');
-    
+
     try {
       isButtonLoading.value = true;
       debugPrint('isButtonLoading set to true');
-      
+
       final request = http.MultipartRequest('POST', Uri.parse(API.checkMobile));
       request.fields.addAll(bodyParams);
       debugPrint('Request URL: ${API.checkMobile}');
@@ -115,16 +117,16 @@ class OTPController extends GetxController {
       debugPrint('Sending request...');
       var res = await request.send();
       var responseDone = await http.Response.fromStream(res);
-      
+
       debugPrint('Response status code: ${res.statusCode}');
       debugPrint('Response body: ${responseDone.body}');
-      
+
       if (res.statusCode == 200) {
         final responseData = json.decode(responseDone.body);
         debugPrint('Parsed response data: $responseData');
         debugPrint('Response code: ${responseData['code']}');
         debugPrint('Response data: ${responseData['data']}');
-        
+
         isButtonLoading.value = false;
         debugPrint('isButtonLoading set to false');
         return responseData;
@@ -172,7 +174,8 @@ class OTPController extends GetxController {
     }
   }
 
-  Future<Map<String, dynamic>> postLoginApi(Map<String, String> bodyParams) async {
+  Future<Map<String, dynamic>> postLoginApi(
+      Map<String, String> bodyParams) async {
     // Ensure valid FCM token is passed in device_id
     String deviceId = bodyParams['device_id']?.trim() ?? '';
     if (deviceId.isEmpty ||
@@ -188,11 +191,11 @@ class OTPController extends GetxController {
     debugPrint('  mobile: ${bodyParams['mobile']}');
     debugPrint('  password: ${bodyParams['password']?.length ?? 0} characters');
     debugPrint('  device_id (FCM Token): ${bodyParams['device_id']}');
-    
+
     try {
       isButtonLoading.value = true;
       debugPrint('isButtonLoading set to true');
-      
+
       final request = http.MultipartRequest('POST', Uri.parse(API.login));
       request.headers['Accept'] = 'application/json';
       request.fields.addAll(bodyParams);
@@ -206,7 +209,7 @@ class OTPController extends GetxController {
 
       debugPrint('Login response status code: ${res.statusCode}');
       debugPrint('Login response body: ${responseDone.body}');
-      
+
       final responseData = json.decode(responseDone.body);
       debugPrint('Parsed login response: $responseData');
       debugPrint('Response code: ${responseData['code']}');
@@ -215,18 +218,19 @@ class OTPController extends GetxController {
       isButtonLoading.value = false;
       debugPrint('isButtonLoading set to false');
 
-      if (res.statusCode == 200 && (responseData['code'] == 200 || responseData['code'] == '200')) {
+      if (res.statusCode == 200 &&
+          (responseData['code'] == 200 || responseData['code'] == '200')) {
         debugPrint('Login successful! Saving user data...');
-        
+
         await SharPreferences.setBoolean(SharPreferences.isLogin, true);
         debugPrint('Saved isLogin = true');
-        
+
         await SharPreferences.setString(
           SharPreferences.userData,
           jsonEncode(responseData['data']['user']),
         );
         debugPrint('Saved user data');
-        
+
         await SharPreferences.setString(
           SharPreferences.token,
           responseData['data']['token'].toString(),
@@ -237,17 +241,20 @@ class OTPController extends GetxController {
           responseData['data']['user']['id'].toString(),
         );
         debugPrint('Saved user id');
-        
+
         // Save the active FCM token in preferences
-        if (bodyParams['device_id'] != null && bodyParams['device_id']!.trim().isNotEmpty) {
-          await SharPreferences.setString(SharPreferences.fcmToken, bodyParams['device_id']!.trim());
+        if (bodyParams['device_id'] != null &&
+            bodyParams['device_id']!.trim().isNotEmpty) {
+          await SharPreferences.setString(
+              SharPreferences.fcmToken, bodyParams['device_id']!.trim());
           debugPrint('Saved active FCM token');
         }
-        
+
         debugPrint('User ID: ${responseData['data']['user']['id']}');
         debugPrint('User name: ${responseData['data']['user']['name']}');
       } else {
-        debugPrint('Login failed - Code: ${responseData['code']}, Message: ${responseData['msg']}');
+        debugPrint(
+            'Login failed - Code: ${responseData['code']}, Message: ${responseData['msg']}');
       }
 
       return responseData;
@@ -294,7 +301,8 @@ class OTPController extends GetxController {
 
   bool isOTPComplete() {
     bool complete = otp.value.length == 6;
-    debugPrint('OTP complete check: ${otp.value.length}/6 digits - Complete: $complete');
+    debugPrint(
+        'OTP complete check: ${otp.value.length}/6 digits - Complete: $complete');
     return complete;
   }
 }

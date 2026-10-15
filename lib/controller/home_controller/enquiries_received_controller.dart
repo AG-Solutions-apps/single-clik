@@ -63,7 +63,8 @@ class EnquiriesReceivedController extends GetxController
     super.onInit();
   }
 
-  Future postReceivedApi(String enquiriesType, {bool isAutoRefresh = false}) async {
+  Future postReceivedApi(String enquiriesType,
+      {bool isAutoRefresh = false}) async {
     if (_isDisposed) return;
 
     // Prevent concurrent fetches for the same type
@@ -107,7 +108,9 @@ class EnquiriesReceivedController extends GetxController
             final fetchedCount = newData.length;
 
             // Detect new enquiries: if new count > old count, there are new items
-            if (isAutoRefresh && fetchedCount > _lastOpenCount && _lastOpenCount > 0) {
+            if (isAutoRefresh &&
+                fetchedCount > _lastOpenCount &&
+                _lastOpenCount > 0) {
               final delta = fetchedCount - _lastOpenCount;
               newOpenCount.value += delta;
             }
@@ -115,7 +118,8 @@ class EnquiriesReceivedController extends GetxController
             openReceivedList.value = newData;
             _lastOpenCount = fetchedCount;
 
-            debugPrint('✅ Received open enquiries: $fetchedCount (prev: $prevCount)');
+            debugPrint(
+                '✅ Received open enquiries: $fetchedCount (prev: $prevCount)');
           } else if (enquiriesType == "2") {
             closeReceivedList.value = newData;
           }

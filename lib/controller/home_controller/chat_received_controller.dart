@@ -29,7 +29,8 @@ class ChatReceivedController extends GetxController {
   String _lastMessageId = "";
 
   // Cache key for storing messages
-  String get _cacheKey => "chat_received_messages_${Get.arguments['id'] ?? ''}_${Get.arguments['user_id'] ?? ''}";
+  String get _cacheKey =>
+      "chat_received_messages_${Get.arguments['id'] ?? ''}_${Get.arguments['user_id'] ?? ''}";
 
   // Track if controller is disposed
   bool _isDisposed = false;
@@ -101,7 +102,8 @@ class ChatReceivedController extends GetxController {
 
             // Update last message ID
             if (validMessages.isNotEmpty && validMessages.last is Map) {
-              _lastMessageId = (validMessages.last as Map)['id']?.toString() ?? "";
+              _lastMessageId =
+                  (validMessages.last as Map)['id']?.toString() ?? "";
             }
 
             // Scroll to bottom after cache loads
@@ -149,7 +151,7 @@ class ChatReceivedController extends GetxController {
       _charController = null;
     }
     scrollController.dispose();
-    
+
     // Trigger instant refresh of bottom bar and enquiries when user leaves chat screen
     _triggerAllRefresh();
     super.onClose();
@@ -206,7 +208,8 @@ class ChatReceivedController extends GetxController {
       final response = await request.send().timeout(const Duration(seconds: 5));
       final responseBody = await response.stream.bytesToString();
 
-      if (responseBody.trim().startsWith('{') || responseBody.trim().startsWith('[')) {
+      if (responseBody.trim().startsWith('{') ||
+          responseBody.trim().startsWith('[')) {
         try {
           final responseData = json.decode(responseBody);
 
@@ -222,17 +225,17 @@ class ChatReceivedController extends GetxController {
 
               if (newMessages.isNotEmpty) {
                 // Deduplicate optimistic messages if they have been confirmed by the server
-                final optimisticMessages = chatList.where((msg) =>
-                  msg is Map && msg['is_optimistic'] == true
-                ).toList();
+                final optimisticMessages = chatList
+                    .where((msg) => msg is Map && msg['is_optimistic'] == true)
+                    .toList();
 
                 for (var optMsg in optimisticMessages) {
                   final text = optMsg['text']?.toString() ?? '';
                   final isConfirmed = newMessages.any((newMsg) =>
-                    newMsg is Map &&
-                    newMsg['text']?.toString().trim() == text.trim() &&
-                    newMsg['user_id']?.toString() == optMsg['user_id']?.toString()
-                  );
+                      newMsg is Map &&
+                      newMsg['text']?.toString().trim() == text.trim() &&
+                      newMsg['user_id']?.toString() ==
+                          optMsg['user_id']?.toString());
                   if (isConfirmed) {
                     final tempId = optMsg['temp_id']?.toString() ?? '';
                     if (tempId.isNotEmpty) {
@@ -242,19 +245,22 @@ class ChatReceivedController extends GetxController {
                 }
 
                 // Update last message ID
-                if (newMessages.last is Map && (newMessages.last as Map).containsKey('id')) {
+                if (newMessages.last is Map &&
+                    (newMessages.last as Map).containsKey('id')) {
                   _lastMessageId = (newMessages.last as Map)['id'].toString();
                 }
 
                 if (isFromTimer) {
                   // Only add new messages that don't exist yet
-                  final existingIds = chatList.map((msg) =>
-                    msg is Map ? msg['id']?.toString() : null
-                  ).toSet();
+                  final existingIds = chatList
+                      .map((msg) => msg is Map ? msg['id']?.toString() : null)
+                      .toSet();
 
-                  final uniqueNewMessages = newMessages.where((msg) =>
-                    msg is Map && !existingIds.contains(msg['id']?.toString())
-                  ).toList();
+                  final uniqueNewMessages = newMessages
+                      .where((msg) =>
+                          msg is Map &&
+                          !existingIds.contains(msg['id']?.toString()))
+                      .toList();
 
                   if (uniqueNewMessages.isNotEmpty && !_isDisposed) {
                     chatList.addAll(uniqueNewMessages);
@@ -264,9 +270,10 @@ class ChatReceivedController extends GetxController {
                   }
                 } else {
                   // For non-timer refresh, replace all messages but preserve optimistic ones
-                  final optimisticMessages = chatList.where((msg) =>
-                    msg is Map && msg['is_optimistic'] == true
-                  ).toList();
+                  final optimisticMessages = chatList
+                      .where(
+                          (msg) => msg is Map && msg['is_optimistic'] == true)
+                      .toList();
 
                   if (optimisticMessages.isNotEmpty) {
                     // Keep optimistic messages and add new ones
@@ -292,7 +299,6 @@ class ChatReceivedController extends GetxController {
           debugPrint('JSON parsing error: $e');
         }
       }
-
     } on TimeoutException catch (e) {
       debugPrint('Timeout in postChatApi: $e');
     } catch (e) {
@@ -355,7 +361,9 @@ class ChatReceivedController extends GetxController {
 
     try {
       final enquiryId = Get.arguments['id']?.toString() ?? '';
-      final replyId = userMap['user_id']?.toString() ?? Get.arguments['user_id']?.toString() ?? '';
+      final replyId = userMap['user_id']?.toString() ??
+          Get.arguments['user_id']?.toString() ??
+          '';
 
       if (enquiryId.isEmpty || replyId.isEmpty) {
         _removeOptimisticMessage(tempId);
@@ -386,7 +394,8 @@ class ChatReceivedController extends GetxController {
       });
       request.fields.addAll(bodyParams);
 
-      final response = await request.send().timeout(const Duration(seconds: 10));
+      final response =
+          await request.send().timeout(const Duration(seconds: 10));
       final responseBody = await response.stream.bytesToString();
 
       // Cancel the timeout timer
@@ -413,7 +422,6 @@ class ChatReceivedController extends GetxController {
           }
         });
       }
-
     } catch (e) {
       debugPrint('Error sending: $e');
       _optimisticTimers[tempId]?.cancel();
@@ -443,9 +451,7 @@ class ChatReceivedController extends GetxController {
 
       // Remove from lists
       localMessages.removeWhere((msg) => msg['temp_id'] == tempId);
-      chatList.removeWhere((msg) =>
-        msg is Map && msg['temp_id'] == tempId
-      );
+      chatList.removeWhere((msg) => msg is Map && msg['temp_id'] == tempId);
 
       // Save to cache without optimistic messages
       _saveMessagesToCache(chatList);
@@ -486,23 +492,28 @@ class ChatReceivedController extends GetxController {
   void _triggerAllRefresh() {
     try {
       if (Get.isRegistered<HomeController>()) {
-        Get.find<HomeController>().getSentEnquiriesUnreadCount('1', forceRefresh: true);
+        Get.find<HomeController>()
+            .getSentEnquiriesUnreadCount('1', forceRefresh: true);
       }
     } catch (e) {
       debugPrint('Error refreshing home controller counts: $e');
     }
     try {
       if (Get.isRegistered<EnquiriesSentController>()) {
-        Get.find<EnquiriesSentController>().postSentApi("1", isAutoRefresh: true);
-        Get.find<EnquiriesSentController>().postSentApi("2", isAutoRefresh: true);
+        Get.find<EnquiriesSentController>()
+            .postSentApi("1", isAutoRefresh: true);
+        Get.find<EnquiriesSentController>()
+            .postSentApi("2", isAutoRefresh: true);
       }
     } catch (e) {
       debugPrint('Error refreshing enquiries sent: $e');
     }
     try {
       if (Get.isRegistered<EnquiriesReceivedController>()) {
-        Get.find<EnquiriesReceivedController>().postReceivedApi("1", isAutoRefresh: true);
-        Get.find<EnquiriesReceivedController>().postReceivedApi("2", isAutoRefresh: true);
+        Get.find<EnquiriesReceivedController>()
+            .postReceivedApi("1", isAutoRefresh: true);
+        Get.find<EnquiriesReceivedController>()
+            .postReceivedApi("2", isAutoRefresh: true);
       }
     } catch (e) {
       debugPrint('Error refreshing enquiries received: $e');

@@ -106,14 +106,12 @@ class AppUpdateController extends GetxController {
       // Strategy 2: Direct Play Store fallback
       // ------------------------------------------------------------
       if (storeVersion.isEmpty) {
-        final fallbackResult =
-            await _fetchPlayStoreVersion(appPackageName);
+        final fallbackResult = await _fetchPlayStoreVersion(appPackageName);
 
         storeVersion = fallbackResult['version'] ?? "";
 
         if (storeVersion.isNotEmpty) {
-          canUpdate =
-              _isVersionHigher(storeVersion, localVersion);
+          canUpdate = _isVersionHigher(storeVersion, localVersion);
         }
       }
 
@@ -127,8 +125,7 @@ class AppUpdateController extends GetxController {
       // SHOW UPDATE DIALOG ONLY IF NEW VERSION EXISTS
       // ------------------------------------------------------------
       if (storeVersion.isNotEmpty &&
-          (canUpdate ||
-              _isVersionHigher(storeVersion, localVersion))) {
+          (canUpdate || _isVersionHigher(storeVersion, localVersion))) {
         if (!_isDialogShowing) {
           debugPrint(
             "🚀 Triggering Update Dialog: "
@@ -162,9 +159,7 @@ class AppUpdateController extends GetxController {
         "?id=$packageName&gl=in&hl=en",
       );
 
-      final response = await http
-          .get(url)
-          .timeout(const Duration(seconds: 5));
+      final response = await http.get(url).timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final html = response.body;
@@ -206,33 +201,24 @@ class AppUpdateController extends GetxController {
     String localVersion,
   ) {
     try {
-      final cleanStore =
-          storeVersion.split('+')[0].trim();
+      final cleanStore = storeVersion.split('+')[0].trim();
 
-      final cleanLocal =
-          localVersion.split('+')[0].trim();
+      final cleanLocal = localVersion.split('+')[0].trim();
 
-      final List<int> storeParts = cleanStore
-          .split('.')
-          .map((e) => int.tryParse(e) ?? 0)
-          .toList();
+      final List<int> storeParts =
+          cleanStore.split('.').map((e) => int.tryParse(e) ?? 0).toList();
 
-      final List<int> localParts = cleanLocal
-          .split('.')
-          .map((e) => int.tryParse(e) ?? 0)
-          .toList();
+      final List<int> localParts =
+          cleanLocal.split('.').map((e) => int.tryParse(e) ?? 0).toList();
 
-      final int maxLength =
-          storeParts.length > localParts.length
-              ? storeParts.length
-              : localParts.length;
+      final int maxLength = storeParts.length > localParts.length
+          ? storeParts.length
+          : localParts.length;
 
       for (int i = 0; i < maxLength; i++) {
-        final int s =
-            i < storeParts.length ? storeParts[i] : 0;
+        final int s = i < storeParts.length ? storeParts[i] : 0;
 
-        final int l =
-            i < localParts.length ? localParts[i] : 0;
+        final int l = i < localParts.length ? localParts[i] : 0;
 
         if (s > l) return true;
 
@@ -277,8 +263,7 @@ class AppUpdateController extends GetxController {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: ConstantColor.primary
-                          .withValues(alpha: 0.1),
+                      color: ConstantColor.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -287,9 +272,7 @@ class AppUpdateController extends GetxController {
                       size: 28,
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   const Expanded(
                     child: Text(
                       "Update Available!",
@@ -308,8 +291,7 @@ class AppUpdateController extends GetxController {
 
               content: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     "A new version of SINGLE CLIk is available on Google Play Store.",
@@ -318,23 +300,18 @@ class AppUpdateController extends GetxController {
                       color: Colors.black87,
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
-                      borderRadius:
-                          BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-
                     child: Column(
                       children: [
                         // CURRENT VERSION
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
                               "Current Version:",
@@ -343,7 +320,6 @@ class AppUpdateController extends GetxController {
                                 color: Colors.grey,
                               ),
                             ),
-
                             Text(
                               localVersion,
                               style: const TextStyle(
@@ -358,8 +334,7 @@ class AppUpdateController extends GetxController {
 
                         // LATEST VERSION
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
                               "Latest Version:",
@@ -368,14 +343,12 @@ class AppUpdateController extends GetxController {
                                 color: Colors.grey,
                               ),
                             ),
-
                             Text(
                               storeVersion,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color:
-                                    ConstantColor.primary,
+                                color: ConstantColor.primary,
                               ),
                             ),
                           ],
@@ -383,9 +356,7 @@ class AppUpdateController extends GetxController {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
                   const Text(
                     "Please update the app to access the latest features and bug fixes.",
                     style: TextStyle(
@@ -425,40 +396,32 @@ class AppUpdateController extends GetxController {
                 // UPDATE NOW
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        ConstantColor.primary,
+                    backgroundColor: ConstantColor.primary,
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    padding:
-                        const EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
                     ),
                   ),
-
                   onPressed: () async {
-                    final Uri uri =
-                        Uri.parse(appUrl);
+                    final Uri uri = Uri.parse(appUrl);
 
                     if (await canLaunchUrl(uri)) {
                       await launchUrl(
                         uri,
-                        mode:
-                            LaunchMode.externalApplication,
+                        mode: LaunchMode.externalApplication,
                       );
                     } else {
                       await launchUrl(
                         Uri.parse(
                           "https://play.google.com/store/apps/details?id=$appPackageName",
                         ),
-                        mode:
-                            LaunchMode.externalApplication,
+                        mode: LaunchMode.externalApplication,
                       );
                     }
                   },
-
                   child: const Text(
                     "Update Now",
                     style: TextStyle(

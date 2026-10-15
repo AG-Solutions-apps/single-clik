@@ -17,7 +17,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   FocusNode descriptionFocusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
-
     double height = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -119,7 +118,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     SizedBox(height: height * 0.03),
                     TextFormField(
                       controller:
-                      feedBackController.descriptionController.value,
+                          feedBackController.descriptionController.value,
                       onChanged: (value) {},
                       textInputAction: TextInputAction.newline,
                       maxLines: 5,
@@ -165,7 +164,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                             )),
                       ),
                     ),
-
                     SizedBox(height: height * 0.03),
                     AppButton(
                       onTap: () async {
@@ -177,10 +175,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                           Get.snackbar(
                             "Input Required!",
                             'Please Enter Subject',
-                            snackPosition:
-                            SnackPosition.BOTTOM,
+                            snackPosition: SnackPosition.BOTTOM,
                           );
-                         /* ShowToast.showToast(
+                          /* ShowToast.showToast(
                             'Please Enter Subject',
                             showSuccess: false,
                           );*/
@@ -193,8 +190,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                           Get.snackbar(
                             "Input Required!",
                             'Please Enter Description',
-                            snackPosition:
-                            SnackPosition.BOTTOM,
+                            snackPosition: SnackPosition.BOTTOM,
                           );
                         } else {
                           focusNode.unfocus();

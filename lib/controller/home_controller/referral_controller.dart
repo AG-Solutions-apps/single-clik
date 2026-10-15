@@ -36,14 +36,16 @@ class ReferralController extends GetxController {
         return;
       }
     }
-    final cachedUser = await SharPreferences.getString(SharPreferences.userData);
+    final cachedUser =
+        await SharPreferences.getString(SharPreferences.userData);
     if (cachedUser != null && cachedUser.trim().isNotEmpty) {
       try {
         final decoded = json.decode(cachedUser);
         final code = _extractReferralCode(decoded);
         if (code.isNotEmpty && code.toLowerCase() != 'null') {
           userReferralCode.value = code;
-          debugPrint('✅ Referral Code pre-resolved from SharPreferences: "$code"');
+          debugPrint(
+              '✅ Referral Code pre-resolved from SharPreferences: "$code"');
         }
       } catch (_) {}
     }
@@ -105,7 +107,9 @@ class ReferralController extends GetxController {
       // 3. Check map values (skipping product/history lists)
       for (final entry in data.entries) {
         final keyStr = entry.key.toString().toLowerCase();
-        if (keyStr == 'products' || keyStr == 'product_services' || keyStr == 'claim_history') {
+        if (keyStr == 'products' ||
+            keyStr == 'product_services' ||
+            keyStr == 'claim_history') {
           continue;
         }
         if (entry.value is Map || entry.value is List) {
@@ -132,7 +136,8 @@ class ReferralController extends GetxController {
         isLoading.value = false;
         return;
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.fetchProfile));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.fetchProfile));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -156,11 +161,18 @@ class ReferralController extends GetxController {
           if (responseData['data'] != null) {
             if (responseData['data'] is Map) {
               final dataMap = responseData['data'] as Map;
-              code = (dataMap['referral_code'] ?? dataMap['refferal_code'] ?? '').toString().trim();
-            } else if (responseData['data'] is List && (responseData['data'] as List).isNotEmpty) {
+              code =
+                  (dataMap['referral_code'] ?? dataMap['refferal_code'] ?? '')
+                      .toString()
+                      .trim();
+            } else if (responseData['data'] is List &&
+                (responseData['data'] as List).isNotEmpty) {
               for (var item in (responseData['data'] as List)) {
                 if (item is Map) {
-                  final c = (item['referral_code'] ?? item['refferal_code'] ?? '').toString().trim();
+                  final c =
+                      (item['referral_code'] ?? item['refferal_code'] ?? '')
+                          .toString()
+                          .trim();
                   if (c.isNotEmpty && c.toLowerCase() != 'null') {
                     code = c;
                     break;
@@ -176,14 +188,16 @@ class ReferralController extends GetxController {
           }
 
           // 3. Fallback to HomeController.userData
-          if ((code.isEmpty || code.toLowerCase() == 'null') && Get.isRegistered<HomeController>()) {
+          if ((code.isEmpty || code.toLowerCase() == 'null') &&
+              Get.isRegistered<HomeController>()) {
             final hc = Get.find<HomeController>();
             code = _extractReferralCode(hc.userData);
           }
 
           // 4. Fallback to cached SharedPreferences userData
           if (code.isEmpty || code.toLowerCase() == 'null') {
-            final cachedUser = await SharPreferences.getString(SharPreferences.userData);
+            final cachedUser =
+                await SharPreferences.getString(SharPreferences.userData);
             if (cachedUser != null && cachedUser.trim().isNotEmpty) {
               try {
                 final decoded = json.decode(cachedUser);
@@ -200,7 +214,8 @@ class ReferralController extends GetxController {
           // History Points (Referrals)
           if (responseData['history_points'] is List) {
             historyPoints.value = List<Map<String, dynamic>>.from(
-              (responseData['history_points'] as List).map((e) => Map<String, dynamic>.from(e)),
+              (responseData['history_points'] as List)
+                  .map((e) => Map<String, dynamic>.from(e)),
             );
           } else {
             historyPoints.clear();
@@ -209,7 +224,8 @@ class ReferralController extends GetxController {
           // Claim History
           if (responseData['claim_history'] is List) {
             claimHistory.value = List<Map<String, dynamic>>.from(
-              (responseData['claim_history'] as List).map((e) => Map<String, dynamic>.from(e)),
+              (responseData['claim_history'] as List)
+                  .map((e) => Map<String, dynamic>.from(e)),
             );
           } else {
             claimHistory.clear();
@@ -218,11 +234,16 @@ class ReferralController extends GetxController {
           // Available Products for Claim
           if (responseData['products'] is List) {
             final rawProducts = List<Map<String, dynamic>>.from(
-              (responseData['products'] as List).map((e) => Map<String, dynamic>.from(e)),
+              (responseData['products'] as List)
+                  .map((e) => Map<String, dynamic>.from(e)),
             );
             rawProducts.sort((a, b) {
-              final ptsA = int.tryParse(a['refferal_products_points']?.toString() ?? '0') ?? 0;
-              final ptsB = int.tryParse(b['refferal_products_points']?.toString() ?? '0') ?? 0;
+              final ptsA = int.tryParse(
+                      a['refferal_products_points']?.toString() ?? '0') ??
+                  0;
+              final ptsB = int.tryParse(
+                      b['refferal_products_points']?.toString() ?? '0') ??
+                  0;
               return ptsA.compareTo(ptsB);
             });
             products.value = rawProducts;
@@ -244,10 +265,12 @@ class ReferralController extends GetxController {
       final token = await SharPreferences.getString(SharPreferences.token);
       if (token == null || token.trim().isEmpty) {
         isClaiming.value = false;
-        ShowToast.showToast("Authentication error. Please login again.", showSuccess: false);
+        ShowToast.showToast("Authentication error. Please login again.",
+            showSuccess: false);
         return false;
       }
-      final request = http.MultipartRequest('POST', Uri.parse(API.createReferralClaim));
+      final request =
+          http.MultipartRequest('POST', Uri.parse(API.createReferralClaim));
       request.headers.addAll({
         'Authorization': 'Bearer ${token.trim()}',
         'Accept': 'application/json',
@@ -261,27 +284,35 @@ class ReferralController extends GetxController {
 
       if (res.statusCode == 200) {
         final responseData = json.decode(responseDone.body);
-        if (responseData['code'] == 200 || responseData['status'] == true || responseData['status'] == 'true') {
+        if (responseData['code'] == 200 ||
+            responseData['status'] == true ||
+            responseData['status'] == 'true') {
           ShowToast.showToast(
-            responseData['msg'] ?? responseData['message'] ?? "Reward claimed successfully!",
+            responseData['msg'] ??
+                responseData['message'] ??
+                "Reward claimed successfully!",
             showSuccess: true,
           );
           await fetchReferralData();
           return true;
         } else {
           ShowToast.showToast(
-            responseData['msg'] ?? responseData['message'] ?? "Failed to claim reward",
+            responseData['msg'] ??
+                responseData['message'] ??
+                "Failed to claim reward",
             showSuccess: false,
           );
           return false;
         }
       } else {
-        ShowToast.showToast("Failed to claim reward. Please try again.", showSuccess: false);
+        ShowToast.showToast("Failed to claim reward. Please try again.",
+            showSuccess: false);
         return false;
       }
     } catch (e) {
       debugPrint('Error claiming reward: $e');
-      ShowToast.showToast("An error occurred while claiming reward.", showSuccess: false);
+      ShowToast.showToast("An error occurred while claiming reward.",
+          showSuccess: false);
       return false;
     } finally {
       isClaiming.value = false;

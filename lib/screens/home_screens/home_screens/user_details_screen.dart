@@ -28,7 +28,6 @@ class UserDetailsScreen extends StatefulWidget {
 }
 
 class UserDetailsScreenState extends State<UserDetailsScreen> {
-
   ScrollController scrollController = ScrollController();
   RxBool isSliverAppBarExpanded = false.obs;
 
@@ -162,7 +161,8 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                   "SMS",
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
-                subtitle: Text(userDetailsController.userDetails['mobile'] ?? ""),
+                subtitle:
+                    Text(userDetailsController.userDetails['mobile'] ?? ""),
                 onTap: () async {
                   Navigator.pop(context);
                   var contact = userDetailsController.userDetails['mobile'];
@@ -184,7 +184,8 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                     color: Colors.grey.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.copy_all_outlined, color: Colors.grey),
+                  child:
+                      const Icon(Icons.copy_all_outlined, color: Colors.grey),
                 ),
                 title: const Text(
                   "Copy Contact Details",
@@ -193,10 +194,13 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                 onTap: () {
                   Navigator.pop(context);
                   final name = userDetailsController.userDetails['name'] ?? "";
-                  final company = userDetailsController.userDetails['company_name'] ?? "";
-                  final mobile = userDetailsController.userDetails['mobile'] ?? "";
-                  final email = userDetailsController.userDetails['email'] ?? "";
-                  
+                  final company =
+                      userDetailsController.userDetails['company_name'] ?? "";
+                  final mobile =
+                      userDetailsController.userDetails['mobile'] ?? "";
+                  final email =
+                      userDetailsController.userDetails['email'] ?? "";
+
                   String copyText = "Name: $name\n";
                   if (company.toString().isNotEmpty) {
                     copyText += "Company: $company\n";
@@ -205,7 +209,7 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                   if (email.toString().isNotEmpty) {
                     copyText += "Email: $email";
                   }
-                  
+
                   Clipboard.setData(ClipboardData(text: copyText));
                   ShowToast.showToast(
                     "Contact details copied to clipboard.",
@@ -214,7 +218,10 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                 },
               ),
               if (userDetailsController.userDetails['website'] != null &&
-                  userDetailsController.userDetails['website'].toString().trim().isNotEmpty)
+                  userDetailsController.userDetails['website']
+                      .toString()
+                      .trim()
+                      .isNotEmpty)
                 ListTile(
                   leading: Container(
                     padding: const EdgeInsets.all(8),
@@ -228,14 +235,19 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                     "Visit Website",
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  subtitle: Text(userDetailsController.userDetails['website'].toString().trim()),
+                  subtitle: Text(userDetailsController.userDetails['website']
+                      .toString()
+                      .trim()),
                   onTap: () {
                     Navigator.pop(context);
-                    var website = userDetailsController.userDetails['website'].toString().trim();
+                    var website = userDetailsController.userDetails['website']
+                        .toString()
+                        .trim();
                     if (!website.startsWith("http")) {
                       website = "https://" + website;
                     }
-                    launchUrl(Uri.parse(website), mode: LaunchMode.externalApplication);
+                    launchUrl(Uri.parse(website),
+                        mode: LaunchMode.externalApplication);
                   },
                 ),
               const SizedBox(height: 12),
@@ -438,8 +450,9 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w500,
-                                                  color:
-                                                      ConstantColor.whiteColor.withOpacity(0.8),
+                                                  color: ConstantColor
+                                                      .whiteColor
+                                                      .withOpacity(0.8),
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
@@ -467,7 +480,6 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                                           backgroundColor: Colors.transparent,
                                           elevation: 0,
                                         ),
-                                       
                                         Center(
                                           child: GestureDetector(
                                             onTap: () {
@@ -477,10 +489,12 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                                                   return Dialog(
                                                     insetPadding:
                                                         EdgeInsets.symmetric(
-                                                      horizontal: Get.width / 30,
+                                                      horizontal:
+                                                          Get.width / 30,
                                                     ),
                                                     backgroundColor:
-                                                        ConstantColor.whiteColor,
+                                                        ConstantColor
+                                                            .whiteColor,
                                                     child: SizedBox(
                                                       child: AppImageAsset(
                                                         image:
@@ -498,7 +512,8 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                                             child: Container(
                                               decoration: BoxDecoration(
                                                 border: Border.all(
-                                                  color: ConstantColor.whiteColor,
+                                                  color:
+                                                      ConstantColor.whiteColor,
                                                   width: 3,
                                                 ),
                                                 shape: BoxShape.circle,
@@ -531,9 +546,13 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                                         userDetailsController.userDetails[
                                                         'company_name'] ==
                                                     null ||
-                                                userDetailsController.userDetails[
+                                                userDetailsController
+                                                            .userDetails[
                                                         'company_name'] ==
-                                                    null.toString().trim().isEmpty
+                                                    null
+                                                        .toString()
+                                                        .trim()
+                                                        .isEmpty
                                             ? const SizedBox()
                                             : Column(
                                                 children: [
@@ -541,9 +560,11 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                                                     "Company",
                                                     style: TextStyle(
                                                       fontSize: 12,
-                                                      fontWeight: FontWeight.w400,
-                                                      color:
-                                                          ConstantColor.whiteColor.withOpacity(0.7),
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: ConstantColor
+                                                          .whiteColor
+                                                          .withOpacity(0.7),
                                                     ),
                                                   ),
                                                   Text(
@@ -553,7 +574,8 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                                                         "",
                                                     style: TextStyle(
                                                       fontSize: 14,
-                                                      fontWeight: FontWeight.w500,
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                       color: ConstantColor
                                                           .whiteColor,
                                                     ),
@@ -576,7 +598,8 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                             indicatorSize: TabBarIndicatorSize.tab,
                             indicatorWeight: 3,
                             labelColor: ConstantColor.whiteColor,
-                            unselectedLabelColor: ConstantColor.whiteColor.withOpacity(0.7),
+                            unselectedLabelColor:
+                                ConstantColor.whiteColor.withOpacity(0.7),
                             labelStyle: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -587,7 +610,10 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                             ),
                             tabs: [
                               Tab(
-                                text: userDetailsController.userDetails['profile_type']?.toString() == "1"
+                                text: userDetailsController
+                                            .userDetails['profile_type']
+                                            ?.toString() ==
+                                        "1"
                                     ? "Services"
                                     : "Product &\nServices",
                               ),
@@ -628,7 +654,10 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
             SizedBox(height: height * 0.03),
             Text(
               userDetailsController.userDetails['about_us'] == null ||
-                      userDetailsController.userDetails['about_us'].toString().trim().isEmpty
+                      userDetailsController.userDetails['about_us']
+                          .toString()
+                          .trim()
+                          .isEmpty
                   ? "No details available."
                   : userDetailsController.userDetails['about_us']
                       .toString()
@@ -653,7 +682,7 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            
+
             // Services Offered Header
             Row(
               children: [
@@ -677,12 +706,15 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            
+
             // Check if categories list is empty
-            if (userDetailsController.userDetailsProduct['categories'] == null ||
-                (userDetailsController.userDetailsProduct['categories'] as List).isEmpty)
+            if (userDetailsController.userDetailsProduct['categories'] ==
+                    null ||
+                (userDetailsController.userDetailsProduct['categories'] as List)
+                    .isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                 child: Text(
                   "No services listed",
                   style: TextStyle(
@@ -700,16 +732,14 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                     .userDetailsProduct['categories'].length,
                 itemBuilder: (context, index) {
                   return Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Text(
                           ' ' +
                               userDetailsController
-                                  .userDetailsProduct[
-                                      'categories'][index]
+                                  .userDetailsProduct['categories'][index]
                                       ["category"]
                                   .toString()
                                   .trim()
@@ -726,47 +756,43 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         itemCount: userDetailsController
-                            .userDetailsProduct['subcategories']
-                            .length,
+                            .userDetailsProduct['subcategories'].length,
                         itemBuilder: (context, index2) {
                           return userDetailsController
-                                              .userDetailsProduct[
-                                          'subcategories']
+                                          .userDetailsProduct['subcategories']
                                       [index2]["category_id"] !=
                                   userDetailsController
-                                              .userDetailsProduct[
-                                          'categories'][index]
-                                      ["u_catg_id"]
+                                          .userDetailsProduct['categories']
+                                      [index]["u_catg_id"]
                               ? const SizedBox.shrink()
                               : Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4),
                                   child: Row(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment
-                                            .center,
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.only(left: 30, right: 10),
-                                        child: Icon(Icons.circle, size: 7, color: ConstantColor.primary),
+                                        padding: const EdgeInsets.only(
+                                            left: 30, right: 10),
+                                        child: Icon(Icons.circle,
+                                            size: 7,
+                                            color: ConstantColor.primary),
                                       ),
                                       Expanded(
                                         child: Text(
                                           userDetailsController
                                               .userDetailsProduct[
-                                                  'subcategories']
-                                                  [index2][
-                                                  "subcategory"]
+                                                  'subcategories'][index2]
+                                                  ["subcategory"]
                                               .toString()
                                               .trim()
-                                              .replaceAll(
-                                                  ",", "\n")
+                                              .replaceAll(",", "\n")
                                               .trim(),
                                           style: TextStyle(
                                             fontSize: 15,
-                                            fontWeight:
-                                                FontWeight.w600,
-                                            color: ConstantColor
-                                                .blackColor,
+                                            fontWeight: FontWeight.w600,
+                                            color: ConstantColor.blackColor,
                                           ),
                                         ),
                                       ),
@@ -780,12 +806,13 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                   );
                 },
               ),
-            
-            if (userDetailsController.userDetails['profile_type']?.toString() != "1") ...[
+
+            if (userDetailsController.userDetails['profile_type']?.toString() !=
+                "1") ...[
               const SizedBox(height: 12),
               const Divider(),
               const SizedBox(height: 16),
-              
+
               // Products Header
               Row(
                 children: [
@@ -809,18 +836,18 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               // Products Display List
               Builder(
                 builder: (context) {
-                  final products = List.from(
-                    userDetailsController.userDetailsProduct['products'] ??
-                    userDetailsController.userDetailsProduct['product_services'] ??
-                    userDetailsController.userDetails['products'] ??
-                    userDetailsController.userDetails['product_services'] ??
-                    []
-                  );
-                  
+                  final products = List.from(userDetailsController
+                          .userDetailsProduct['products'] ??
+                      userDetailsController
+                          .userDetailsProduct['product_services'] ??
+                      userDetailsController.userDetails['products'] ??
+                      userDetailsController.userDetails['product_services'] ??
+                      []);
+
                   if (products.isEmpty) {
                     return Center(
                       child: Padding(
@@ -828,7 +855,8 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.shopping_bag_outlined, size: 48, color: Colors.grey[300]),
+                            Icon(Icons.shopping_bag_outlined,
+                                size: 48, color: Colors.grey[300]),
                             const SizedBox(height: 12),
                             Text(
                               "No products uploaded by this business yet",
@@ -843,11 +871,12 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                       ),
                     );
                   }
-                  
+
                   return GridView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
@@ -876,12 +905,17 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                                       backgroundColor: Colors.transparent,
                                       elevation: 0,
                                       leading: IconButton(
-                                        icon: const Icon(Icons.close, color: Colors.black),
+                                        icon: const Icon(Icons.close,
+                                            color: Colors.black),
                                         onPressed: () => Get.back(),
                                       ),
                                       title: Text(
-                                        (product['product_name'] ?? '').toString(),
-                                        style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
+                                        (product['product_name'] ?? '')
+                                            .toString(),
+                                        style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                     ConstrainedBox(
@@ -890,11 +924,14 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                                         maxWidth: Get.width * 0.9,
                                       ),
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 8),
                                         child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                           child: AppImageAsset(
-                                            image: "${ConstantString.productImgUrlPath}${product['product_images'] ?? ''}",
+                                            image:
+                                                "${ConstantString.productImgUrlPath}${product['product_images'] ?? ''}",
                                             isFile: false,
                                             fit: BoxFit.contain,
                                           ),
@@ -926,9 +963,11 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
                             children: [
                               Expanded(
                                 child: ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+                                  borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(11)),
                                   child: AppImageAsset(
-                                    image: "${ConstantString.productImgUrlPath}${product['product_images'] ?? ''}",
+                                    image:
+                                        "${ConstantString.productImgUrlPath}${product['product_images'] ?? ''}",
                                     isFile: false,
                                     fit: BoxFit.cover,
                                   ),
@@ -981,8 +1020,7 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
               ),
             ),
             Text(
-              userDetailsController.userDetails['mobile'] ??
-                  "",
+              userDetailsController.userDetails['mobile'] ?? "",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -999,8 +1037,7 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
               ),
             ),
             Text(
-              userDetailsController.userDetails['email'] ??
-                  "",
+              userDetailsController.userDetails['email'] ?? "",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -1017,8 +1054,7 @@ class UserDetailsScreenState extends State<UserDetailsScreen> {
               ),
             ),
             Text(
-              userDetailsController.userDetails['whatsapp'] ??
-                  "",
+              userDetailsController.userDetails['whatsapp'] ?? "",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,

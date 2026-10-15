@@ -15,7 +15,6 @@ class TermsAndConditionPage extends StatefulWidget {
 }
 
 class TermsAndConditionPageState extends State<TermsAndConditionPage> {
-
   final controller = WebViewController();
 
   @override
@@ -28,7 +27,8 @@ class TermsAndConditionPageState extends State<TermsAndConditionPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(child: Scaffold(
+    return SafeArea(
+        child: Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.transparent,

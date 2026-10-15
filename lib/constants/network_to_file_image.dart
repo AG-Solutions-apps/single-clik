@@ -12,5 +12,4 @@ class NetworkToFileImage {
       return url;
     }
   }
-
 }

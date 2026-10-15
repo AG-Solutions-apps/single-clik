@@ -59,41 +59,40 @@ class AppButton extends StatelessWidget {
         child: Center(
           child: isLoading
               ? LoadingAnimationWidget.staggeredDotsWave(
-            color: Colors.white,
-            size: 26,
-          )
+                  color: Colors.white,
+                  size: 26,
+                )
               : child ??
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: fontSize ?? 18,
-                          color: buttonTextColor ?? Colors.white,
-                          fontWeight: FontWeight.w500,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: fontSize ?? 18,
+                              color: buttonTextColor ?? Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
-                      ),
+                        if (arrowShow)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Image.asset(
+                              "assets/icons/icon_left.png",
+                              height: 24,
+                            ),
+                          ),
+                      ],
                     ),
-                    if (arrowShow)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Image.asset(
-                          "assets/icons/icon_left.png",
-                          height: 24,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+                  ),
         ),
       ),
     );
   }
-
 }

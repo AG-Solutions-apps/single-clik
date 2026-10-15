@@ -99,5 +99,4 @@ Widget appTextFormField(
       ),
     ),
   );
-
 }

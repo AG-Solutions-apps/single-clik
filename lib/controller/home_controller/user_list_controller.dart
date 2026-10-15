@@ -53,7 +53,5 @@ class UserListController extends GetxController {
       // ShowToast.showToast('Something went wrong.',showSuccess: false,);
       debugPrint(e.toString());
     }
-
   }
-
 }

@@ -43,11 +43,13 @@ class NotificationController extends GetxController {
       } else {
         isAutoRefreshing.value = true;
       }
-      
+
       final token = await SharPreferences.getString(SharPreferences.token);
       if (token == null || token.trim().isEmpty) {
-        if (!isAutoRefresh) isLoading.value = false;
-        else isAutoRefreshing.value = false;
+        if (!isAutoRefresh)
+          isLoading.value = false;
+        else
+          isAutoRefreshing.value = false;
         notificationDataList.value = [];
         return;
       }
@@ -73,8 +75,7 @@ class NotificationController extends GetxController {
       } else {
         notificationDataList.value = [];
       }
-    }
-    catch (e) {
+    } catch (e) {
       debugPrint('Error fetching notifications: $e');
     } finally {
       if (!_isDisposed) {

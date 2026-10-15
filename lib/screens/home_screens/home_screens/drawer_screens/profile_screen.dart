@@ -26,7 +26,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final HomeController homeController = Get.put(HomeController());
   final ProfileController profileController = Get.put(ProfileController());
-  final UpdateProfileController updateProfileController = Get.put(UpdateProfileController());
+  final UpdateProfileController updateProfileController =
+      Get.put(UpdateProfileController());
 
   RxBool businessLogin = true.obs;
 
@@ -118,9 +119,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             child: ClipOval(
                               child: AppImageAsset(
-                                key: ValueKey('profile_photo_${homeController.photoVersion.value}'),
+                                key: ValueKey(
+                                    'profile_photo_${homeController.photoVersion.value}'),
                                 image: profileController.filePath.value,
-                                isFile: !profileController.filePath.value.startsWith("http"),
+                                isFile: !profileController.filePath.value
+                                    .startsWith("http"),
                                 fit: BoxFit.cover,
                                 height: Get.width / 3,
                                 width: Get.width / 3,
@@ -133,16 +136,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: GestureDetector(
                               onTap: () async {
                                 final ImagePicker picker = ImagePicker();
-                                final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                                final XFile? image = await picker.pickImage(
+                                    source: ImageSource.gallery);
                                 if (image != null) {
                                   await profileController.cropImage(image);
-                                  if (profileController.croppedProfileFile!.value.path.isNotEmpty) {
-                                    profileController.filePath.value = profileController.croppedProfileFile!.value.path;
-                                    await profileController.autoUploadProfilePhoto();
+                                  if (profileController.croppedProfileFile!
+                                      .value.path.isNotEmpty) {
+                                    profileController.filePath.value =
+                                        profileController
+                                            .croppedProfileFile!.value.path;
+                                    await profileController
+                                        .autoUploadProfilePhoto();
                                   }
                                 }
                               },
-                              
                             ),
                           ),
                         ],
@@ -151,7 +158,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 16),
                     Text(
                       businessLogin.value
-                          ? (companyName.isNotEmpty ? companyName : "Company Name")
+                          ? (companyName.isNotEmpty
+                              ? companyName
+                              : "Company Name")
                           : (name.isNotEmpty ? name : "Username"),
                       style: TextStyle(
                         fontSize: 20,
@@ -161,13 +170,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
                         color: ConstantColor.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: Text(
-                        businessLogin.value ? "Business Account" : "User Account",
+                        businessLogin.value
+                            ? "Business Account"
+                            : "User Account",
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -189,36 +201,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.grey[200]!),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Column(
                     children: businessLogin.value
                         ? [
-                            _buildInfoRow(Icons.business_rounded, "Company Name", companyName),
+                            _buildInfoRow(Icons.business_rounded,
+                                "Company Name", companyName),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.phone_iphone_rounded, "Mobile", (profileData['mobile'] ?? '').toString()),
+                            _buildInfoRow(Icons.phone_iphone_rounded, "Mobile",
+                                (profileData['mobile'] ?? '').toString()),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.chat_bubble_outline_rounded, "Whatsapp", (profileData['whatsapp'] ?? '').toString()),
+                            _buildInfoRow(
+                                Icons.chat_bubble_outline_rounded,
+                                "Whatsapp",
+                                (profileData['whatsapp'] ?? '').toString()),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.email_outlined, "Email", (profileData['email'] ?? '').toString()),
+                            _buildInfoRow(Icons.email_outlined, "Email",
+                                (profileData['email'] ?? '').toString()),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.language_rounded, "Website", (profileData['website'] ?? '').toString()),
+                            _buildInfoRow(Icons.language_rounded, "Website",
+                                (profileData['website'] ?? '').toString()),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.category_outlined, "Category", "IT Company, Event Planner"),
+                            _buildInfoRow(Icons.category_outlined, "Category",
+                                "IT Company, Event Planner"),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.dashboard_customize_outlined, "Sub Category", "Mobile Apps, Web Developer, Event Planner"),
+                            _buildInfoRow(
+                                Icons.dashboard_customize_outlined,
+                                "Sub Category",
+                                "Mobile Apps, Web Developer, Event Planner"),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.info_outline_rounded, "About Us", (profileData['about_us'] ?? '').toString()),
+                            _buildInfoRow(
+                                Icons.info_outline_rounded,
+                                "About Us",
+                                (profileData['about_us'] ?? '').toString()),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.location_on_outlined, "Area", (profileData['area'] ?? '').toString()),
+                            _buildInfoRow(Icons.location_on_outlined, "Area",
+                                (profileData['area'] ?? '').toString()),
                           ]
                         : [
-                            _buildInfoRow(Icons.person_outline_rounded, "Name", name),
+                            _buildInfoRow(
+                                Icons.person_outline_rounded, "Name", name),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.phone_iphone_rounded, "Mobile", (profileData['mobile'] ?? '').toString()),
+                            _buildInfoRow(Icons.phone_iphone_rounded, "Mobile",
+                                (profileData['mobile'] ?? '').toString()),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.email_outlined, "Email ID", (profileData['email'] ?? '').toString()),
+                            _buildInfoRow(Icons.email_outlined, "Email ID",
+                                (profileData['email'] ?? '').toString()),
                             const Divider(height: 1),
-                            _buildInfoRow(Icons.location_on_outlined, "Area", (profileData['area'] ?? '').toString()),
+                            _buildInfoRow(Icons.location_on_outlined, "Area",
+                                (profileData['area'] ?? '').toString()),
                           ],
                   ),
                 ),
@@ -251,93 +283,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       border: Border.all(color: Colors.grey[200]!),
                     ),
                     padding: const EdgeInsets.all(16),
-                    child: Builder(
-                      builder: (context) {
-                        final products = List.from(profileData['products'] ?? profileData['product_services'] ?? []);
-                        if (products.isEmpty) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              child: Column(
-                                children: [
-                                  Icon(Icons.shopping_bag_outlined, size: 40, color: Colors.grey[300]),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "No products added yet",
-                                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }
-                        return GridView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 1.0,
-                          ),
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            final product = products[index];
-                            return Stack(
+                    child: Builder(builder: (context) {
+                      final products = List.from(profileData['products'] ??
+                          profileData['product_services'] ??
+                          []);
+                      if (products.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Column(
                               children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: Colors.grey[200]!),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      Expanded(
-                                        child: ClipRRect(
-                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                                          child: AppImageAsset(
-                                            image: "${ConstantString.productImgUrlPath}${product['product_images'] ?? ''}",
-                                            isFile: false,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(6),
-                                        child: Text(
-                                          (product['product_name'] ?? '').toString(),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Delete button
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: GestureDetector(
-                                    onTap: () => _confirmDeleteProduct(context, product),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(Icons.delete_forever_rounded, color: Colors.white, size: 16),
-                                    ),
-                                  ),
+                                Icon(Icons.shopping_bag_outlined,
+                                    size: 40, color: Colors.grey[300]),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "No products added yet",
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.grey[500]),
                                 ),
                               ],
-                            );
-                          },
+                            ),
+                          ),
                         );
                       }
-                    ),
+                      return GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.0,
+                        ),
+                        itemCount: products.length,
+                        itemBuilder: (context, index) {
+                          final product = products[index];
+                          return Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey[200]!),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                                top: Radius.circular(8)),
+                                        child: AppImageAsset(
+                                          image:
+                                              "${ConstantString.productImgUrlPath}${product['product_images'] ?? ''}",
+                                          isFile: false,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(6),
+                                      child: Text(
+                                        (product['product_name'] ?? '')
+                                            .toString(),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Delete button
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () =>
+                                      _confirmDeleteProduct(context, product),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                        Icons.delete_forever_rounded,
+                                        color: Colors.white,
+                                        size: 16),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }),
                   ),
                 ),
               ],
@@ -354,15 +400,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onTap: () {
                           if (homeController.userData['user_type'] == 1) {
                             if (homeController.userData['category'] != null &&
-                                homeController.userData['category'].toString().trim().isNotEmpty) {
+                                homeController.userData['category']
+                                    .toString()
+                                    .trim()
+                                    .isNotEmpty) {
                               _showAlreadyJoinedDialog(context, width, height);
                             } else {
                               _showEditProfileBottomSheet(context);
                             }
                           } else {
                             Get.to(() => UpdateProfileScreen(
-                                userData: Map<String, dynamic>.from(profileController.profileMap)
-                            ))!.then((value) {
+                                    userData: Map<String, dynamic>.from(
+                                        profileController.profileMap)))!
+                                .then((value) {
                               if (value == true) {
                                 profileController.postFetchProfileApi();
                               }
@@ -453,12 +503,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showAlreadyJoinedDialog(BuildContext context, double width, double height) {
+  void _showAlreadyJoinedDialog(
+      BuildContext context, double width, double height) {
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           insetPadding: EdgeInsets.symmetric(horizontal: Get.width / 20),
           child: Padding(
             padding: EdgeInsets.all(width / 20),
@@ -493,44 +545,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Obx(() => AppButton(
-                        title: "Call us",
-                        onTap: () async {
-                          profileController.isButtonLoading.value = true;
-                          await profileController.postDeveloperApi().then((value) async {
-                            if (value['code'] == 200) {
-                              Uri url = Uri.parse('tel:+${value['data']['company_mobile'] ?? ''}');
-                              if (await canLaunchUrl(url)) {
+                            title: "Call us",
+                            onTap: () async {
+                              profileController.isButtonLoading.value = true;
+                              await profileController
+                                  .postDeveloperApi()
+                                  .then((value) async {
+                                if (value['code'] == 200) {
+                                  Uri url = Uri.parse(
+                                      'tel:+${value['data']['company_mobile'] ?? ''}');
+                                  if (await canLaunchUrl(url)) {
+                                    profileController.isButtonLoading.value =
+                                        false;
+                                    Get.back();
+                                    await launchUrl(url);
+                                  } else {
+                                    profileController.isButtonLoading.value =
+                                        false;
+                                    Get.back();
+                                    ShowToast.showToast(
+                                      ConstantString.somethingWantWrongMsg,
+                                      showSuccess: false,
+                                    );
+                                  }
+                                } else {
+                                  profileController.isButtonLoading.value =
+                                      false;
+                                  Get.back();
+                                  ShowToast.showToast(
+                                    value['msg'] ??
+                                        ConstantString.somethingWantWrongMsg,
+                                    showSuccess: false,
+                                  );
+                                }
+                              }).catchError((error) {
+                                debugPrint('Error: $error');
                                 profileController.isButtonLoading.value = false;
                                 Get.back();
-                                await launchUrl(url);
-                              } else {
-                                profileController.isButtonLoading.value = false;
-                                Get.back();
-                                ShowToast.showToast(
-                                  ConstantString.somethingWantWrongMsg,
-                                  showSuccess: false,
-                                );
-                              }
-                            } else {
-                              profileController.isButtonLoading.value = false;
-                              Get.back();
-                              ShowToast.showToast(
-                                value['msg'] ?? ConstantString.somethingWantWrongMsg,
-                                showSuccess: false,
-                              );
-                            }
-                          }).catchError((error) {
-                            debugPrint('Error: $error');
-                            profileController.isButtonLoading.value = false;
-                            Get.back();
-                            ShowToast.showToast(error.toString(), showSuccess: false);
-                          });
-                        },
-                        arrowShow: false,
-                        borderRadius: BorderRadius.circular(8),
-                        buttonTextColor: Colors.white,
-                        isLoading: profileController.isButtonLoading.value,
-                      )),
+                                ShowToast.showToast(error.toString(),
+                                    showSuccess: false);
+                              });
+                            },
+                            arrowShow: false,
+                            borderRadius: BorderRadius.circular(8),
+                            buttonTextColor: Colors.white,
+                            isLoading: profileController.isButtonLoading.value,
+                          )),
                     ),
                   ],
                 ),
@@ -543,10 +603,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showEditProfileBottomSheet(BuildContext context) {
-    profileController.nameController.value.text = (profileController.profileMap['name'] ?? '').toString();
-    profileController.emailController.value.text = (profileController.profileMap['email'] ?? '').toString();
-    profileController.areaController.value.text = (profileController.profileMap['area'] ?? '').toString();
-    profileController.referredCodeController.value.text = (profileController.profileMap['referred_by_code'] ?? '').toString();
+    profileController.nameController.value.text =
+        (profileController.profileMap['name'] ?? '').toString();
+    profileController.emailController.value.text =
+        (profileController.profileMap['email'] ?? '').toString();
+    profileController.areaController.value.text =
+        (profileController.profileMap['area'] ?? '').toString();
+    profileController.referredCodeController.value.text =
+        (profileController.profileMap['referred_by_code'] ?? '').toString();
 
     showModalBottomSheet(
       context: context,
@@ -588,13 +652,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildSheetTextField("Full Name", profileController.nameController.value, TextInputType.name),
+                _buildSheetTextField("Full Name",
+                    profileController.nameController.value, TextInputType.name),
                 const SizedBox(height: 15),
-                _buildSheetTextField("Email Address", profileController.emailController.value, TextInputType.emailAddress),
+                _buildSheetTextField(
+                    "Email Address",
+                    profileController.emailController.value,
+                    TextInputType.emailAddress),
                 const SizedBox(height: 15),
-                _buildSheetTextField("Area / Location", profileController.areaController.value, TextInputType.text),
+                _buildSheetTextField("Area / Location",
+                    profileController.areaController.value, TextInputType.text),
                 const SizedBox(height: 15),
-                _buildSheetTextField("Referred By Code (Optional)", profileController.referredCodeController.value, TextInputType.text),
+                _buildSheetTextField(
+                    "Referred By Code (Optional)",
+                    profileController.referredCodeController.value,
+                    TextInputType.text),
                 const SizedBox(height: 25),
                 Row(
                   children: [
@@ -605,7 +677,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           foregroundColor: Colors.grey[600],
                           side: BorderSide(color: Colors.grey[300]!),
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
                         ),
                         child: const Text("Cancel"),
                       ),
@@ -613,61 +686,88 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(width: 15),
                     Expanded(
                       child: Obx(() => ElevatedButton(
-                        onPressed: profileController.isButtonLoading.value
-                            ? null
-                            : () async {
-                                profileController.isButtonLoading.value = true;
-                                Map<String, String> bodyParams = {
-                                  'name': profileController.nameController.value.text.trim(),
-                                  'email': profileController.emailController.value.text.trim(),
-                                  'area': profileController.areaController.value.text.trim(),
-                                  'referred_by_code': profileController.referredCodeController.value.text.trim(),
-                                  'profile_type': (profileController.profileMap['profile_type'] ?? '0').toString(),
-                                };
-                                await profileController
-                                    .postUpdateProfileApi(
-                                        bodyParams,
-                                        profileController.filePath.value.contains("cache") 
-                                            ? profileController.filePath.value.trim() 
-                                            : "")
-                                    .then((value) async {
-                                  if (value != null && value['code'] == 200) {
-                                    await profileController.postFetchProfileApi();
-                                    await AppImageCacheManager.clearImageCache();
-                                    homeController.photoVersion.value++;
-                                    homeController.postFetchProfileApi(forceRefresh: true);
-                                    Get.back();
-                                    ShowToast.showToast(
-                                      value['msg'] ?? ConstantString.dataUpdatedSuccessfullyMsg,
-                                      showSuccess: true,
-                                    );
-                                  } else {
-                                    ShowToast.showToast(
-                                      value['msg'] ?? ConstantString.somethingWantWrongMsg,
-                                      showSuccess: false,
-                                    );
-                                  }
-                                }).catchError((error) {
-                                  debugPrint('Error: $error');
-                                  ShowToast.showToast(error.toString(), showSuccess: false);
-                                }).whenComplete(() {
-                                  profileController.isButtonLoading.value = false;
-                                });
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ConstantColor.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        child: profileController.isButtonLoading.value
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                              )
-                            : const Text("Save Changes"),
-                      )),
+                            onPressed: profileController.isButtonLoading.value
+                                ? null
+                                : () async {
+                                    profileController.isButtonLoading.value =
+                                        true;
+                                    Map<String, String> bodyParams = {
+                                      'name': profileController
+                                          .nameController.value.text
+                                          .trim(),
+                                      'email': profileController
+                                          .emailController.value.text
+                                          .trim(),
+                                      'area': profileController
+                                          .areaController.value.text
+                                          .trim(),
+                                      'referred_by_code': profileController
+                                          .referredCodeController.value.text
+                                          .trim(),
+                                      'profile_type': (profileController
+                                                  .profileMap['profile_type'] ??
+                                              '0')
+                                          .toString(),
+                                    };
+                                    await profileController
+                                        .postUpdateProfileApi(
+                                            bodyParams,
+                                            profileController.filePath.value
+                                                    .contains("cache")
+                                                ? profileController
+                                                    .filePath.value
+                                                    .trim()
+                                                : "")
+                                        .then((value) async {
+                                      if (value != null &&
+                                          value['code'] == 200) {
+                                        await profileController
+                                            .postFetchProfileApi();
+                                        await AppImageCacheManager
+                                            .clearImageCache();
+                                        homeController.photoVersion.value++;
+                                        homeController.postFetchProfileApi(
+                                            forceRefresh: true);
+                                        Get.back();
+                                        ShowToast.showToast(
+                                          value['msg'] ??
+                                              ConstantString
+                                                  .dataUpdatedSuccessfullyMsg,
+                                          showSuccess: true,
+                                        );
+                                      } else {
+                                        ShowToast.showToast(
+                                          value['msg'] ??
+                                              ConstantString
+                                                  .somethingWantWrongMsg,
+                                          showSuccess: false,
+                                        );
+                                      }
+                                    }).catchError((error) {
+                                      debugPrint('Error: $error');
+                                      ShowToast.showToast(error.toString(),
+                                          showSuccess: false);
+                                    }).whenComplete(() {
+                                      profileController.isButtonLoading.value =
+                                          false;
+                                    });
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ConstantColor.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: profileController.isButtonLoading.value
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2, color: Colors.white),
+                                  )
+                                : const Text("Save Changes"),
+                          )),
                     ),
                   ],
                 ),
@@ -679,7 +779,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSheetTextField(String label, TextEditingController controller, TextInputType type) {
+  Widget _buildSheetTextField(
+      String label, TextEditingController controller, TextInputType type) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -696,7 +797,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           controller: controller,
           keyboardType: type,
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -721,7 +823,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Delete Product"),
-          content: Text("Are you sure you want to delete '${product['product_name']}'?"),
+          content: Text(
+              "Are you sure you want to delete '${product['product_name']}'?"),
           actions: [
             TextButton(
               onPressed: () => Get.back(),
@@ -735,7 +838,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   await profileController.postDeleteProductApi(
                     (product['id'] ?? product['product_id'] ?? '').toString(),
                   );
-                  ShowToast.showToast("Product deleted successfully!", showSuccess: true);
+                  ShowToast.showToast("Product deleted successfully!",
+                      showSuccess: true);
                   await profileController.postFetchProfileApi();
                 } catch (e) {
                   ShowToast.showToast("Error: $e", showSuccess: false);
@@ -751,7 +855,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _pickProductImage(BuildContext context, RxString selectedProductImagePath) {
+  void _pickProductImage(
+      BuildContext context, RxString selectedProductImagePath) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -763,24 +868,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.photo_library_outlined, color: Colors.deepOrange),
+                leading: const Icon(Icons.photo_library_outlined,
+                    color: Colors.deepOrange),
                 title: const Text("Choose from Gallery"),
                 onTap: () async {
                   Get.back();
                   final ImagePicker picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                  final XFile? image =
+                      await picker.pickImage(source: ImageSource.gallery);
                   if (image != null) {
                     selectedProductImagePath.value = image.path;
                   }
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.camera_alt_outlined, color: Colors.deepOrange),
+                leading: const Icon(Icons.camera_alt_outlined,
+                    color: Colors.deepOrange),
                 title: const Text("Take a Photo"),
                 onTap: () async {
                   Get.back();
                   final ImagePicker picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(source: ImageSource.camera);
+                  final XFile? image =
+                      await picker.pickImage(source: ImageSource.camera);
                   if (image != null) {
                     selectedProductImagePath.value = image.path;
                   }
@@ -837,7 +946,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildSheetTextField("Product Name", nameController, TextInputType.text),
+                _buildSheetTextField(
+                    "Product Name", nameController, TextInputType.text),
                 const SizedBox(height: 15),
                 Text(
                   "Product Image",
@@ -850,7 +960,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 8),
                 Obx(() => selectedProductImagePath.value.isEmpty
                     ? GestureDetector(
-                        onTap: () => _pickProductImage(context, selectedProductImagePath),
+                        onTap: () => _pickProductImage(
+                            context, selectedProductImagePath),
                         child: Container(
                           height: 120,
                           width: double.infinity,
@@ -861,9 +972,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.add_photo_alternate_outlined, size: 40, color: Colors.grey[400]),
+                              Icon(Icons.add_photo_alternate_outlined,
+                                  size: 40, color: Colors.grey[400]),
                               const SizedBox(height: 8),
-                              Text("Select product image", style: TextStyle(color: Colors.grey[500])),
+                              Text("Select product image",
+                                  style: TextStyle(color: Colors.grey[500])),
                             ],
                           ),
                         ),
@@ -896,7 +1009,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   color: Colors.black54,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.close, color: Colors.white, size: 18),
+                                child: const Icon(Icons.close,
+                                    color: Colors.white, size: 18),
                               ),
                             ),
                           ),
@@ -904,9 +1018,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             bottom: 8,
                             right: 8,
                             child: GestureDetector(
-                              onTap: () => _pickProductImage(context, selectedProductImagePath),
+                              onTap: () => _pickProductImage(
+                                  context, selectedProductImagePath),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: Colors.black54,
                                   borderRadius: BorderRadius.circular(20),
@@ -914,9 +1030,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.edit, color: Colors.white, size: 12),
+                                    Icon(Icons.edit,
+                                        color: Colors.white, size: 12),
                                     SizedBox(width: 4),
-                                    Text("Change", style: TextStyle(color: Colors.white, fontSize: 11)),
+                                    Text("Change",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 11)),
                                   ],
                                 ),
                               ),
@@ -934,7 +1053,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           foregroundColor: Colors.grey[600],
                           side: BorderSide(color: Colors.grey[300]!),
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
                         ),
                         child: const Text("Cancel"),
                       ),
@@ -946,26 +1066,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           final pName = nameController.text.trim();
                           final pImage = selectedProductImagePath.value;
                           if (pName.isEmpty) {
-                            ShowToast.showToast("Please enter product name", showSuccess: false);
+                            ShowToast.showToast("Please enter product name",
+                                showSuccess: false);
                             return;
                           }
                           if (pImage.isEmpty) {
-                            ShowToast.showToast("Please select product image", showSuccess: false);
+                            ShowToast.showToast("Please select product image",
+                                showSuccess: false);
                             return;
                           }
-                          
+
                           Get.back();
                           EasyLoading.show(status: 'Adding product...');
                           try {
-                            final result = await profileController.postCreateProductApi(pName, pImage);
-                            if (result != null && (result['code'] == 200 || result['code'] == 201)) {
-                              ShowToast.showToast("Product added successfully!", showSuccess: true);
+                            final result = await profileController
+                                .postCreateProductApi(pName, pImage);
+                            if (result != null &&
+                                (result['code'] == 200 ||
+                                    result['code'] == 201)) {
+                              ShowToast.showToast("Product added successfully!",
+                                  showSuccess: true);
                               await profileController.postFetchProfileApi();
                             } else {
-                              ShowToast.showToast(result['msg'] ?? result['message'] ?? "Failed to add product", showSuccess: false);
+                              ShowToast.showToast(
+                                  result['msg'] ??
+                                      result['message'] ??
+                                      "Failed to add product",
+                                  showSuccess: false);
                             }
                           } catch (e) {
-                            ShowToast.showToast("Error: $e", showSuccess: false);
+                            ShowToast.showToast("Error: $e",
+                                showSuccess: false);
                           } finally {
                             EasyLoading.dismiss();
                           }
@@ -974,7 +1105,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           backgroundColor: ConstantColor.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
                         ),
                         child: const Text("Add Product"),
                       ),
@@ -989,5 +1121,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
-
