@@ -44,3 +44,4 @@ class SharPreferences {
   }
 
 }
+//local storage

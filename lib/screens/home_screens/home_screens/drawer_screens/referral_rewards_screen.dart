@@ -154,30 +154,16 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
     return code;
   }
 
-  void _shareReferralCode({String? productName, int? neededBusinesses, int? neededUsers}) {
+  void _shareReferralCode() {
     final code = _getReferralCode();
-    final String shareMessage;
+    final hasCode = code.isNotEmpty && code != 'N/A';
 
-    if (productName != null && productName.isNotEmpty) {
-      shareMessage =
-          "🌟 *Single Clik Referral & Rewards* 🌟\n\n"
-          "Help me unlock *$productName* on Single Clik!\n\n"
-          "${code.isNotEmpty && code != 'N/A' ? 'Use my Referral Code: *$code*\n\n' : ''}"
-          "🎁 *Earn reward points for every referral:*\n"
-          "💼 Business Referral: *1,000 Points*\n"
-          "👤 User Referral: *500 Points*\n\n"
-          "📲 Download & Register now:\nhttps://singleclik.com/app\n\n"
-          "${code.isNotEmpty && code != 'N/A' ? 'Enter Referral Code: *$code* during signup! 🚀' : 'Start earning rewards today! 🚀'}";
-    } else {
-      shareMessage =
-          "🌟 *Join Single Clik & Earn Rewards!* 🌟\n\n"
-          "${code.isNotEmpty && code != 'N/A' ? 'Use my Referral Code: *$code* to get instant rewards!\n\n' : ''}"
-          "🎁 *Earn points on every referral:*\n"
-          "💼 Business Referral: *1,000 Points*\n"
-          "👤 User Referral: *500 Points*\n\n"
-          "📲 Download & Register now:\nhttps://singleclik.com/app\n\n"
-          "${code.isNotEmpty && code != 'N/A' ? 'Don\'t forget to enter code: *$code*! 🚀' : 'Start earning rewards today! 🚀'}";
-    }
+    final String shareMessage =
+        "Hey! 👋 I came across this amazing app,\n *Single Clik* — it's really good and super useful!\n\n"
+        "You can download the app from this link:\n"
+        "🔗 https://singleclik.com/app\n\n"
+        "${hasCode ? '🎁 Use my Referral Code: *$code* when you sign up!\n\n' : ''}"
+        "Download it now and check it out! 🚀";
 
     Share.share(shareMessage);
   }
@@ -394,7 +380,7 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
         unselectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.normal),
         tabs: [
           Tab(
-            text: "Claim Rewards (${referralController.products.length})",
+            text: " Rewards (${referralController.products.length})",
           ),
           Tab(
             text: "History (${referralController.historyPoints.length})",
@@ -410,7 +396,13 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
   // ── Tab 1: Products List ────────────────────────────────────────────────────
 
   Widget _buildProductsTab(double height, double width) {
-    final products = referralController.products;
+    final products = List<Map<String, dynamic>>.from(referralController.products);
+    products.sort((a, b) {
+      final ptsA = int.tryParse(a['refferal_products_points']?.toString() ?? '0') ?? 0;
+      final ptsB = int.tryParse(b['refferal_products_points']?.toString() ?? '0') ?? 0;
+      return ptsA.compareTo(ptsB);
+    });
+
     if (products.isEmpty) {
       return _buildEmptyState("No reward products available at the moment.");
     }
@@ -578,116 +570,75 @@ class _ReferralRewardsScreenState extends State<ReferralRewardsScreen>
                   ),
                 )
               else
-                InkWell(
-                  onTap: () => _shareReferralCode(
-                    productName: prodName,
-                    neededBusinesses: neededBusinesses,
-                    neededUsers: neededUsers,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xffFFF3E0),
-                          Color(0xffFFE0B2),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: const Color(0xffFFB74D),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.orange.withOpacity(0.08),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xffFFF1F2),
+                        Color(0xffFFE4E6),
                       ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: const Color(0xffE65100).withOpacity(0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.share_rounded,
-                            color: Color(0xffE65100),
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xffBF360C),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  children: [
-                                    const TextSpan(text: "Refer "),
-                                    TextSpan(
-                                      text: "$neededBusinesses Business${neededBusinesses > 1 ? 'es' : ''}",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xffD84315),
-                                      ),
-                                    ),
-                                    const TextSpan(text: " or "),
-                                    TextSpan(
-                                      text: "$neededUsers User${neededUsers > 1 ? 's' : ''}",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xffD84315),
-                                      ),
-                                    ),
-                                    const TextSpan(text: " to claim this!"),
-                                  ],
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: const Color(0xffFDA4AF).withValues(alpha: 0.6),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xffE11D48).withValues(alpha: 0.06),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _shareReferralCode(),
+                      borderRadius: BorderRadius.circular(14),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.share_rounded,
+                                  color: Color(0xffE11D48),
+                                  size: 17,
                                 ),
-                              ),
-                              const SizedBox(height: 2),
-                              Row(
-                                children: [
-                                  Text(
-                                    "Need ${_formatNumber(neededPts)} more pts",
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey[700],
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                const SizedBox(width: 7),
+                                const Text(
+                                  "Refer Now",
+                                  style: TextStyle(
+                                    color: Color(0xffE11D48),
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.3,
                                   ),
-                                  const SizedBox(width: 6),
-                                  const Text(
-                                    "• Tap to share & invite ↗",
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xffE65100),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              "Refer $neededBusinesses Business${neededBusinesses > 1 ? 'es' : ''} or $neededUsers User${neededUsers > 1 ? 's' : ''} to claim reward ",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Color(0xff9F1239),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 14,
-                          color: Color(0xffE65100),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),

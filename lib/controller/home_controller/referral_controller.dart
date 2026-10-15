@@ -217,9 +217,15 @@ class ReferralController extends GetxController {
 
           // Available Products for Claim
           if (responseData['products'] is List) {
-            products.value = List<Map<String, dynamic>>.from(
+            final rawProducts = List<Map<String, dynamic>>.from(
               (responseData['products'] as List).map((e) => Map<String, dynamic>.from(e)),
             );
+            rawProducts.sort((a, b) {
+              final ptsA = int.tryParse(a['refferal_products_points']?.toString() ?? '0') ?? 0;
+              final ptsB = int.tryParse(b['refferal_products_points']?.toString() ?? '0') ?? 0;
+              return ptsA.compareTo(ptsB);
+            });
+            products.value = rawProducts;
           } else {
             products.clear();
           }
