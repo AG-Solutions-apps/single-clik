@@ -46,6 +46,7 @@ gradlew.bat
 
 # Keystore and signing
 **/*.jks
+!android/keystore/common_key.jks
 **/*.keystore
 key.properties
 

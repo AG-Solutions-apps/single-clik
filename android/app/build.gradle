@@ -32,6 +32,10 @@ if (keystorePropertiesFile.exists()) {
     }
 }
 
+def hasReleaseKey = keystorePropertiesFile.exists() && 
+    keystoreProperties['storeFile'] != null && 
+    rootProject.file(keystoreProperties['storeFile']).exists()
+
 android {
     namespace "com.singleclick.agsolution"
     compileSdkVersion 36
@@ -53,10 +57,12 @@ android {
 
     signingConfigs {
         release {
-            storeFile rootProject.file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
+            if (hasReleaseKey) {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
         }
     }
 
@@ -74,7 +80,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            signingConfig hasReleaseKey ? signingConfigs.release : signingConfigs.debug
             minifyEnabled false
             shrinkResources false
         }
